@@ -135,7 +135,7 @@ bool DCSTokenizer::LoadFile(const char *filename, std::string &errorMessage)
 	// final count returned from fread() should always be reliable.  We're
 	// not allowing for any expansion in fread() translations, but as far
 	// as I know, no expanding translations exist.
-	contentLength = fread(contents.get(), 1, len, fp);
+	contentLength = static_cast<long>(fread(contents.get(), 1, len, fp));
 	if (contentLength < 0)
 	{
 		errorMessage = DCSEncoder::format("Error reading file \"%s\" (error %d)", filename, errno);

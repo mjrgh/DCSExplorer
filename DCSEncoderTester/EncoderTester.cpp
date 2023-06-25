@@ -280,7 +280,7 @@ int main(int argc, char **argv)
 						"Encoding time:      %.2lf seconds\n"
 						"\n",
 						filename.c_str(), fileSize, uncompressedSize,
-						dcsObj.nFrames, dcsObj.nBytes,
+						dcsObj.nFrames, static_cast<unsigned long>(dcsObj.nBytes),
 						static_cast<float>(fileSize) / static_cast<float>(dcsObj.nBytes),
 						(1.0f - static_cast<float>(dcsObj.nBytes) / static_cast<float>(uncompressedSize)) * 100.0f,
 						static_cast<float>(dcsObj.nFrames) * .00768f, dt);

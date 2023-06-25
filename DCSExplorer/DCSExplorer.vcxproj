@@ -147,8 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\DCSDecoder\DCS93x.cpp" />
-    <ClCompile Include="..\DCSDecoder\DCS95x.cpp" />
+    <ClCompile Include="..\Utilities\BuildDate.cpp" />
     <ClCompile Include="DCSExplorer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

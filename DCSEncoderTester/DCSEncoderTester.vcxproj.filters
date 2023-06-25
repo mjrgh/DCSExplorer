@@ -18,9 +18,6 @@
     <ClCompile Include="EncoderTester.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\PinMameMin\AudioStream.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\DCSEncoder\DCSEncoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

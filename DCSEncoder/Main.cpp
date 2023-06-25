@@ -18,6 +18,7 @@
 #include <memory>
 #include "DCSCompiler.h"
 #include "OSSpecific.h"
+#include "../Utilities/BuildDate.h"
 
 
 //
@@ -117,8 +118,10 @@ int main(int argc, char **argv)
 	// check usage
 	if (argi + 2 != argc)
 	{
+		ProgramBuildDate buildDate;
 		printf(
-			"DCS Encoder / (c)2023 Michael J Roberts / BSD 3-clause license / NO WARRANTY\n"
+			"DCS Encoder   Version 1.0, Build %s\n"
+			"(c)%s Michael J Roberts / BSD 3-clause license / NO WARRANTY\n"
 			"\n"
 			"Usage: dcsencoder [options] <prototypeRom> <scriptFile>\n"
 			"\n"
@@ -140,8 +143,8 @@ int main(int argc, char **argv)
 			"                        or * to use the same sizes as the corresponding prototype ROMs\n"
 			"   --stream-dir=<dir>   search in directory <dir> when looking for a stream file that's\n"
 			"                        not found in the current directory (this can be specified any\n"
-			"                        number of times, to search in multiple locations)\n"
-		);
+			"                        number of times, to search in multiple locations)\n",
+			buildDate.YYYYMMDD().c_str(), buildDate.CopyrightYears(2023).c_str());
 		exit(1);
 	}
 

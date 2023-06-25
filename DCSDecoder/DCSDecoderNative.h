@@ -5,7 +5,6 @@
 // a DCS audio player in portable C++ code.
 //
 #include <memory>
-#include "ADSP2100x.h"
 #include "DCSDecoder.h"
 
 class DCSDecoderNative : public DCSDecoder

@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Utilities\BuildDate.cpp" />
     <ClCompile Include="DCSCompiler.cpp" />
     <ClCompile Include="DCSEncoder.cpp" />
     <ClCompile Include="DCSEncodeFile.cpp" />
@@ -159,6 +160,7 @@
     <ClCompile Include="OSSpecificWin32.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Utilities\BuildDate.h" />
     <ClInclude Include="DCSCompiler.h" />
     <ClInclude Include="DCSEncoder.h" />
     <ClInclude Include="DCSTokenizer.h" />

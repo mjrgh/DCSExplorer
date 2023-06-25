@@ -149,7 +149,7 @@ public:
 	// .zip file, mostly so that the caller can display it to the user.
 	// THe list pointer can be null if the caller doesn't need the
 	// information.
-	static const int ROMSIZE_SAME_AS_PROTO = 0xFFFFFFFF;
+	static const uint32_t ROMSIZE_SAME_AS_PROTO = 0xFFFFFFFF;
 	struct ROMDesc
 	{
 		int chipNum;           // nominal ROM chip number (2-9)

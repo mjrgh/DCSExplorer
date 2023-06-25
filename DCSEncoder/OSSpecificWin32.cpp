@@ -7,7 +7,7 @@
 
 #include "OSSpecific.h"
 
-#if defined(WIN32)
+#if defined(_WIN32)
 //
 // Windows-specific
 //

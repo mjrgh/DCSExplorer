@@ -21,10 +21,7 @@
     <ClCompile Include="DCSExplorer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\DCSDecoder\DCS95x.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\DCSDecoder\DCS93x.cpp">
+    <ClCompile Include="..\Utilities\BuildDate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

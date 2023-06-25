@@ -49,6 +49,7 @@
 #include <set>
 #include <Windows.h>
 #include <conio.h>
+#include "../Utilities/BuildDate.h"
 #include "../SimpleWindowsAudio/SimpleWindowsAudio.h"
 #include "../HiResTimer/HiResTimer.h"
 #include "../DCSDecoder/DCSDecoder.h"
@@ -550,8 +551,10 @@ int main(int argc, char **argv)
 	// make sure we have a single filename argument remaining
 	if (argi + 1 != argc)
 	{
+		ProgramBuildDate buildDate;
 		printf(
-			"DCS Explorer / (c)2023 Michael J Roberts / BSD 3-clause license / NO WARRANTY\n"
+			"DCS Explorer   Version 1.0, Build %s\n"
+			"(c)%s Michael J Roberts / BSD 3-clause license / NO WARRANTY\n"
 			"\n"
 			"Usage: dcsexplorer [options] <rom-zip-file>\n"
 			"Options:\n"
@@ -575,8 +578,8 @@ int main(int argc, char **argv)
 			"   --tracks         show a listing of the tracks found in the ROM catalog\n"
 			"   --u2=<file>      designate <file> as the sound ROM image for U2\n"
 			"   --vol=<level>    set the initial volume level, 0 to 255\n"
-			"   --validate       validation mode (run the emulator alongside the selected decoder to compare)\n"
-		);
+			"   --validate       validation mode (run the emulator alongside the selected decoder to compare)\n",
+			buildDate.YYYYMMDD().c_str(), buildDate.CopyrightYears(2023).c_str());
 		exit(1);
 	}
 
@@ -641,7 +644,7 @@ int main(int argc, char **argv)
 		for (int i = 0 ; i < 8 ; ++i)
 		{
 			if (roms[i] != nullptr)
-				printf("  [U%d] %s, %lu bytes\n", i + 2, roms[i]->filename.c_str(), roms[i]->dataSize);
+				printf("  [U%d] %s, %lu bytes\n", i + 2, roms[i]->filename.c_str(), static_cast<unsigned long>(roms[i]->dataSize));
 		}
 		printf("\n");
 
@@ -1148,7 +1151,7 @@ int main(int argc, char **argv)
 			{
 				fprintf(fp, "Recent commands: ");
 				uint64_t fn = UINT64_MAX;
-				int idx = recentCmdWrite - numRecentCmds;
+				int idx = static_cast<int>(recentCmdWrite - numRecentCmds);
 				if (idx < 0)
 					idx += _countof(recentCommands);
 				for (size_t i = 0 ; i < numRecentCmds ; ++i, idx = (idx + 1) % _countof(recentCommands))
@@ -1502,7 +1505,7 @@ int main(int argc, char **argv)
 				// hardware playback position has opened up enough space in the buffer,
 				// so this naturally keeps the decoding rate in sync with the actual
 				// audio output.
-				audioPlayer->WriteAudioData(buf, dst - buf);
+				audioPlayer->WriteAudioData(buf, static_cast<DWORD>(dst - buf));
 			}
 		}
 	}

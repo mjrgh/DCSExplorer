@@ -2107,7 +2107,7 @@ bool DCSCompiler::GenerateROM(const char *outZipFile,
 		uint8_t *p;
 
 		// free space available
-		uint32_t BytesFree() const { return size - (p - data.get()); }
+		uint32_t BytesFree() const { return static_cast<uint32_t>(size - (p - data.get())); }
 
 		// Force the next free pointer to be even-aligned.  If it's
 		// currently on an odd boundary, we'll bump it by one byte.
@@ -2159,7 +2159,7 @@ bool DCSCompiler::GenerateROM(const char *outZipFile,
 	auto LinearROMPointer = [this](const uint8_t *ptr, const ROMImage *rom)
 	{
 		// figure the offset from the base of the ROM
-		uint32_t ofs = ptr - rom->data.get();
+		uint32_t ofs = static_cast<uint32_t>(ptr - rom->data.get());
 
 		// add the chip select - this goes in bits 21-24 for DCS-95
 		// audio/video boards, or bits 20-23 for the original 
@@ -2185,10 +2185,10 @@ bool DCSCompiler::GenerateROM(const char *outZipFile,
 	};
 
 	// Figure the ROM size for a given chip number
-	auto NewRomSize = [this, romSize](int chipNum)
+	auto NewRomSize = [this, romSize](int chipNum) -> uint32_t
 	{
 		// start with the ROM size setting
-		size_t newSize = romSize;
+		uint32_t newSize = romSize;
 
 		// if that's set to SAME AS PROTO, we need to find the corresponding
 		// prototype chip, so that we can create the new chip at the same size
@@ -2199,7 +2199,7 @@ bool DCSCompiler::GenerateROM(const char *outZipFile,
 			{
 				if (z.chipNum == chipNum)
 				{
-					newSize = z.dataSize;
+					newSize = static_cast<uint32_t>(z.dataSize);
 					break;
 				}
 			}
@@ -2281,7 +2281,7 @@ bool DCSCompiler::GenerateROM(const char *outZipFile,
 	auto Reserve = [this, &AddChip, &newRoms, &errorMessage](uint8_t* &p, ROMImage* &rom, size_t nBytes)
 	{
 		// check if we're out of space in the current ROM
-		int ofs = p - rom->data.get();
+		int ofs = static_cast<int>(p - rom->data.get());
 		int rem = rom->size - ofs;
 		if (rem < 0 || static_cast<size_t>(rem) < nBytes)
 		{
@@ -2669,7 +2669,7 @@ bool DCSCompiler::GenerateROM(const char *outZipFile,
 
 		// record the stream's newly assigned address
 		s->romAddr.chipNo = bestChip->chipNum;
-		s->romAddr.imageOffset = bestChip->p - bestChip->data.get();
+		s->romAddr.imageOffset = static_cast<uint32_t>(bestChip->p - bestChip->data.get());
 		s->romAddr.linearAddr = LinearROMPointer(bestChip->p, bestChip);
 			
 		// Copy the stream into the chosen chip's free area

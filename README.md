@@ -1,45 +1,56 @@
 # DCS Explorer
 
 This project is the result of some pinball archaeology, an attempt to
-better understand the DCS audio format that was used in the Williams
-pinball machines of the 1990s.
+better understand the DCS audio format.  DCS is the name of the audio
+system used in Williams pinball machines, including those from
+sub-brands Bally and Midway, from 1993 through 1998.  DCS stores the
+audio data using a proprietary compressed digital audio format that's
+similar in design to mainstream formats like MP3, AAC, and Vorbis, and
+the player system has some special features tailored to the
+event-driven environment of an arcade game.
 
-DCS is the name of the audio system used in Williams pinball machines
-(including those from sub-brands Bally and Midway) from 1993 through 1998.
-The system was physically implemented with a circuit board based
-on the Analog Devices ADSP-2105 processor, and used a proprietary
-compressed digital audio format that's similar in design to
-mainstream formats like MP3, AAC, and Vorbis.
+In the pinball machines, DCS was physically implemented with a
+purpose-built circuit board based on the Analog Devices ADSP-2105
+processor.  But the hardware is only incidental; DCS is really a
+software platform that can be implemented on any CPU, as long as it
+can perform the decoding work fast enough for real-time playback.
+Today's PCs are plenty fast enough, and in fact, even a higher-end
+microcontroller like a Raspberry Pi can easily handle the job.
 
-The details of the DCS format have never been published, so it's
-always been difficult to find out exactly what's in a DCS pinball's
-sound ROMs, and quite impossible to create new ones.  The only way to
-examine the contents of a DCS ROM up until now was to run PinMame in
-its debugging mode, and just try all of the possible command codes to
-see what each one did.  That wasn't an entirely satisfactory solution,
-in part because the PinMame UI isn't very friendly, and in part because
-some commands have side effects that aren't apparent when you just run
-through them all one by one.
+The internal details of the DCS format have never been published
+(until now), so it's always been difficult to find out exactly what's
+in a DCS pinball's sound ROMs, and quite impossible to create new
+ones.  The only way to examine the contents of a DCS ROM was to run
+PinMame in its debugging mode, and just try all of the possible
+command codes to see what each one did.  That wasn't an entirely
+satisfactory solution, in part because the PinMame UI is awkward, and
+in part because some of the commands in a DCS ROM don't just trigger
+simple audio playback; some have side effects that aren't apparent
+when you just run through them all one by one.
 
-This project has three main pieces:
+DCS Explorer is my name for the overall project, which consists
+of three main pieces:
 
 * The DCS Explorer program, a simple command-line tool that lets you examine
 the contents of a DCS ROM in detail, and interactively play back
 the audio it contains.
 
-* DCSDecoder, a C++ class that implements a fully native decoder for
+* DCSDecoder, a portable C++ class that implements a fully native decoder for
 DCS ROMs, without any ADSP-2105 emulation.  It's a standalone class
-with no dependencies on PinMame or any other external libraries, so
-it's easy to incorporate into any C++ project, and its programming
+with no dependencies on PinMame or any other external libraries, and
+no dependencies on any system audio interfaces or OS services.
+It's easy to incorporate into any C++ project, and its programming
 interface is easy to use.  It works with all of the DCS pinball
 titles released from 1993 to 1998.  I've tested
 representative ROMs for every DCS title and validated that they
 produce PCM output that's bit-for-bit identical to the PinMame
 emulator's output.  (In fact, my work on this project turned up two
 errors in PinMame's emulation that have since been corrected in the
-PinMame mainline.)  It's also written in a readable coding style
-and extensively commented, so it can serve as a technical
-reference to DCS internals for people who can read C++ code.
+PinMame mainline.)  The code is written in a readable style
+and extensively commented, in the hopes that it can serve as an
+informational resource to DCS internals for people who can
+read C++ code, and as a reference implementation for developing
+new DCS-related software.
 
 * DCS Encoder, a program that lets you create your own DCS ROMs.
 It not only transcodes audio files into the DCS format, but also
@@ -48,10 +59,14 @@ machine.  You can use it both to create wholly original DCS ROMs, and
 to make minor changes ("patches") to existing ones, such as
 replacing just a few selected audio tracks with original material.
 You can encode original DCS audio from mainstream sources like
-MP3, WAV, and Ogg Vorbis files.
+MP3, WAV, and Ogg Vorbis files.  The project's C++ code is
+structured into reusable modules that could be incorporated into
+other projects as well, with services to encode audio into the
+DCS formats and generate ROM images.
 
 Refer to the README.md files in the project folders for details
 on the individual projects.
+
 
 
 ## DCS Technical Reference
@@ -94,7 +109,7 @@ but I didn't encounter any complications getting that building, so
 hopefully you won't either.
 
 
-## Origins and goals of this project
+## Origins and goals of the project
 
 I got started on this project because I wanted a DCS decoder that I
 could use on an embedded platform, for another project.  PinMame's
@@ -124,6 +139,12 @@ original program, I realized that I also understood it well enough to
 this project, my DCS Encoder, which can create original DCS ROMs with
 new audio material.
 
+I thought about calling the project DCS Exploder, based on the jokey
+name a friend always uses for certain Microsoft applications.  It was
+tempting especially because of the nice symmetry that would have obtained
+from calling the encoder the DCS Imploder.  But it seemed a little too
+silly.
+
 
 ## Links to other DCS documentation
 
@@ -131,13 +152,14 @@ My new [DCS Audio Format Technical Reference](http://mjrnet.org/pinscape/dcsref/
 which documents what I learned in the course of this project,
 is probably the only source of information on DCS internals.
 
-Up until now, very little information has been published on the DCS
+Very little information was previously published on the DCS
 format.  That shouldn't be entirely surprising, given that it's a
 proprietary format that was only ever used in embedded systems for a
 niche industry that mostly disappeared over 20 years ago.  And yet, living
 as we do in the age of total information awareness, I'm
 always shocked and amazed when I encounter *any* subject, no matter how obscure,
-that isn't exhaustively documented somewhere on the Web.  DCS seems to
+that isn't exhaustively documented somewhere on the Web.  Especially when
+it's something at the intersection of technology and popular art.  DCS seems to
 be of those rare subjects that time forgot.  In all of the Web, there are only a few
 mentions of the technology, and those few mentions are really skimpy.
 There's a skeletal [Wikipedia page](https://en.wikipedia.org/wiki/Digital_Compression_System),
@@ -147,27 +169,27 @@ from a long-defunct pinball 'zine (remember 'zines?) that's only still accessibl
 
 [PinMame](https://github.com/vpinball/pinmame) is another place to
 look for a certain amount technical information, but that will only
-tell you about the hardware.  PinMame includes a
-software emulator that can run the original ROM images from the DCS
-boards, and the emulator's source code contains a lot of fine-grained
-detail about how the original circuit boards work.  The emulator has
-details that you can't learn from reading the published schematics of
-the boards, because the boards use proprietary PLAs (programmable
-logic arrays) whose programming isn't published anywhere.  The PLAs
-implement most of the external addressing logic that connects the
-CPU to the on-board peripherals, so you can't infer from the schematics
-alone how the software is meant to access the peripherals or what side
-effects are triggered in the hardware when it does.  That's something you
-have to know to understand how the ROM software works.  The PinMame
-code also helps nail down some of the details of the various chips on
-the board, such as the ADSP-2105 CPU and AD1851 DAC, and how they're
-used in that particular application.
-
-When I say that the PinMame source code "contains" this information, I
-don't mean to suggest that it's explicitly documented there.  I just
-mean that the information is embodied in the structure of the C code.
-If you can read the C code, you can work backwards from the code to
-infer things about how the hardware being emulated must have worked.
+tell you about the hardware.  PinMame includes a software emulator
+that can run the original ROM images from the DCS boards, and the
+emulator's source code contains a lot of fine-grained detail about how
+the original circuit boards work.  The emulator has details that you
+can't learn from reading the published schematics of the boards,
+because the boards use proprietary PLAs (programmable logic arrays)
+whose programming isn't published anywhere.  The PLAs implement most
+of the external addressing logic that connects the CPU to the on-board
+peripherals, so you can't infer from the schematics alone how the
+software is meant to access the peripherals or what side effects are
+triggered in the hardware when it does.  That's something you have to
+know to understand how the ROM software works.  The PinMame code also
+helps nail down some of the details of the various chips on the board,
+such as the ADSP-2105 CPU and AD1851 DAC, and how they're used in that
+particular application.  But PinMame will only tell you about the DCS
+hardware environment; PinMame's whole philosophy is that the software
+is a black box that you trick into thinking it's still running in a
+dark corner of an arcade in a mall in the 1980s.  It doesn't try to
+peek inside to see what the software is made of.  The present project
+takes the exact opposite approach: forget the hardware, let's figure
+out everything the software is doing.
 
 
 ## Third-party software credits

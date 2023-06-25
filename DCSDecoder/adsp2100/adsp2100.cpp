@@ -612,7 +612,7 @@ static void update_breakpoints()
 		{
 			auto addr = breakpoints[i].addr;
 			if (addr >= 0 && addr < 0x4000)
-				breakpointByAddr[addr] = i + 1;
+				breakpointByAddr[addr] = static_cast<uint32_t>(i + 1);
 		}
 	}
 }
@@ -792,7 +792,7 @@ static void debugger()
 					breakpoints[i].inUse = true;
 					breakpoints[i].addr = parse_debug_val(p + 3);
 					ok = true;
-					printf("Breakpoint #%d added at $%04x\n", i+1, breakpoints[i].addr);
+					printf("Breakpoint #%d added at $%04x\n", static_cast<int>(i+1), breakpoints[i].addr);
 					update_breakpoints();
 					break;
 				}
@@ -809,7 +809,7 @@ static void debugger()
 			{
 				if (breakpoints[i].inUse)
 				{
-					printf("#%-2d  $%04x\n", i+1, breakpoints[i].addr);
+					printf("#%-2d  $%04x\n", static_cast<int>(i+1), breakpoints[i].addr);
 					++cnt;
 				}
 			}

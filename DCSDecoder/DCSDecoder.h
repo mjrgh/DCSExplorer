@@ -114,7 +114,6 @@
 #include <memory>
 #include <map>
 #include <functional>
-#include "ADSP2100x.h"
 
 class DCSDecoder
 {
@@ -790,7 +789,7 @@ public:
 
 	// Get the current offset from a ROM pointer.  This returns the
 	// offset of the current address from the base of the ROM.
-	uint32_t ROMPointerOffset(ROMPointer rp) { return rp.p - ROM[rp.chipSelect].data; }
+	uint32_t ROMPointerOffset(ROMPointer rp) { return static_cast<uint32_t>(rp.p - ROM[rp.chipSelect].data); }
 
 	// Hardware version.  This reflects the target hardware platform that
 	// the loaded ROM was designed to work with.  We need to know which
@@ -1333,36 +1332,3 @@ public:
 	std::function<void()> func;
 };
 
-
-// DCSDecoder subclass for implementations based on C++ translations
-// of ADSP-2105 assembly code.  These implementations run as native
-// code on the local platform, but they use the ADSP2100x class to
-// simulate some of the original hardware environment to minimize
-// the amount of code that has to be modified to fit the portable
-// C environment.  This class is an intermediary that fills out the
-// abstractions in the ADSP2100x base class with implementations
-// to fit the DCSDecoder class structure.
-class DCSDecoderTranslated : public DCSDecoder, public ADSP2100x
-{
-public:
-	DCSDecoderTranslated(Host *host) : DCSDecoder(host) { }
-
-protected:
-	// Store a ROM pointer in two DM() locations as a linear address
-	void StoreROMPointer(uint16_t dmAddr, ROMPointer rp);
-
-	// Write a control reigster.  This simulates writing to one
-	// of the ADSP-2105's memory-mapped system registers.  This
-	// ignores most of the control register settings, since they're
-	// mostly not relevant to the C++ version.  The routine does
-	// handle the autobuffer setup codes and the CPU reset codes.
-	void WriteControlReg(uint16_t addr, uint16_t data);
-
-	// Read the Host->Sound Board data port from memory-mapped DM()
-	uint16_t ReadDataPortDM(uint16_t addr) { return ReadDataPort(); }
-
-	// Write the Sound Board->Host data port from memory-mapped DM()
-	void WriteDataPortDM(uint16_t addr, uint16_t data) {
-		host->ReceiveDataPort(static_cast<uint8_t>(data & 0x00FF));
-	}
-};

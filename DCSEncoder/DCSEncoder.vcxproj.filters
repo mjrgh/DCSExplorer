@@ -33,6 +33,9 @@
     <ClCompile Include="OSSpecificWin32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Utilities\BuildDate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DCSEncoder.h">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OSSpecific.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Utilities\BuildDate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

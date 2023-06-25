@@ -1498,7 +1498,7 @@ DCSDecoderNative::StreamInfo DCSDecoderNative::GetStreamInfo(ROMPointer streamPt
     }
 
     // figure the stream size
-    int nBytes = ch.audioStream.playbackBitPtr.p.p - startp;
+    int nBytes = static_cast<int>(ch.audioStream.playbackBitPtr.p.p - startp);
 
     // get the stream major type
     int streamType = (ch.audioStream.header[0] & 0x80) != 0 ? 1 : 0;

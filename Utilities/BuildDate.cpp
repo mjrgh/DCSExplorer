@@ -91,12 +91,20 @@ void ProgramBuildDate::Init(const char *date, const char *time)
     wday = (jdn + 1) % 7;
 }
 
-const char *ProgramBuildDate::CopyrightYears(char buf[10], int startingYear)
+std::string ProgramBuildDate::YYYYMMDD() const
 {
+    char buf[16];
+    sprintf_s(buf, "%04d%02d%02d", yyyy, mm, dd);
+    return buf;
+}
+
+std::string ProgramBuildDate::CopyrightYears(int startingYear) const
+{
+    char buf[16];
     if (yyyy == startingYear)
-        sprintf_s(buf, 10, "%4d", startingYear);
+        sprintf_s(buf, "%4d", startingYear);
     else
-        sprintf_s(buf, 10, "%4d-%4d", startingYear, yyyy);
+        sprintf_s(buf, "%4d-%4d", startingYear, yyyy);
 
     return buf;
 }

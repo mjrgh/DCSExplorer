@@ -1,7 +1,7 @@
 #pragma once
 
 #if !defined(LSB_FIRST) && !defined(MSB_FIRST)
-#ifdef WIN32
+#if _WIN32
 #define LSB_FIRST
 #else
 #error "One of LSB_FIRST or MSB_FIRST must be #defined to specify platform byte order"

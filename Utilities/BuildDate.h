@@ -79,11 +79,13 @@ struct ProgramBuildDate
 	// and a time string in the compiler's __TIME__ format.  
 	void Init(const char *date, const char *time);
 
+	// Return a build date string
+	std::string YYYYMMDD() const;
+
 	// Generate a copyright date string of the form "<base year>-<current year>",
 	// or just "<current year>" if the two are the same.  This can be used to
 	// build a copyright message banner that automatically updates to include
 	// the year of the current build, with the range starting at the initial
-	// creation time.  The buffer must be at least 10 characters.  Returns a
-	// pointer to the buffer.
-	const char *CopyrightYears(char buf[10], int startingYear);
+	// creation time.
+	std::string CopyrightYears(int startingYear) const;
 };

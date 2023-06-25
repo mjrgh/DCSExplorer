@@ -151,7 +151,6 @@
   <ItemGroup>
     <ClCompile Include="..\DCSEncoder\DCSEncodeFile.cpp" />
     <ClCompile Include="..\DCSEncoder\DCSEncoder.cpp" />
-    <ClCompile Include="..\PinMameMin\AudioStream.cpp" />
     <ClCompile Include="EncoderTester.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

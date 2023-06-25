@@ -322,7 +322,7 @@ bool DCSEncoder::EncodeWAVFile(const char *filename, DCSAudio &dcsObj, std::stri
         }
 
         // deduct this chunk from the remaining data size
-        dataSize -= n;
+        dataSize -= static_cast<uint32_t>(n);
 
         // process the samples per the format
         int16_t samples[256];
@@ -835,7 +835,7 @@ bool DCSEncoder::CloseStream(Stream *stream, DCSAudio &obj, std::string &errorMe
             size_t size = bitWriter[i].CalcStreamSize();
             if (bestIdx < 0 || size < bestSize)
             {
-                bestIdx = i;
+                bestIdx = static_cast<int>(i);
                 bestSize = size;
             }
         }
@@ -849,7 +849,7 @@ bool DCSEncoder::CloseStream(Stream *stream, DCSAudio &obj, std::string &errorMe
     }
 
     // convert the winner to a DCS object
-    if (!bitWriter[bestIdx].Store(obj, stream->frames.size(), errorMessage))
+    if (!bitWriter[bestIdx].Store(obj, static_cast<int>(stream->frames.size()), errorMessage))
         return false;
 
     // success

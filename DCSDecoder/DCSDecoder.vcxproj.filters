@@ -47,9 +47,6 @@
     <ClCompile Include="DCSDecoderZipLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ADSP2100x.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="adsp2100\adsp2100.cpp">
       <Filter>adsp2100</Filter>
     </ClCompile>

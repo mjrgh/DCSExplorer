@@ -164,8 +164,8 @@ be of those rare subjects that time forgot.  In all of the Web, there are only a
 mentions of the technology, and those few mentions are really skimpy.
 There's a skeletal [Wikipedia page](https://en.wikipedia.org/wiki/Digital_Compression_System),
 and a sort of [marketing-highlights article](https://web.archive.org/web/20070929205008/http://pinballhq.com/willy/willy3.htm)
-from a long-defunct pinball 'zine (remember 'zines?) that's only still accessible at all thanks to
-[the Wayback Machine](https://web.archive.org/), and that's about it.
+posted to a Usenet pinball group, still accessible thanks to
+[the Wayback Machine](https://web.archive.org/).  And that's about it.
 
 [PinMame](https://github.com/vpinball/pinmame) is another place to
 look for a certain amount technical information, but that will only

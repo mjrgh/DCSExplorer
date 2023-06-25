@@ -1,7 +1,9 @@
 # DCSDecoder Class
 
 DCSDecoder is a C++ class that decodes and plays back the audio in a
-pinball ROM set for a game that used the DCS audio system.
+pinball ROM set for a game that used the DCS audio system.  It's
+designed as a reusable, stand-alone class that can easily be
+embedded in any C++ project, with no external dependencies.
 
 
 ## How is this different from PinMame's DCS emulator?
@@ -16,41 +18,65 @@ implementation of a compatible decoder.  It's an entirely stand-alone
 class, with no dependencies on any outside projects, that can be
 easily embedded in any C++ program.  It also features a relatively
 simple programming interface that lets you perform DCS decoding and
-playback with a few function calls.
+playback with a few function calls.  It's designed to let the host
+program drive the audio playback system timing; it just serves as
+a source of PCM samples, which you can retrieve on your own schedule.
 
-There are several benefits to this approach.  One is that C++ code is
-much easier to read than ADSP-2105 assembly code (even if you already
-know how to read ADSP-2105 assembly), so this implementation can serve
-as an educational resource for those wishing to learn about how the
-DCS format works.  Another is that the native implementation is
+There are several benefits to this approach.  One is that it lets
+you see what the decoder is actually doing inside.  PinMame by design
+doesn't concern itself with what's going on inside the software; it
+tackles the emulation problem by mimicking the original hardware.
+You could always look at the original ADSP-2105 machine code to
+see what it was doing, but PinMame doesn't provide much in the way
+of tools for that, and even if it did, ADSP-2105 assembly code doesn't
+make for easy reading (for me, at least) and doesn't do much to
+illuminate what's going on at any level of abstraction above bits
+and bytes.  So an immediate benefit to a C++ implementation is that
+it's a lot easier to see what going on at the design level.
+
+Another benefit is that the native implementation is
 considerably faster than an emulator, by a factor of at least 20.
 This makes it possible to use the native version on processors that
-would be too slow to run the emulator for real-time playback, such as
-microcontrollers.  A third benefit is that the native class is easy to
+would be too slow to run the PinMame ADSP-2105 emulation, such as
+microcontrollers. 
+
+A third benefit is that the native class is easy to
 embed in host applications.  It has no external dependencies (apart
 from the standard C++ run-time libraries) and is designed for easy use
-in just about any application architecture.  The PinMame emulator, in
-contrast, is so entangled with PinMame's internal interfaces and
-structures that it's impractical to reuse in almost any other context.
+in just about any application architecture.  The PinMame DCS emulator,
+in contrast, is so entangled with PinMame's internal application structure
+that it's impractical to reuse in almost any other context.
 
 
 ## Alternative emulator decoder
 
-DCSDecoder *also* features a subclass that implements decoding through
-the ADSP-2105 emulator, much like PinMame.  But that's really a bonus
-add-on, and isn't used at all when running the native decoder.  What's
-more, it's just as stand-alone as the native decoder: you can embed it
-in a C++ application using the identical abstract class interface used
-with the native decoder.
+DCSDecoder is structured into a base class that provides an abstract
+interface to the decoder, and subclasses that implement specific
+decoding strategies.  So far, we've been talking about the native
+decoder implementation, which is a ground-up, 100% C++ implementation
+of the DCS decoder and run-time system.
 
-The main reason the emulator version is part of the project at all is
-to serve as a reference implementation to test that the native decoder
-is working properly.  The emulated version is as close as we can get
-on a PC to the actual DCS hardware.  That's useful because it would be
-difficult to test rigorously against physical DCS boards.  The board
-don't have any way to read the bit stream going into the DAC, and even
-if they did, it would be hard to synchronize that with the data on the
-PC side.
+The project contains a second subclass that implements decoding
+through ADSP-2105 machine code interpretation, much like PinMame.
+This version of the decoder simply runs the original ROM code in
+emulation.  Note that this subclass *still* doesn't somehow
+incorporate PinMame - it uses the same ADSP-2105 machine code
+interpreter that PinMame does, but it doesn't share anything
+with PinMame outside of that.  The emulator subclass is just as
+easy to embed in a new C++ project as the native decoder is.
+
+The emulator decoder isn't integral to the project - it's a bonus
+feature.  You can run the native decoder without even including the
+emulator files in the build; the emulator is just a parallel
+subclass specialization.  The main reason the emulator version is
+part of the project at all is to serve as a reference implementation
+to test that the native decoder is working properly.  The emulated
+version is as close as we can get on a PC to the actual DCS hardware,
+so it serves as our reference point for correct behavior.  (It would
+be better still to test against a physical DCS board from a pinball
+machine, but that would take some pretty specialized equipment.  It's
+not within the realm of the practical for me.  Testing against the
+emulator is the next best thing.)
 
 
 ## Using the decoder class in a program

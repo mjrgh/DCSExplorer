@@ -66,11 +66,14 @@ patch for PinMame).
 for stream files.  You can specify this as many times as necessary
 to add multiple directories to search.
 
-Note that DCS ROM sizes must be 512K or 1M.  (The Wikipedia page on
-DCS incorrectly states that DCS-95 boards could accept 2M ROMs.  A
-close look at the schematics shows that they're actually limited to
-the same 1M limit as the original boards.  Sorry to disappoint if you
-were hoping to create a mod with a gigantic amount of new material.)
+Note that DCS ROM sizes must be 512K or 1M.  The Wikipedia page on
+DCS notes that DCS-95 boards could accept 2M ROMs, but the schematics
+suggest that this capability was optionally enabled or disabled at the
+factory via a soldered jumper.  None of the DCS pinball ROMs ever
+exceeded 1M, so I suspect that all of the boards shipped with pinball
+machines were factory-configured for 1M chips only.  My assumption
+is that 2M ROMs would fail if installed in a physical DCS board,
+so the encoder doesn't allow that as an option.
 
 
 ## Output file
@@ -1049,7 +1052,7 @@ everything is set back to normal at the end.
 
 <indent>
 Note: this command is only allowed in the 1994 and later
-software. 
+software.
 </indent>
 
 <indent>

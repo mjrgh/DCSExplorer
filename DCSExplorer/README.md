@@ -47,7 +47,8 @@ interactively play back its audio tracks.
 DCS sound board (without the pinball machine that goes with it).  On
 the original machines, the pinball controller commanded the sound
 board by sending it the track numbers to play.  The interactive mode
-works the same way, letting you type in the track numbers. Each track
+works the same way, letting you play the role of the WPC host board
+by typing in the command numbers manually.  Each track
 number is a four-digit hexadecimal number; use the `--tracks` option
 to get a listing of the available tracks.
 
@@ -156,29 +157,27 @@ beats.
 
 The track design is the root reason that it's always been so difficult
 to extract all of the audio in a DCS ROM for conversion to another
-format.  It's simply not possible in principle to extract *everything*,
-because the content is inherently dynamic.
+format.  The content is inherently dynamic, so merely trying all
+of the track numbers one at a time doesn't necessarily tell you
+everything that's in the ROM.
 
 A "stream" contains the actual audio, as compressed digital data.
 DCS streams use a proprietary lossy compression format based on the
 same basic DSP math as more widely used formats like MP3 and Vorbis.
 
-I'll document the stream format in detail separately.  The quick
-overview is that a stream is s sequence of frames, where a frame
+The full details of the stream format can be found in my
+[DCS Audio Format Technical Reference](http://mjrnet.org/pinscape/dcsref/DCS_format_reference.html).
+The quick overview is that a stream is s sequence of frames, where a frame
 represents a 7.68ms time window, containing 240 consecutive PCM
 samples at 31250 samples per second.  The binary data stream doesn't
 contain the PCM samples directly; instead, a stream stores a
 frequency-domain transformation of the PCM data over a 256-sample time
 window (256, not 240, because consecutive frames overlap by 16
 samples).  The transformed samples are then stored in the stream using
-a ZIP-like bit-compression encoding that tries to squeeze the bits
-into a smaller space by using short bit sequences in the coding to
-represent common bit patterns in the data, similar to how Morse Code
-assigns the shortest dot-and-dash patterns to the most frequently used
-letters.  That part of the coding is lossless, but it only accounts
-for a small part of the compression.  Most of the compression comes
-from the "lossy" part, which saves space by reducing the precision of
-the stored information.  For example, if an audio sample in the
+a Zip-like bit-compression encoding.  That part of the coding is lossless,
+but it only accounts for a small part of the compression.  Most of the
+compression comes from the "lossy" part, which saves space by reducing the
+precision of the stored information.  For example, if an audio sample in the
 original frequency-domain frame has the value 1.234567, the encoder
 can save some space by rounding that to 1.235, 1.24, or even just 1.2,
 depending on how the sample relates to other samples within the frame.

@@ -1,0 +1,268 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{436D0FAB-C75A-3EB1-9814-5C4AFA35F889}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>libnyquist</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">libnyquist</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">libnyquist</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">libnyquist</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">libnyquist</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\FLAC\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libogg\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\src;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\musepack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\celt;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\libopus\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk\float;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);WIN32;_WINDOWS;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DisableSpecificWarnings>4018;4244;4305</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\FLAC\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libogg\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\src;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\musepack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\celt;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\libopus\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk\float;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\FLAC\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libogg\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\src;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\musepack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\celt;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\libopus\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk\float;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\FLAC\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libogg\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\src;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\musepack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\celt;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\libopus\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk\float;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);WIN32;_WINDOWS;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DisableSpecificWarnings>4018;4244;4305</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\FLAC\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libogg\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\src;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\musepack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\celt;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\libopus\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk\float;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\FLAC\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libogg\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\src;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\musepack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\celt;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\libopus\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk\float;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\FLAC\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libogg\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\src;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\musepack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\celt;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\libopus\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk\float;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DisableSpecificWarnings>4018;4244;4305</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\FLAC\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libogg\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\src;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\musepack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\celt;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\libopus\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk\float;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\FLAC\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libogg\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\src;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\musepack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\celt;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\libopus\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk\float;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\FLAC\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libogg\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\src;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\musepack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\celt;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\libopus\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk\float;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DisableSpecificWarnings>4018;4244;4305</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\FLAC\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libogg\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\src;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\musepack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\celt;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\libopus\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk\float;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\FLAC\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libogg\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\libvorbis\src;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\musepack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\celt;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\libopus\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\opusfile\src\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\opus\silk\float;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\include;D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist\Common.h" />
+    <ClInclude Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist\Decoders.h" />
+    <ClInclude Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist\Encoders.h" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\Common.cpp" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\Encoders.cpp" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\FlacDecoder.cpp" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\FlacDependencies.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\Mp3Decoder.cpp" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\MusepackDecoder.cpp" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\MusepackDependencies.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\OpusDecoder.cpp" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\OpusDependencies.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\VorbisDecoder.cpp" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\VorbisDependencies.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\WavDecoder.cpp" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\WavPackDecoder.cpp" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\common_utils.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\decorr_utils.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\entropy_utils.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\extra1.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\extra2.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\open_filename.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\open_legacy.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\open_raw.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\open_utils.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\pack.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\pack_dns.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\pack_dsd.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\pack_floats.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\pack_utils.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\read_words.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\tag_utils.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\tags.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack3.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack3_open.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack3_seek.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack_dsd.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack_floats.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack_seek.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack_utils.c" />
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\write_words.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

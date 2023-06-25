@@ -1,0 +1,95 @@
+html {
+    margin: 2em;
+}
+
+body {
+    font: 10pt/14pt Verdana, Geneva, sans-serif;
+    background: #ffffff;
+    color: #000000;
+    margin: 0px;
+    padding: 0px;
+    max-width: 100ex;
+}
+
+.float-right {
+    float: right;
+    margin-left: 1em;
+    margin-bottom: 1em;
+}
+
+table {
+    font: 10pt/14pt Verdana, Geneva, sans-serif;
+}
+
+h1 {
+    margin: 1em 0px 1.25em 0px;
+    font-size: 200%;
+    font-weight: bold;
+}
+
+h2 {
+    margin: 2em 0px 1em 0px;
+    font-size: 140%;
+    font-weight: bold;
+    padding-top: calc(.75em + 17px);
+    background-image: url("wave-rule.png");
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: top;
+}
+
+h3 {
+    margin: 1.5em 0px 1ex 0px;
+    font-size: 125%;
+    font-weight: bold;
+}
+h3 + div {
+	margin-top: 1ex;
+}
+
+h4 {
+    margin: 1.5em 0px .5ex 0px;
+    font-size: 110%;
+    font-weight: bold;
+}
+h4 + div {
+	margin-top: .5ex;
+}
+
+img.ex {
+    display: block;
+    margin: 2em auto;
+}
+.caption {
+    margin-top: -1.5em;
+    font-weight: bold;
+    text-align: center;
+}
+
+table.data {
+    border-collapse: collapse;
+    margin: 2em auto;
+}
+table.data, table.data td {
+    border: 1px solid #f0f0f0;
+}
+table.data th, table.data td {
+    padding: 1ex 1em;
+    text-align: center;
+}
+table.data th {
+    background: #f0f0f0;
+    border: 1px solid #ffffff;
+}
+table.data td {
+}
+
+li {
+    margin-top: 1.25ex;
+    margin-bottom: 1.25ex;
+}
+
+.indented {
+    margin-left: 2em;
+    margin-right: 2em;
+}

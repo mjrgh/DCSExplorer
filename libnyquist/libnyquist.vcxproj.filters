@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\Common.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\Encoders.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\FlacDecoder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\FlacDependencies.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\Mp3Decoder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\MusepackDecoder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\MusepackDependencies.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\OpusDecoder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\OpusDependencies.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\VorbisDecoder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\VorbisDependencies.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\WavDecoder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\src\WavPackDecoder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\common_utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\decorr_utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\entropy_utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\extra1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\extra2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\open_filename.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\open_legacy.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\open_raw.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\open_utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\pack.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\pack_dns.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\pack_dsd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\pack_floats.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\pack_utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\read_words.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\tag_utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\tags.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack3_open.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack3_seek.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack_dsd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack_floats.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack_seek.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\unpack_utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\third_party\wavpack\src\write_words.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist\Common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist\Decoders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\per\Visual Pinball Cabinet Project\PinMameMin\libnyquist\include\libnyquist\Encoders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{D13EC247-FC4D-31AA-B830-3F38AAC1A70A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{3DC4E608-E9C5-3627-A513-63EE7E806BA7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{FA63A56E-B440-3374-A648-18220386F9BC}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

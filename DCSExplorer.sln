@@ -43,8 +43,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleWindowsAudio", "Simpl
 		{192D6309-D38E-4F66-BA6F-951B659D9A37} = {192D6309-D38E-4F66-BA6F-951B659D9A37}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "zlib\zlib.vcxproj", "{C625B460-F959-475F-A651-688631B5CB55}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -125,14 +123,6 @@ Global
 		{02E448ED-44A0-4C78-B476-9D7CE424F362}.Release|x64.Build.0 = Release|x64
 		{02E448ED-44A0-4C78-B476-9D7CE424F362}.Release|x86.ActiveCfg = Release|Win32
 		{02E448ED-44A0-4C78-B476-9D7CE424F362}.Release|x86.Build.0 = Release|Win32
-		{C625B460-F959-475F-A651-688631B5CB55}.Debug|x64.ActiveCfg = Debug|x64
-		{C625B460-F959-475F-A651-688631B5CB55}.Debug|x64.Build.0 = Debug|x64
-		{C625B460-F959-475F-A651-688631B5CB55}.Debug|x86.ActiveCfg = Debug|Win32
-		{C625B460-F959-475F-A651-688631B5CB55}.Debug|x86.Build.0 = Debug|Win32
-		{C625B460-F959-475F-A651-688631B5CB55}.Release|x64.ActiveCfg = Release|x64
-		{C625B460-F959-475F-A651-688631B5CB55}.Release|x64.Build.0 = Release|x64
-		{C625B460-F959-475F-A651-688631B5CB55}.Release|x86.ActiveCfg = Release|Win32
-		{C625B460-F959-475F-A651-688631B5CB55}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1238,7 +1238,7 @@
 
 <p>
    <b>$04 UINT8(byte) / Write Data Port</b> <span style="padding-left: 3em;"><i>1993a software only</i></span><br>
-   Write the specified byte
+   Writes the specified byte
    value to the data port, which sends the byte to the WPC host board.
    (This variant of the opcode applies to all
    ROM versions except the early 1993 software version shipped with <i>Indiana Jones:
@@ -1247,10 +1247,10 @@
 </p>
 <p>
    Special side-effect for decoder software 1.05: For this decoder
-   software version only, some byte values have special side effects:
+   software version only, two specific byte values have special side effects:
 </p>
 <ul>
-   <li>$69 = enable global volume override on channel 5
+   <li>$69 = enable <a href="#Channel5VolumeOverrideHack">global volume override</a> on channel 5
    <li>$6A = disable global volume override on channel 5
 </ul>
 <p>
@@ -3834,29 +3834,39 @@ for (int i = 0 ; i < 16 ; ++i) {
    I call this the Channel 5 Volume Override Hack.
 </p>
 <p>
-   This unfortunate feature has the effect of making Channel 5 (and only that channel)
+   This feature has the effect of making Channel 5 (and only that channel)
    act as though the master volume level <i>and</i> the per-channel
    host-controlled volume level were both set to $FF, regardless
    of their actual current settings.  This override is only in effect when a
    special flag is enabled.  The flag is enabled by using track
    program opcode $04 to write byte value $69 to the data port.
    The flag is disabled by writing byte value $6A to the data port,
-   or simply by starting a new audio stream on channel 5.
+   or by starting a new audio stream on channel 5.
 </p>
 <p>
-   I included this in my native C++ DCS Decoder implementation, just for
-   the sake of 100% bug-for-bug compatibility, but it's of marginal value
-   even to the games that used the 1.05 software.  It was only
-   ever triggered by one track each in the five software 1.05
+   I included this behavior in my native C++ DCS Decoder implementation, just for
+   the sake of 100% bug-for-bug compatibility, but it's of marginal value at best.
+   It was only ever triggered by one track each in the five software 1.05
    games, and always the same track ($03DE), which I think is one of
    the stock operator-menu sounds; it probably just got copied into
    each game from a template starter ROM, so it might not even
    actually be used in most of the games where it appears.  Why
    that one track requires the special full-volume playback override
-   is unclear; it was probably just a poorly-thought-out quick fix,
-   for a problem that wasn't properly understood to start with,
-   added by a summer intern, and quickly forgotten, not anything
-   with real intention behind it.
+   is unclear, and I doubt very much that a player or operator would
+   ever notice the difference.  But even so, someone cared about it enough to
+   go to the trouble to add the code, which is non-trivial - it comprises
+   four or five related changes scattered through the machine code program.
+</p>
+<p>
+   I call this a "hack" because it's so obviously a quick-and-dirty
+   code change that someone added to achieve some ad hoc objective,
+   without thinking it through properly, and probably without even
+   considering if the objective itself made any sense.
+   The fact that it was only ever used for a single sound effect
+   makes it look even more like the whole idea was misguided from
+   the start.  It creates this weird special-case gotcha for sound
+   designers working with the software, who have to be aware of
+   the non-sensical side effect of the data port write.
 </p>
 
 <a name="SpecialCommands"></a>

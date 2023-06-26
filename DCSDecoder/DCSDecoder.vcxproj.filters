@@ -36,6 +36,9 @@
     <ClInclude Include="DCSDecoderEmu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PlatformSpecific.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DCSDecoder.cpp">

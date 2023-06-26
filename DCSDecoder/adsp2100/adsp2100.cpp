@@ -135,7 +135,7 @@
 /****************************************************************************/
 /* Write a 24-bit value to program memory                                   */
 /****************************************************************************/
-#define ADSP2100_WRPGM(A,V)	(*(UINT32 *)(A) = (V) & 0xffffff)
+#define ADSP2100_WRPGM(A,V)	(*(uint32_t *)(A) = (V) & 0xffffff)
 
 
 
@@ -160,9 +160,9 @@ static int chip_type = CHIP_TYPE_ADSP2100;
 static int mstat_mask;
 static int imask_mask;
 
-static UINT16 *reverse_table = 0;
-static UINT16 *mask_table = 0;
-static UINT8 *condition_table = 0;
+static uint16_t *reverse_table = 0;
+static uint16_t *mask_table = 0;
+static uint8_t *condition_table = 0;
 
 static RX_CALLBACK sport_rx_callback = 0;
 static TX_CALLBACK sport_tx_callback = 0;
@@ -181,17 +181,17 @@ static void check_irqs(void);
 **#################################################################################################*/
 
 
-INLINE UINT32 RWORD_DATA(UINT32 addr)
+INLINE uint32_t RWORD_DATA(uint32_t addr)
 {
 	return adsp2100_host_read_dm(addr);
 }
 
-INLINE void WWORD_DATA(UINT32 addr, UINT32 data)
+INLINE void WWORD_DATA(uint32_t addr, uint32_t data)
 {
 	adsp2100_host_write_dm(addr, data);
 }
 
-INLINE UINT32 RWORD_PGM(UINT32 addr)
+INLINE uint32_t RWORD_PGM(uint32_t addr)
 {
 	// special case for original (pre DCS-95) boards - PM($3000)
 	// is the data port
@@ -201,7 +201,7 @@ INLINE UINT32 RWORD_PGM(UINT32 addr)
 	return adsp2100_op_rom[addr];
 }
 
-INLINE void WWORD_PGM(UINT32 addr, UINT32 data)
+INLINE void WWORD_PGM(uint32_t addr, uint32_t data)
 {
 	// special case hack for pre-WPC95 DCS - program memory 0x3000 
 	// is the sound board data port
@@ -316,7 +316,7 @@ INLINE int adsp2101_generate_irq(int which, int indx)
 
 static void check_irqs(void)
 {
-	UINT8 check;
+	uint8_t check;
 	if (chip_type >= CHIP_TYPE_ADSP2101)
 	{
 		/* check IRQ2 */
@@ -392,7 +392,7 @@ void adsp2100_init(void)
 void adsp2100_set_mstat(int val) { set_mstat(val); }
 
 // external access to Ix registers
-void adsp2100_set_Ix_reg(int x, INT32 val)
+void adsp2100_set_Ix_reg(int x, int32_t val)
 {
 	adsp2100.i[x] = val & 0x3fff;
 	adsp2100.base[x] = val & adsp2100.lmask[x];
@@ -476,11 +476,11 @@ static int create_tables(void)
 
 	/* allocate the tables */
 	if (!reverse_table)
-		reverse_table = (UINT16 *)malloc(0x4000 * sizeof(UINT16));
+		reverse_table = (uint16_t *)malloc(0x4000 * sizeof(uint16_t));
 	if (!mask_table)
-		mask_table = (UINT16 *)malloc(0x4000 * sizeof(UINT16));
+		mask_table = (uint16_t *)malloc(0x4000 * sizeof(uint16_t));
 	if (!condition_table)
-		condition_table = (UINT8 *)malloc(0x1000 * sizeof(UINT8));
+		condition_table = (uint8_t *)malloc(0x1000 * sizeof(uint8_t));
 
 	/* handle errors */
 	if (!reverse_table || !mask_table || !condition_table)
@@ -489,7 +489,7 @@ static int create_tables(void)
 	/* initialize the bit reversing table */
 	for (i = 0; i < 0x4000; i++)
 	{
-		UINT16 data = 0;
+		uint16_t data = 0;
 
 		data |= (i >> 13) & 0x0001;
 		data |= (i >> 11) & 0x0002;
@@ -997,7 +997,7 @@ int adsp2100_execute(int cycles)
 	/* core execution loop */
 	do
 	{
-		UINT32 op, temp;
+		uint32_t op, temp;
 
 		adsp2100.ppc = adsp2100.pc;	/* copy PC to previous PC */
 
@@ -1320,19 +1320,19 @@ int adsp2100_execute(int cycles)
 			break;
 		case 0x30: case 0x31: case 0x32: case 0x33:
 			// 001100xx xxxxxxxx xxxxxxxx  load non-data register immediate (group 0)
-			WRITE_REG(0, op & 15, (INT32)(op << 14) >> 18);
+			WRITE_REG(0, op & 15, (int32_t)(op << 14) >> 18);
 			break;
 		case 0x34: case 0x35: case 0x36: case 0x37:
 			// 001101xx xxxxxxxx xxxxxxxx  load non-data register immediate (group 1)
-			WRITE_REG(1, op & 15, (INT32)(op << 14) >> 18);
+			WRITE_REG(1, op & 15, (int32_t)(op << 14) >> 18);
 			break;
 		case 0x38: case 0x39: case 0x3a: case 0x3b:
 			// 001110xx xxxxxxxx xxxxxxxx  load non-data register immediate (group 2)
-			WRITE_REG(2, op & 15, (INT32)(op << 14) >> 18);
+			WRITE_REG(2, op & 15, (int32_t)(op << 14) >> 18);
 			break;
 		case 0x3c: case 0x3d: case 0x3e: case 0x3f:
 			// 001111xx xxxxxxxx xxxxxxxx  load non-data register immediate (group 3)
-			WRITE_REG(3, op & 15, (INT32)(op << 14) >> 18);
+			WRITE_REG(3, op & 15, (int32_t)(op << 14) >> 18);
 			break;
 		case 0x40: case 0x41: case 0x42: case 0x43: case 0x44: case 0x45: case 0x46: case 0x47:
 		case 0x48: case 0x49: case 0x4a: case 0x4b: case 0x4c: case 0x4d: case 0x4e: case 0x4f:
@@ -1766,14 +1766,14 @@ void adsp2105_load_boot_data(const uint8_t *srcdata, uint32_t *dstdata)
 {
 	/* see how many words we need to copy */
 #ifdef LSB_FIRST
-	UINT32 size = 8 * (srcdata[3] + 1), i;
+	uint32_t size = 8 * (srcdata[3] + 1), i;
 #else
 	UINT32 size = 8 * (srcdata[2] + 1), i;
 #endif
 	for (i = 0; i < size; i++)
 	{
 #ifdef LSB_FIRST
-		UINT32 opcode = (srcdata[i*4+0] << 16) | (srcdata[i*4+1] << 8) | srcdata[i*4+2];
+		uint32_t opcode = (srcdata[i*4+0] << 16) | (srcdata[i*4+1] << 8) | srcdata[i*4+2];
 #else
 		UINT32 opcode = (srcdata[i*4+1] << 16) | (srcdata[i*4+0] << 8) | srcdata[i*4+3];
 #endif

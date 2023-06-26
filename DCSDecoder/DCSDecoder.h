@@ -105,15 +105,16 @@
 // in the decoder, and releases the mutex on return.
 //
 
-
 #pragma once
 #include <stdint.h>
+#include <stdarg.h>
 #include <string>
 #include <list>
 #include <vector>
 #include <memory>
 #include <map>
 #include <functional>
+#include "PlatformSpecific.h"
 
 class DCSDecoder
 {

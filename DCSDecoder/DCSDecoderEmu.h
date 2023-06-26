@@ -75,10 +75,10 @@ public:
 
 protected:
 	// friend functions
-	friend UINT32 adsp2100_host_read_dm(UINT32);
-	friend void adsp2100_host_write_dm(UINT32, UINT32);
-	friend UINT32 adsp2100_host_read_pm(UINT32);
-	friend void adsp2100_host_write_pm(UINT32, UINT32);
+	friend uint32_t adsp2100_host_read_dm(uint32_t);
+	friend void adsp2100_host_write_dm(uint32_t, uint32_t);
+	friend uint32_t adsp2100_host_read_pm(uint32_t);
+	friend void adsp2100_host_write_pm(uint32_t, uint32_t);
 
 	// memory handlers
 	uint16_t ReadDM(uint16_t addr);

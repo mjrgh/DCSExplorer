@@ -2,3 +2,4 @@
 Debug/
 Release/
 Win32/
+*.o

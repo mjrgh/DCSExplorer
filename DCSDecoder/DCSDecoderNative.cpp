@@ -10,6 +10,7 @@
 //
 
 #include <assert.h>
+#include <string.h>
 #include <memory>
 #include <list>
 #include "DCSDecoderNative.h"
@@ -46,6 +47,14 @@ void DCSDecoderNative::InitStandalone(OSVersion osVersion)
 
     case OSVersion::OS95:
         hwVersion = HWVersion::DCS95;
+        break;
+
+    case OSVersion::Invalid:
+        hwVersion = HWVersion::Invalid;
+        break;
+
+    case OSVersion::Unknown:
+        hwVersion = HWVersion::Unknown;
         break;
     }
 }
@@ -845,7 +854,7 @@ void DCSDecoderNative::ExecTrack(int curChannel)
         return;
 
     // process the track's opcode sequence from the current location
-    for (uint16_t tmpu16 = 0 ;; )
+    for ( ;; )
     {
         // Read the next opcode's count prefix.  If the channel's
         // track counter hasn't yet reached the count prefix, pause

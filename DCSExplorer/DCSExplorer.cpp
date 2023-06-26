@@ -1994,7 +1994,7 @@ void TraceAndDisassemble(FILE *fp, const uint8_t *code, Annotations &annotations
 	while (workQueue.size() != 0)
 	{
 		// take the next item off thee queue
-		UINT16 addr = workQueue.front();
+		uint16_t addr = workQueue.front();
 		workQueue.pop_front();
 
 		// process instructions sequentially from the current address until we
@@ -2006,8 +2006,8 @@ void TraceAndDisassemble(FILE *fp, const uint8_t *code, Annotations &annotations
 			reachable[addr] = 1;
 
 			// figure other addresses reachable from here
-			UINT32 op = ReadOpcode(code + addr*4);
-			UINT8 opmain = (op >> 16) & 0xff;
+			uint32_t op = ReadOpcode(code + addr*4);
+			uint8_t opmain = (op >> 16) & 0xff;
 			switch (opmain)
 			{
 			case 0x03:

@@ -62,7 +62,7 @@ struct ThreadContext
 	volatile bool shutdownRequested = false;
 
 	// STOP command requested - stop current track playback
-	volatile UINT32 stopRequested = 0;
+	volatile uint32_t stopRequested = 0;
 
 	// is a track currently playing?
 	volatile bool isPlaying = false;

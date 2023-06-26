@@ -526,7 +526,7 @@ std::string DCSDecoder::GetVersionInfo(HWVersion *hw, OSVersion *os) const
 			year = "1997";
 			break;
 		}
-		 sprintf_s(nbuf, "Software %d.%02d (%s)", nominalVersion >> 8, nominalVersion & 0xFF, year);
+		snprintf(nbuf, _countof(nbuf), "Software %d.%02d (%s)", nominalVersion >> 8, nominalVersion & 0xFF, year);
 	}
 
 	// build a human-readable version description
@@ -535,6 +535,10 @@ std::string DCSDecoder::GetVersionInfo(HWVersion *hw, OSVersion *os) const
 	{
 	case OSVersion::Invalid:
 		s = "Not detected";
+		break;
+
+	case OSVersion::Unknown:
+		s = "Unknown";
 		break;
 
 	case OSVersion::OS93a:
@@ -573,6 +577,10 @@ std::string DCSDecoder::GetVersionInfo(HWVersion *hw, OSVersion *os) const
 		h = "Hardware type not detected";
 		break;
 
+	case HWVersion::Unknown:
+		h = "Unknown hardware type";
+		break;
+
 	case HWVersion::DCS93:
 		h = "DCS audio board";
 		break;
@@ -583,7 +591,7 @@ std::string DCSDecoder::GetVersionInfo(HWVersion *hw, OSVersion *os) const
 	}
 
 	char buf[128];
-	sprintf_s(buf, "%s, %s", h, s);
+	snprintf(buf, _countof(buf), "%s, %s", h, s);
 	return buf;
 }
 
@@ -623,7 +631,7 @@ int DCSDecoder::GetNumChannels() const
 		// get the channel count from op04 and the mask from op14
 		int nChannels = static_cast<int>(vars.find('n')->second);
 		uint32_t mask = vars.find('m')->second;
-		if (mask == (1 << nChannels) - 1)
+		if (mask == static_cast<uint32_t>((1 << nChannels) - 1))
 			return nChannels;
 	}
 
@@ -1888,7 +1896,7 @@ std::string DCSDecoder::vformat(const char *fmt, va_list va)
 	// figure the buffer size required
 	va_list va2;
 	va_copy(va2, va);
-	int len = _vscprintf(fmt, va2);
+	int len = vsnprintf(nullptr, 0, fmt, va2);
 	va_end(va2);
 
 	// validate the length
@@ -1897,7 +1905,7 @@ std::string DCSDecoder::vformat(const char *fmt, va_list va)
 
 	// allocate the buffer and format the text into it
 	std::unique_ptr<char> buf(new char[len + 1]);
-	vsprintf_s(buf.get(), len + 1, fmt, va);
+	vsnprintf(buf.get(), len + 1, fmt, va);
 
 	// return a std::string constructed from the buffer
 	return std::string(buf.get());

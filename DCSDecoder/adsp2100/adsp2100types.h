@@ -10,18 +10,8 @@
 #error "Only one of LSB_FIRST -or- MSB_FIRST can be #defined"
 #endif
 
-// The ADSP emulator code uses Windows-style xINTx types for the
-// definite-bit-width integer sizes.  Define these in terms of the
-// portable stdint.h types.
 #include <stdint.h>
-typedef int8_t INT8;
-typedef uint8_t UINT8;
-typedef int16_t INT16;
-typedef uint16_t UINT16;
-typedef int32_t INT32;
-typedef uint32_t UINT32;
-typedef int64_t INT64;
-typedef uint64_t UINT64;
+typedef uint64_t uint64_t;
 
 
 /*###################################################################################################
@@ -29,8 +19,8 @@ typedef uint64_t UINT64;
 **#################################################################################################*/
 
 /* transmit and receive data callbacks types */
-typedef INT32 (*RX_CALLBACK)(int port);
-typedef void  (*TX_CALLBACK)(int port, INT32 data);
+typedef int32_t (*RX_CALLBACK)(int port);
+typedef void  (*TX_CALLBACK)(int port, int32_t data);
 
 
 /*###################################################################################################
@@ -82,8 +72,8 @@ enum
 /* 16-bit registers that can be loaded signed or unsigned */
 typedef union
 {
-	UINT16	u;
-	INT16	s;
+	uint16_t	u;
+	int16_t	s;
 } ADSPREG16;
 
 
@@ -95,7 +85,7 @@ typedef union
 #else
 	struct { ADSPREG16 sr1, sr0; } srx;
 #endif
-	UINT32 sr;
+	uint32_t sr;
 } SHIFTRESULT;
 
 
@@ -104,12 +94,12 @@ typedef union
 {
 #ifdef LSB_FIRST
 	struct { ADSPREG16 mr0, mr1, mr2, mrzero; } mrx;
-	struct { UINT32 mr0, mr1; } mry;
+	struct { uint32_t mr0, mr1; } mry;
 #else
 	struct { ADSPREG16 mrzero, mr2, mr1, mr0; } mrx;
 	struct { UINT32 mr1, mr0; } mry;
 #endif
-	UINT64 mr;
+	uint64_t mr;
 } MACRESULT;
 
 /* there are two banks of "core" registers */
@@ -146,51 +136,51 @@ typedef struct
 	ADSPCORE	alt;
 
 	/* Memory addressing registers */
-	UINT32		i[8];
-	INT32		m[8];
-	UINT32		l[8];
-	UINT32		lmask[8];
-	UINT32		base[8];
-	UINT8		px;
+	uint32_t		i[8];
+	int32_t		m[8];
+	uint32_t		l[8];
+	uint32_t		lmask[8];
+	uint32_t		base[8];
+	uint8_t		px;
 
 	/* other CPU registers */
-	UINT32		pc;
-	UINT32		ppc;
-	UINT32		loop;
-	UINT32		loop_condition;
-	UINT32		cntr;
+	uint32_t		pc;
+	uint32_t		ppc;
+	uint32_t		loop;
+	uint32_t		loop_condition;
+	uint32_t		cntr;
 
 	/* status registers */
-	UINT32		astat;
-	UINT32		sstat;
-	UINT32		mstat;
-	UINT32		astat_clear;
-	UINT32		idle;
+	uint32_t		astat;
+	uint32_t		sstat;
+	uint32_t		mstat;
+	uint32_t		astat_clear;
+	uint32_t		idle;
 
 	/* stacks */
-	UINT32		loop_stack[ADSP2100_LOOP_STACK_DEPTH];
-	UINT32		cntr_stack[ADSP2100_CNTR_STACK_DEPTH];
-	UINT32		pc_stack[ADSP2100_PC_STACK_DEPTH];
-	UINT8		stat_stack[ADSP2100_STAT_STACK_DEPTH][3];
-	INT32		pc_sp;
-	INT32		cntr_sp;
-	INT32		stat_sp;
-	INT32		loop_sp;
+	uint32_t		loop_stack[ADSP2100_LOOP_STACK_DEPTH];
+	uint32_t		cntr_stack[ADSP2100_CNTR_STACK_DEPTH];
+	uint32_t		pc_stack[ADSP2100_PC_STACK_DEPTH];
+	uint8_t		stat_stack[ADSP2100_STAT_STACK_DEPTH][3];
+	int32_t		pc_sp;
+	int32_t		cntr_sp;
+	int32_t		stat_sp;
+	int32_t		loop_sp;
 
 	/* external I/O */
-	UINT8		flagout;
-	UINT8		flagin;
-	UINT8		fl0;
-	UINT8		fl1;
-	UINT8		fl2;
+	uint8_t		flagout;
+	uint8_t		flagin;
+	uint8_t		fl0;
+	uint8_t		fl1;
+	uint8_t		fl2;
 
 	/* interrupt handling */
-	UINT8		imask;
-	UINT8		icntl;
-	UINT16		ifc;
-	UINT8		irq_state[5];
-	UINT8		irq_latch[5];
-	INT32		interrupt_cycles;
+	uint8_t		imask;
+	uint8_t		icntl;
+	uint16_t		ifc;
+	uint8_t		irq_state[5];
+	uint8_t		irq_latch[5];
+	int32_t		interrupt_cycles;
 	int			(*irq_callback)(int irqline);
 } adsp2100_Regs;
 

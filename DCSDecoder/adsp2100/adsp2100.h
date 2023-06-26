@@ -32,17 +32,17 @@ adsp2100_Regs& adsp2100_get_regs();
 **#################################################################################################*/
 
 // CPU ROM - memory space provided by the client program
-extern UINT32 *adsp2100_op_rom;
+extern uint32_t *adsp2100_op_rom;
 
 // These routines are special-cased for the DCSDecoderEmulator.  We redirect
 // memory reads and writes to external handlers provided by the client program.
 // Note that PM() read/write operations are only directed to the client for
 // the special location PM($3000) - other addresses are handled directly via
 // the oprom array.
-extern UINT32 adsp2100_host_read_dm(UINT32 addr);
-extern void adsp2100_host_write_dm(UINT32 addr, UINT32 data);
-extern UINT32 adsp2100_host_read_pm(UINT32 addr);
-extern void adsp2100_host_write_pm(UINT32 addr, UINT32 data);
+extern uint32_t adsp2100_host_read_dm(uint32_t addr);
+extern void adsp2100_host_write_dm(uint32_t addr, uint32_t data);
+extern uint32_t adsp2100_host_read_pm(uint32_t addr);
+extern void adsp2100_host_write_pm(uint32_t addr, uint32_t data);
 
 /*###################################################################################################
 **	PUBLIC FUNCTIONS
@@ -58,7 +58,7 @@ extern void adsp2100_host_invoke_irq(int which, int indx, int cycleLimit);
 
 // external access to registers
 void adsp2100_set_mstat(int val);
-void adsp2100_set_Ix_reg(int x, INT32 val);
+void adsp2100_set_Ix_reg(int x, int32_t val);
 
 // debugger interface, if available
 extern void adsp2100_init_debugger();

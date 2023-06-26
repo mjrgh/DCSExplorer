@@ -147,6 +147,7 @@
     <ClInclude Include="DCSDecoderNative.h" />
     <ClInclude Include="DCSDecoder.h" />
     <ClInclude Include="DCSDecoderEmu.h" />
+    <ClInclude Include="PlatformSpecific.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="adsp2100\2100dasm.cpp">

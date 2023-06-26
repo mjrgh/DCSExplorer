@@ -602,29 +602,29 @@ int DCSDecoderEmulated::SearchForOpcodes(const char *opcodes,
 //
 
 // CPU ROM - memory space provided by the client program
-UINT32 *adsp2100_op_rom;
+uint32_t *adsp2100_op_rom;
 
 // These routines are special-cased for the DCSDecoderEmulator.  We redirect
 // memory reads and writes to external handlers provided by the client program.
 // Note that PM() read/write operations are only directed to the client for
 // the special location PM($3000) - other addresses are handled directly via
 // the oprom array.
-UINT32 adsp2100_host_read_dm(UINT32 addr)
+uint32_t adsp2100_host_read_dm(uint32_t addr)
 {
 	return DCSDecoderEmulated::instance->ReadDM(static_cast<uint16_t>(addr));
 }
 
-void adsp2100_host_write_dm(UINT32 addr, UINT32 data)
+void adsp2100_host_write_dm(uint32_t addr, uint32_t data)
 {
 	DCSDecoderEmulated::instance->WriteDM(static_cast<uint16_t>(addr), static_cast<uint16_t>(data));
 }
 
-UINT32 adsp2100_host_read_pm(UINT32 addr)
+uint32_t adsp2100_host_read_pm(uint32_t addr)
 {
 	return DCSDecoderEmulated::instance->ReadPM(static_cast<uint16_t>(addr));
 }
 
-void adsp2100_host_write_pm(UINT32 addr, UINT32 data)
+void adsp2100_host_write_pm(uint32_t addr, uint32_t data)
 {
 	DCSDecoderEmulated::instance->WritePM(static_cast<uint16_t>(addr), data);
 }
@@ -644,8 +644,8 @@ void adsp2100_host_write_pm(UINT32 addr, UINT32 data)
 void DCSDecoderEmulated::DCSSpeedup1994(adsp2100_Regs &regs, uint16_t *DM, uint32_t *PM)
 {
 	// figure which hardware variation we're working with
-	UINT16 *ram1source, *ram2source, volume;
-	UINT32 volumeOP = PM[regs.pc + 0x2b84 - 0x2b45];
+	uint16_t *ram1source, *ram2source, volume;
+	uint32_t volumeOP = PM[regs.pc + 0x2b84 - 0x2b45];
 	if (regs.pc > 0x2000)
 	{
 		ram1source = &DM[0x1000];
@@ -660,12 +660,12 @@ void DCSDecoderEmulated::DCSSpeedup1994(adsp2100_Regs &regs, uint16_t *DM, uint3
 	}
 
 	// perform the frequency domain to time domain transform
-	UINT16 *i0, *i2;
+	uint16_t *i0, *i2;
 	i0 = &ram2source[0];
 	i2 = &ram2source[0x0080];
 	/* M0 = 0, M1 = 1, M2 = -1 */
 	for (int ii = 0; ii < 0x0040; ii++) {
-		INT16 ax0, ay0, ax1, ay1, ar;
+		int16_t ax0, ay0, ax1, ay1, ar;
 		ax0 = *i0++;
 		ay0 = *i2;
 		ax1 = *i0--;
@@ -686,8 +686,8 @@ void DCSDecoderEmulated::DCSSpeedup1994(adsp2100_Regs &regs, uint16_t *DM, uint3
 	mem63f = mem63e >> 1;
 	for (int ii = 0; ii < 6; ii++)
 	{
-		UINT16 *i0, *i1, *i2, *i4, *i5;
-		INT16 m2, m3;
+		uint16_t *i0, *i1, *i2, *i4, *i5;
+		int16_t m2, m3;
 		i4 = &ram1source[0x0080];
 		i5 = &ram1source[0x0000];
 		i0 = &ram2source[0x0000];
@@ -698,24 +698,24 @@ void DCSDecoderEmulated::DCSSpeedup1994(adsp2100_Regs &regs, uint16_t *DM, uint3
 		m3 = mem63e - 1;
 		for (int jj = 0; jj < mem63d; jj++)
 		{
-			INT16 mx0, my0, my1;
+			int16_t mx0, my0, my1;
 			my0 = *i4++;
 			my1 = *i5++;
 			mx0 = *i1++;
 			for (int kk = 0; kk < mem63f; kk++) {
-				INT16 mx1, ax0, ay0, ay1, ar;
-				INT32 tmp, mr;
+				int16_t mx1, ax0, ay0, ay1, ar;
+				int32_t tmp, mr;
 				mx1 = *i1++;
-				tmp = (((INT32)mx0 * my0)<<1);
+				tmp = (((int32_t)mx0 * my0)<<1);
 				mr = tmp;
 				ay0 = *i0++;
-				tmp = (((INT32)mx1 * my1)<<1);
+				tmp = (((int32_t)mx1 * my1)<<1);
 				mr = (mr - tmp + 0x8000) & (((tmp & 0xffff) == 0x8000) ? 0xfffeffff : 0xffffffff);
 				ax0 = mr>>16;
 				tmp = (mx1 * my0)<<1;
 				mr = tmp;
 				ay1 = *i0--; /* M0 = -1 */
-				tmp = (((INT32)mx0 * my1)<<1);
+				tmp = (((int32_t)mx0 * my1)<<1);
 				mr = (mr + tmp + 0x8000) & (((tmp & 0xffff) == 0x8000) ? 0xfffeffff : 0xffffffff);
 				mx0 = *i1++;
 				ar = ay0 - ax0;
@@ -736,15 +736,15 @@ void DCSDecoderEmulated::DCSSpeedup1994(adsp2100_Regs &regs, uint16_t *DM, uint3
 		mem63f >>= 1;
 	}
 
-	UINT16 my0;
+	uint16_t my0;
 	i0 = &ram2source[0x0000];
 	my0 = volume < 0x8000 ? volume : 0x8000;
 	for (int ii = 0; ii < 0x0100; ii++)
 	{
-		INT16 mx0;
-		INT32 mr;
+		int16_t mx0;
+		int32_t mr;
 		mx0 = *i0;
-		mr = ((INT32)mx0 * my0);
+		mr = ((int32_t)mx0 * my0);
 		*i0++ = mr>>15; // >>16;
 	}
 	regs.pc = regs.pc + 0x2b89 - 0x2b44;
@@ -774,11 +774,11 @@ void DCSDecoderEmulated::DCSSpeedup1993(adsp2100_Regs &regs, uint16_t *DM, uint3
 		}
 	}
 
-	UINT32 volumeOP = PM[regs.pc-5 + 0x0135 - 0x00e8];
-	UINT16 *ram = DM;
-	UINT16 volume = ram[((volumeOP >> 4) & 0x3fff)];
+	uint32_t volumeOP = PM[regs.pc-5 + 0x0135 - 0x00e8];
+	uint16_t *ram = DM;
+	uint16_t volume = ram[((volumeOP >> 4) & 0x3fff)];
 
-	UINT16 *i0, *i1, *i2, *i3;
+	uint16_t *i0, *i1, *i2, *i3;
 	i0 = &ram[0x3800];
 	i1 = &ram[0x38fe];
 	i2 = &ram[0x3900];
@@ -788,7 +788,7 @@ void DCSDecoderEmulated::DCSSpeedup1993(adsp2100_Regs &regs, uint16_t *DM, uint3
 	*i2++ = 0;
 	for (int ii = 0 ; ii < 0x0040 ; ++ii)
 	{
-		INT16 ax0, ay0, ax1, ay1, ar;
+		int16_t ax0, ay0, ax1, ay1, ar;
 		ax0 = *i0++;
 		ay0 = *i1++;
 		ar = ax0 + ay0;
@@ -818,9 +818,9 @@ void DCSDecoderEmulated::DCSSpeedup1993(adsp2100_Regs &regs, uint16_t *DM, uint3
 	mem623 = 0x40;
 	for (int ii = 0 ; ii < 7 ; ++ii)
 	{
-		UINT16 *i0, *i1, *i2;
-		UINT32 *i4, *i5;
-		INT16 m2, m3;
+		uint16_t *i0, *i1, *i2;
+		uint32_t *i4, *i5;
+		int16_t m2, m3;
 
 		i4 = &PM[0x1780];
 		i5 = &PM[0x1700];
@@ -832,23 +832,23 @@ void DCSDecoderEmulated::DCSSpeedup1993(adsp2100_Regs &regs, uint16_t *DM, uint3
 		m3 = mem622 - 1;
 		for (int jj = 0 ; jj < mem621 ; ++jj)
 		{
-			INT16 mx0, my0, my1;
+			int16_t mx0, my0, my1;
 			my0 = (*i4++) >> 8;
 			my1 = (*i5++) >> 8;
 			mx0 = *i1++;
 			for (int kk = 0 ; kk < mem623 ; ++kk)
 			{
-				INT16 mx1, ax0, ay0, ay1, ar;
-				INT32 tmp, mr;
+				int16_t mx1, ax0, ay0, ay1, ar;
+				int32_t tmp, mr;
 				mx1 = *i1++;
-				mr = ((INT32)mx0 * my0) << 1;
+				mr = ((int32_t)mx0 * my0) << 1;
 				ay0 = *i0++;
-				tmp = ((INT32)mx1 * my1) << 1;
+				tmp = ((int32_t)mx1 * my1) << 1;
 				mr = (mr - tmp + 0x8000) & (((tmp & 0xffff) == 0x8000) ? 0xfffeffff : 0xffffffff);
 				ax0 = mr >> 16;
-				mr = ((INT32)mx1 * my0) << 1;
+				mr = ((int32_t)mx1 * my0) << 1;
 				ay1 = *i0--;
-				tmp = (((INT32)mx0 * my1)<<1);
+				tmp = (((int32_t)mx0 * my1)<<1);
 				mr = (mr + tmp + 0x8000) & (((tmp & 0xffff) == 0x8000) ? 0xfffeffff : 0xffffffff);
 				mx0 = *i1++;
 				ar = ay0 - ax0;
@@ -869,9 +869,9 @@ void DCSDecoderEmulated::DCSSpeedup1993(adsp2100_Regs &regs, uint16_t *DM, uint3
 		mem623 >>= 1;
 	}
 
-	UINT16 *i4;
-	INT16 mx0;
-	UINT16 my0;
+	uint16_t *i4;
+	int16_t mx0;
+	uint16_t my0;
 	uint16_t idx1 = 7;
 	i4 = &ram[0x3801];
 	my0 = volume < 0x8000 ? volume : 0x8000;
@@ -879,7 +879,7 @@ void DCSDecoderEmulated::DCSSpeedup1993(adsp2100_Regs &regs, uint16_t *DM, uint3
 	idx1 += 0x20;
 	for (int ii = 0 ; ii < 0x100 ; ii++)
 	{
-		UINT32 mr = ((INT32)mx0 * my0); // << 1; // see shift below
+		uint32_t mr = ((int32_t)mx0 * my0); // << 1; // see shift below
 		mx0 = ram[reverse_bits[idx1]];
 		idx1 += 0x20;
 		*i4 = mr >> 15; // >> 16; // see above

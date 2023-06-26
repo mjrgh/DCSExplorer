@@ -26,10 +26,10 @@ in a DCS pinball's sound ROMs, and quite impossible to create new
 ones.  The only way to examine the contents of a DCS ROM was to run
 PinMame in its debugging mode, and just try all of the possible
 command codes to see what each one did.  That wasn't an entirely
-satisfactory solution, in part because the PinMame UI is awkward, and
-in part because some of the commands in a DCS ROM don't just trigger
-simple audio playback; some have side effects that aren't apparent
-when you just run through them all one by one.
+satisfactory solution, in part because the PinMame UI is a little
+difficult to use, and in part because some of the commands in a DCS
+ROM don't just trigger simple audio playback; some have side effects
+that aren't apparent when you just run through them all one by one.
 
 DCS Explorer is my name for the overall project, which consists
 of three main pieces:
@@ -38,22 +38,24 @@ of three main pieces:
 the contents of a DCS ROM in detail, and interactively play back
 the audio it contains.
 
-* DCSDecoder, a portable C++ class that implements a fully native decoder for
-DCS ROMs, without any ADSP-2105 emulation.  It's a standalone class
-with no dependencies on PinMame or any other external libraries, and
-no dependencies on any system audio interfaces or OS services.
-It's easy to incorporate into any C++ project, and its programming
-interface is easy to use.  It works with all of the DCS pinball
-titles released from 1993 to 1998.  I've tested
-representative ROMs for every DCS title and validated that they
-produce PCM output that's bit-for-bit identical to the PinMame
-emulator's output.  (In fact, my work on this project turned up two
-errors in PinMame's emulation that have since been corrected in the
-PinMame mainline.)  The code is written in a readable style
-and extensively commented, in the hopes that it can serve as an
-informational resource to DCS internals for people who can
-read C++ code, and as a reference implementation for developing
-new DCS-related software.
+* DCSDecoder, a portable C++ class that implements a fully native
+decoder for DCS ROMs, without any ADSP-2105 emulation.  It's a
+standalone class with no dependencies on PinMame or any other external
+libraries, and no dependencies on any system audio interfaces or OS
+services.  It's easy to incorporate into any C++ project, and its
+programming interface is easy to use.  It works with all of the DCS
+pinball titles released from 1993 to 1998.  I've tested representative
+ROMs for every DCS title and validated that they produce PCM output
+that's bit-for-bit identical to the PinMame emulator's output.  (In
+fact, this cross-checking turned up two small bugs in PinMame's DCS
+emulation, which have since been fixed in the PinMame mainline.
+Having the two completely different emulator designs agree on every
+single bit makes me more confident that both of them are getting it
+exactly right.)  The code is written in a readable style and
+extensively commented, in the hopes that it can serve as an
+informational resource to DCS internals for people who can read C++
+code, and as a reference implementation for developing new DCS-related
+software.
 
 * DCS Encoder, a program that lets you create your own DCS ROMs.
 It not only transcodes audio files into the DCS format, but also

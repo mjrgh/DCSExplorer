@@ -229,7 +229,7 @@ protected:
     {
     public: 
         ROMBitPointer() { }
-        ROMBitPointer(ROMPointer p) : p(p), nBits(0), buf(0) { }
+        ROMBitPointer(ROMPointer p) : p(p) { }
 
         // some operations map directly to the underlying ROM pointer
         bool IsNull() const { return p.IsNull(); }
@@ -818,8 +818,8 @@ protected:
     // it's just the subset we need for a compatible decoder implementation.)
 
     // convert int value from signed to unsigned or vice versa, keeping the same type size
-    template<typename T> inline static typename std::make_signed<T>::type SIGNED(T val) { return static_cast<std::make_signed<T>::type>(val); }
-    template<typename T> inline static typename std::make_unsigned<T>::type UNSIGNED(T val) { return static_cast<std::make_unsigned<T>::type>(val); }
+    template<typename T> inline static typename std::make_signed<T>::type SIGNED(T val) { return static_cast<typename std::make_signed<T>::type>(val); }
+    template<typename T> inline static typename std::make_unsigned<T>::type UNSIGNED(T val) { return static_cast<typename std::make_unsigned<T>::type>(val); }
 
     // saturate a 16-bit signed integer value to range -32768..32767
     static uint16_t SaturateInt16(int val) { return val < -32768 ? -32768 : val > 32767 ? 32767 : val; }

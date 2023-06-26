@@ -199,7 +199,7 @@ int nqr::encode_wav_to_disk(const EncoderParams p, const AudioData * d, const st
 //   Opus File Encoding   //
 ////////////////////////////
 
-#include "opus/opusfile/include/opusfile.h"
+#include  "opus/opusfile/include/opusfile.h"
 #include "ogg/ogg.h"
 
 typedef std::pair<std::string, std::string> metadata_t;

@@ -141,7 +141,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ADSP2100x.h" />
     <ClInclude Include="adsp2100\2100ops.h" />
     <ClInclude Include="adsp2100\adsp2100.h" />
     <ClInclude Include="adsp2100\adsp2100types.h" />

@@ -133,10 +133,10 @@ of time.  PinMame successfully uses the JIT approach to run the ARM
 code for some of the early 2000s Stern sound boards.  I decided to try
 the ahead-of-time approach instead, translating to portable C++.  That
 proved a quite workable approach, but as I got further into it, I
-started to get glimpses of how DCS worked on the inside.  That
-aroused my curiosity, and started me down the road of
-writing a fully native decoder based on an understand of the format
-itself, not just a rote translation of old machine code.
+started to get glimpses of how DCS worked on the inside.  That aroused
+my curiosity, and started me down the road to writing a fully native
+decoder based on a thorough understanding of the format, not just a
+rote translation of the old machine code.
 
 Once I understood the format well enough to decode it fully with an
 original program, I realized that I also understood it well enough to

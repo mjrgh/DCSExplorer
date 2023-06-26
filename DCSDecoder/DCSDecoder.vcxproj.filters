@@ -24,9 +24,6 @@
     <ClInclude Include="DCSDecoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ADSP2100x.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="adsp2100\2100ops.h">
       <Filter>adsp2100</Filter>
     </ClInclude>

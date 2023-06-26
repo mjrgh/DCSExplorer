@@ -14,8 +14,11 @@ purpose-built circuit board based on the Analog Devices ADSP-2105
 processor.  But the hardware is only incidental; DCS is really a
 software platform that can be implemented on any CPU, as long as it
 can perform the decoding work fast enough for real-time playback.
-Today's PCs are plenty fast enough, and in fact, even a higher-end
-microcontroller like a Raspberry Pi can easily handle the job.
+Today's PCs are plenty fast enough, and even a single-board
+computer like a Raspberry Pi can easily handle the job.
+The ADSP-2105 was fairly fast for its day, with a 10MHz system
+clock and single-cycle instruction execution, but many
+of today's general-purpose CPUs can run circles around that.
 
 The internal details of the DCS format have never been published
 (until now), so it's always been difficult to find out exactly what's

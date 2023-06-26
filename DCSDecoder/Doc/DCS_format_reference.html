@@ -21,12 +21,12 @@
    specialized CPU designed for DSP applications.  But we're
    not concerned here with the hardware; our focus is on the
    audio format, which doesn't contain any direct dependencies on
-   any particular run-time platform.  For those interested in the
+   any particular CPU or hardware platform.  For those interested in the
    circuit boards, plenty of information is available elsewhere, including
    schematics published in the pinball service manuals, repair
    guides on various pinball sites, and PinMame's open-source emulation,
-   which reverse-engineered most of the details that can't be inferred
-   from the schematics.
+   which reverse-engineered most of the important details that can't be
+   inferred from the schematics.
 </p>
 <p>
    This reference guide describes the DCS audio encoding system in detail,
@@ -302,7 +302,7 @@
    This is interpreted as a 24-bit integer value, in the usual big-endian order
    (most significant byte first).  For the DCS-93 boards, where the actual
    pointers only use 23 bits, the high-order bit is ignored when interpreting
-   the pointer, and is always be set to zero when stored in the ROM.
+   the pointer, and should always be set to zero when stored in the ROM.
 </p>
 <p>
    The simplest way (for me, at least) to think about the linear ROM
@@ -552,7 +552,9 @@
 <p>
    The "bong" tone played after the self-test is a 195Hz square
    wave, starting at 100% PCM amplutude, then attenuated with an
-   exponential decay envelope by about 0.4% every 1ms.  The overall
+   exponential decay envelope by about 0.4% every 1ms.  That is,
+   every 1ms, multiply the current square wave amplitude by
+   0.996 to get the new square wave amplitude.  The overall
    duration of the tone is 750ms.
 </p>
    
@@ -560,12 +562,13 @@
 <h3>Boot sector signature string</h3>
 <p>
     The section at the very beginning of U2 that contains the hard reset
-    boot program also contains a "signature" string - printable text
+    boot program also contains a "signature" string: plain text
     that identifies the ROM set, perhaps so that somebody in possession of a
-    loose chip of uncertain origin can read the first sector and see
-    what's in it.  The signature string starts at byte offset
+    loose chip of uncertain origin can read the first few dozen bytes of
+    the ROM and see what's there.  The signature string starts at byte offset
     4 and runs for up to about 70 bytes.  It consists of free-form
-    ASCII text, terminated with a zero byte, usually containing the title
+    ASCII text in the printable character range (code points 32 through 126),
+    terminated with a zero byte, usually containing the title
     of the pinball machine the ROM goes with (sometimes shortened, and
     sometimes a nickname, or what might have been an in-house working title,
     rather than the formal production title) and a copyright date.  This ASCII text
@@ -698,13 +701,14 @@
 
 <p>
    The table contains one entry per chip in the ROM set.  The end
-   of the table is marked with $0000 in the size field; if all
+   of the table is marked with $0000 in the size field of the
+   first slot that isn't occupied.  If all
    eight slots are occupied, the extra $0000 word after the 8th
    slot serves as the end marker.
 </p>
 <p>
    The DCS software doesn't contain any assumptions that the table
-   is in any particular order, so other application should likewise
+   is in any particular order, so other applications should likewise
    make no such assumptions.  In practice, though, all of the DCS ROMs
    order the entries by chip number, so the entry for
    U2 is always in the first slot, U3 is always in the second
@@ -1631,9 +1635,10 @@
       The reference decoders uses a set of pre-defined constant coefficients
       to undo the windowing when reconstructing the signal, and these
       constants constrain the encoder's choice of window coefficients.
-      See <a href="#WindowFunc">Encoding Window Function</a> for a
-      sample window function, and an explanation of how to choose a window
-      function that satisfies the constraints.
+      See <a href="#WindowFunc">Encoding Window Function</a> for a specific
+      window function you can use, and an explanation of how to choose your
+      own custom window function that satisfies the constraints if you
+      don't want to use the one I came up with.
    </p>
 
    <li>Repeat until reaching the end of the input stream.
@@ -2738,7 +2743,7 @@ for (int i = 0 ; i < 16 ; ++i) {
       <td>1993a Type 1</td>
       <td>18</td>
       <td>
-         2, 2, 2, 2, 3, 4, 5, 6, 5, 6, 7, 9, 11, 14, 12, 12, 12, 13
+         4, 4, 4, 4, 6, 8, 10, 12, 10, 12, 14, 18, 22, 28, 24, 24, 24, 26
       </td>
    </tr>
    <tr>
@@ -2770,7 +2775,13 @@ for (int i = 0 ; i < 16 ; ++i) {
       </td>
    </tr>
 </table>
-
+<p>
+   Note that <b>Samples per band</b> reflects the number of samples the
+   band contributes to the frame buffer <b>after</b> decoding.  The
+   bit stream might contain a different number of input samples,
+   depending on the format.  In some cases, for example, the bit stream
+   contains half as many inputs as there are samples in the band.
+</p>
 <p>
    The purpose of the bands is to group samples that share a common
    set of encoding parameters.  The grouping is a compromise between

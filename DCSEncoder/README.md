@@ -20,7 +20,7 @@ will transcode these files to the DCS format for storage in the new
 ROM set.  The script specifies how the audio files are mapped to the
 pinball game's audio commands.
 
-<style type="text/css">
+<style>
 indent {
     display: block;
 	margin-left: 1em;

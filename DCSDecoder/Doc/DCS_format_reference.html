@@ -85,7 +85,7 @@
    In keeping with the "unofficial" theme, my terminology for DCS's
    internals is entirely made up.  I have no idea what terms the original DCS
    developers used.  I should define a few terms that I use throughout
-   this document in a special technical sense that's somewhat different from t
+   this document in a special technical sense that's somewhat different from
    the ordinary meanings of the words.
 </p>
 
@@ -1565,6 +1565,10 @@
    the re-quantized samples are encoded into a bit stream,
    possibly using entropic coding to further reduce the
    average number of bits of storage required per sample.
+   (Entropic coding uses a Huffman-like code with a varying
+   number of bits per sample, encoding more common values
+   with shorter codewords and less common values with longer
+   codewords, similar to Zip file compression.)
 </p>
 <p>
    Most of the compression in these systems comes
@@ -1572,10 +1576,7 @@
    at lower resolution than was used to collect the original
    PCM samples and thus requires less space to store.  Some
    additional compression is gained from entropic coding of
-   the resulting samples (Huffman-like variable bit length
-   coding, representing common plaintext values with shorter
-   codewords and less common values with longer codewords,
-   similar to Zip compression).
+   the resulting samples.
 </p>
 
 <a name="Frames"></a>
@@ -2102,12 +2103,11 @@ for (int i = 0 ; i < 16 ; ++i) {
 
 <h4>Encoding transform algorithm 4</h4>
 <p>
-   Our final encoder algorithm represents an inversion of the transform
-   algorithm used in the original DCS decoders.  This algorithm
-   wrings out a tiny bit of added efficiency by exploiting
+   Our final encoder algorithm represents a step-by-step mirror image
+   of the transform algorithm used in the original DCS decoders.  This
+   algorithm wrings out a tiny bit of added efficiency by exploiting
    symmetries of the FFT to cut the FFT set size in half, at
-   the cost of many more post-processing steps and considerably
-   greater complexity.
+   the cost of more post-processing steps and greater complexity.
 </p>
 <p>
    I personally like algorithm 3 better, since it's pretty efficient
@@ -2115,16 +2115,22 @@ for (int i = 0 ; i < 16 ; ++i) {
    algorithm 4 from the document, since it's almost ludicrously
    complex, but I decided to leave it for a reason other than its
    modest improvement in efficiency: this is arguably the <i>definitive</i>
-   encoder  transform algorithm, because it essentially runs the original
-   decoders' math formulas backwards.
+   encoder transform algorithm, because it essentially runs the original
+   decoders' math formulas backwards.  Math done numerically on a computer never <i>exactly</i>
+   matches the underlying closed-form expressions written on paper, because
+   the computer version has to work within limited precision and thus
+   yields small numerical differences due to accumulated rounding errors in the
+   intermediate steps; so to the extent that the algorithms differ
+   from the closed-form expressions they purport to implement, this
+   is the one that truly represents the inversion of the decoder
+   transform.
 </p>
 <p>
    It's understandable why they went
    to the added trouble in the original decoders: those were running
    on a low-horsepower embedded platform, so they had to use every
-   trick available to make the software run fast enough for real-time
-   playback.  Modern equipment is so much faster that the difference
-   is probably barely noticeable.
+   trick to make the software run faster.  Modern equipment is so
+   much faster that the difference is probably barely noticeable.
 </p>
 <p>
    <b>Working buffers:</b>  The algorithm uses two buffers:
@@ -2266,9 +2272,9 @@ for (int i = 0 ; i < 16 ; ++i) {
 <p>
    As to why we'd want to do this, it's just that it happens to be
    convenient as an intermediate step along the way to the
-   modified real DFT we're really after.  It arranges the data
+   real-valued DFT we're really after.  It arranges the data
    in a format that we can operate on with the series of post-processing
-   steps to yield the real DFT.
+   steps to yield the real-valued DFT array.
 </p>
 
 
@@ -2368,13 +2374,19 @@ for (int i = 0 ; i < 16 ; ++i) {
    transform in the odd-numbered output slots (interpreting the "slots" as
    real/imaginary pairs of array entries).
    <p>
+      The Cooley-Tukey IDFT algorithm uses bit-reversed addressing.  The
+      algorithm here requires that you do the bit-reversed addressing
+      reorganization <b>after</b> running the Cooley-Tukey main loop.
+      (Some versions of the algorithm do the rearrangement on the input
+      end, but in this case it must be done on the output end instead.)
+   </p>
+   <p>
       Use 1.0 as the IDFT normalization factor.  Note that the normal
       convention for Fourier transforms is to normalize by 1/N (where N
       is the set size) in the inverse transform, so library code might
       make this assumption, but DCS applies the normalization in the
       forward transform instead.
    </p>
-
 
 </ul>
 
@@ -2480,8 +2492,9 @@ for (int i = 0 ; i < 16 ; ++i) {
    detect the software version, but it can be done heuristically by examining
    the ADSP-2105 machine code embedded in the ROM, looking for certain
    instruction patterns that are found only in one version or another.  That's
-   too complex to describe briefly here; see my DCSDecoder
-   class for an implementation.
+   too complex to describe briefly here; see my DCSDecoder class (in the
+   <a href="https://github.com/mjrgh/DCSExplorer" target="_blank">DCS Explorer</a>
+   project) for an implementation.
    Another approach is to simply let your user explicitly specify the
    format version when loading the data.  In cases where the data are
    from one of the official releases of a DCS pinball ROM, it's enough
@@ -2981,7 +2994,7 @@ for (int i = 0 ; i < 16 ; ++i) {
 <h3>1993b Type 0/Type 1 Stream Format</h3>
 
 <p>
-   The 1993b Type 0 and Type 1 formats are similar enough that they can be
+   The 1993b Type 0 and Type 1 formats are similar enough to one another that they can be
    fairly easily combined into a common encode or decoder implementation,
    which only has to use different handling at a few key points in the
    stream processing.  Furthermore, the <a href="#1993aType0">1993a Type 0 format</a>

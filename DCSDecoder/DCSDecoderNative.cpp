@@ -1711,27 +1711,28 @@ void DCSDecoderNative::DecoderImpl94x::DecompressFrame(Channel &channel, uint16_
     // no one ever ended up using sub-format codes $0080 or $0100,
     // but that's not it - I've found examples of at least $0100.
     // The other explanation is that sub-formats $0080, $0100, and
-    // $0180 were all *meant* to use the same mapping tables, so the
-    // other two tables here are just dead code that should have been
-    // removed.
-    // 
-    // I'm including all four tables for the sake of documentation.
-    // But for the sake of strict compatibility with the original
-    // implementation, I'm mapping cases 1 and 2 to table 3, just
-    // like the original code did.
+    // $0180 were all truly meant to use the same mapping tables,
+    // and the other two tables are just dead code that no one ever
+    // bothered to remove
     static const uint16_t preAdjMap0[0x0010] ={  // format subtype 0 table
         0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-    };
-    static const uint16_t preAdjMap1[0x0010] ={  // this table is never used
-        0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
-    };
-    static const uint16_t preAdjMap2[0x0010] ={  // this table is never used
-        0, 0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3
     };
     static const uint16_t preAdjMap3[0x0010] ={  // format subtype 1-3 table
         0, 0, 0, 0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4
     };
     const uint16_t *preAdjMap = (frameSubFormatType == 0) ? preAdjMap0 : preAdjMap3;
+
+    // These two tables are in the original ADSP-2105 decoders, but
+    // the code is structured in a way that makes it impossible for
+    // either of these to be selected.  All paths lead to map 0 or 3.
+    // I'm including these as comments for the sake of documentation.
+    //
+    // static const uint16_t preAdjMap1[0x0010] ={  // this table is never used
+    //     0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+    // };
+    // static const uint16_t preAdjMap2[0x0010] ={  // this table is never used
+    //     0, 0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3
+    // };
 
     // Build the pre-adjustment table.  This provides an additional
     // adjustment to the scaling code specified in the stream header,

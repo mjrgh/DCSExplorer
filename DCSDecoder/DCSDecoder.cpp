@@ -1904,7 +1904,7 @@ std::string DCSDecoder::vformat(const char *fmt, va_list va)
 		return "[Format Error]";
 
 	// allocate the buffer and format the text into it
-	std::unique_ptr<char> buf(new char[len + 1]);
+    std::unique_ptr<char[]> buf(new char[len + 1]);
 	vsnprintf(buf.get(), len + 1, fmt, va);
 
 	// return a std::string constructed from the buffer

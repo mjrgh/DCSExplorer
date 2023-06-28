@@ -156,10 +156,11 @@ proprietary format that was only ever used in embedded systems for a
 niche industry that mostly disappeared over 20 years ago.  And yet, living
 as we do in the age of total information awareness, I'm
 always shocked and amazed when I encounter *any* subject, no matter how obscure,
-that isn't exhaustively documented somewhere on the Web.  Especially when
-it's something at the intersection of technology and popular art.  DCS seems to
-be of those rare subjects that time forgot.  In all of the Web, there are only a few
-mentions of the technology, and those few mentions are really skimpy.
+that isn't exhaustively documented somewhere on the Web.  Especially 
+something like this that lives at the intersection of technology and popular art;
+that's practically what they invented Wikipedia for.  But DCS seems to
+be of those rare subjects that time forgot.  In all of the Web, I can find only a few
+mentions of the technology, and those few mentions are pretty skimpy.
 There's a skeletal [Wikipedia page](https://en.wikipedia.org/wiki/Digital_Compression_System),
 and a sort of [marketing-highlights article](https://web.archive.org/web/20070929205008/http://pinballhq.com/willy/willy3.htm)
 posted to a Usenet pinball group, still accessible thanks to

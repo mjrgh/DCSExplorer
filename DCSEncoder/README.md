@@ -20,12 +20,6 @@ will transcode these files to the DCS format for storage in the new
 ROM set.  The script specifies how the audio files are mapped to the
 pinball game's audio commands.
 
-<style>
-indent {
-    display: block;
-	margin-left: 1em;
-}
-</style>
 
 ## Program options
 
@@ -294,23 +288,23 @@ Here are the commands...
 
 **Default encoding parameters (** *name*=*value*, ... **);**
 
-<indent>
+<p style="margin-left: 1em;">
 Changes the default settings for audio file compression.  The
 default settings are used in subsequent STREAM commands and PLAY
 program steps that import audio files.  See [Encoding Parameters](#EncodingParams).
 Use commas to separate parameters if you're specifying more than one.
 (Don't enter the "..." at the end of the list literally - that's just
 a placeholder meaning "add more *name=-value* pairs as needed".)
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Example: `Default encoding parameters (type=*, BitRate=96000);`
-</indent>
+</p>
 
 
 **Deferred indirect table** *symbolic-name* [**:** *index*] **(** *track-number*, ... **);**
 
-<indent>
+<p style="margin-left: 1em;">
 Defines a [Deferred Indirect table](#DeferredIndirect).  The
 symbolic name is an arbitrary label you assign to the table,
 which you can use to refer to the table in a **Defer Indirect()**
@@ -319,15 +313,15 @@ with a letter of the alphabet or an underscore, and can contain
 any mix of letters and numbers and underscores after that.
 Upper and lower case can be used interchangeably, and case
 differences are ignored when matching the name.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The list of track numbers lists
 the tracks that the table selects, in order of index number,
 starting at index 0.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The optional index assignment lets you specify the numeric index
 (starting at 0) assigned to the table.  If you leave this out, the
 compiler assigns the table's index number automatically.  The DCS
@@ -340,29 +334,29 @@ Deferred Indirect tables, and you want to replace one of the existing
 tables with your own.  Assigning an index explicitly tells the compiler
 to discard the old table imported from the old ROM and replace it with
 your shiny new table.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Suppose you define a table like so:
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 `Deferred indirect table Countdown ($0070, $0071, $0072, $0073);`
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 This defines a table named **Countdown** with four track entries:
 track number $0070 at index 0 (the "$" prefix means that the number is
 expressed in hexadecimal, base-16), track $0071 at index 1, track $0072
 at index 2, and track $0073 at index 3.  You can now refer to the table
 in a track definition:
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 `Track 5 channel 0 Defer Indirect(Countdown[Timer]);`
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 That Track 5 definition tells the decoder that a $0005 command
 from the WPC host doesn't play anything immediately, but just
 queues up **Countdown[Timer]** as the deferred track on channel 0.
@@ -375,12 +369,12 @@ table.  The track selected depends upon the current value of
 the variable **Timer**, as set by a **SetVariable(var Timer)**
 command in a track program.  Whatever the last setting was,
 it's used to select a track from the table.
-</indent>
+</p>
 
 
 **Signature** "*string*"**;**
 
-<indent>
+<p style="margin-left: 1em;">
 Sets the signature string for the first ROM chip (the one labeled
 U2 or S2 on the physical DCS circuit board).  The original DCS ROM
 contents included a block of text at the start of the first ROM
@@ -392,22 +386,22 @@ ordinary ASCII characters.  The length limit is 75 characters.
 (This is the space allowed by the structure of the DCS ADSP-2105
 boot program, which is also stored at the beginning of the U2
 ROM chip).
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 If you include the literal text **&lt;date&gt;** in the string,
 it's replaced with the build date (your computer's system date
 at the time you run the compiler) in MM/DD/YYYY format, as in
 01/31/2023.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Example: `Signature "My new DCS ROM, <date>";`
-</indent>
+</p>
 
 **Stream** *symbolic-name* "*filename*" [**replaces** *address*] [**(** *param=value*, ... **)**]**;**
 
-<indent>
+<p style="margin-left: 1em;">
 Reads an audio file and encodes it into the DCS format for storage
 in the generated ROM set.   The stream is assigned the given symbolic
 name, which you can then use in a **Play()** command within a track
@@ -416,24 +410,24 @@ load a stream directly from a file, without bothering with a separate **Stream**
 command.  The point of the **Stream** command is that it lets you load a
 stream once and then use it in several **Play()** commands without
 having to specify the filename and encoding parameters again each time.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The source file can be in any of the supported
 mainstream audio formats (MP3, Ogg Vorbis, WAV, FLAC), or in DCS Explorer's
 raw exported DCS stream format.  An exported DCS stream lets you reuse an
 audio clip from an existing DCS ROM in a newly generated ROM set without any
 trans-coding losses, as long as the source game and target ROM set are
 based on the same DCS format version.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The optional section in parentheses at the end lets you specify special
 encoding parameters just for this stream, overriding the default
 encoding parameters currently in effect.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The **replaces** clause applies only if you're using the `--patch` mode to
 create a patched version of an existing game's sound ROMs.  This option
 replaces the selected stream from the prototype ROM with the audio clip
@@ -454,36 +448,36 @@ which is the same address you use in the **replaces** clause.  DCS
 Explorer shows track addresses in hexadecimal (base-16), which you
 can enter in the script with a **$** (dollar sign) prefix.  For
 example, `stream MainTheme " replace $102A7E;`.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Example: `Stream MainTheme "main-theme.mp3" (BitRate=96000);`
-</indent>
+</p>
 
 **Track** *track-number* **channel** *channel-number* **{** *program-steps* **};**
 
-<indent>
+<p style="margin-left: 1em;">
 Defines a track program.  When the WPC host sends the same command
 number as the *track-number* to the sound board, the sound board
 immediately loads the program steps into the specified channel
 and starts executing them.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Note that the {curly braces} around the program steps are entered
 literally.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 See [Track Programss](#TrackPrograms) for details on the
 contents of the track program.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Example:
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 ```
 Track $0021 channel 0 {
    SetMixingLevel($70);
@@ -491,11 +485,11 @@ Track $0021 channel 0 {
    Wait(stream);
 };
 ```
-</indent>
+</p>
 
 **Track** *track-number* **channel** *channel-number* **Defer(** *deferred-track-number* **);**
 
-<indent>
+<p style="margin-left: 1em;">
 Defines a deferred track command.  When the WPC host sends the
 same command number as the *track-number* to the sound board, the
 sound board stashes the *deferred-track-number* into a special
@@ -504,19 +498,19 @@ This then sits dormant until some other active track program
 executes a **StartDeferred** command targeting the same channel.
 That retrieves the pending deferred track information from the
 special memory location, and starts that track running.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Example: `Track $0051 channel 0 defer($0080);`
-</indent>
+</p>
 
 **Track** *track-number* **channel** *channel-number* **Defer Indirect(** <i>table-name</i><b>[</b><i>var-name</i><b>]</b> **);**
 
-<indent>
+<p style="margin-left: 1em;">
 Note that the [square brackets] after the table name are entered literally.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Defines a [Deferred Indirect](#DeferredIndirect) track.  When the
 WPC host sends the same command number as the *track-number* to the
 sound board, the sound board stashes the <i>table-name</i><b>[</b><i>var-name</i><b>]</b>
@@ -526,9 +520,9 @@ track program executes a **StartDeferred** command targeting the
 same channel.  That retrieves the pending deferral information
 from the special memory location, and starts the selected
 track executing.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 We call this type of deferral "indirect" because
 it doesn't specify the new track number directly.  Instead,
 it specifies a Deferred Indirect table, which must have been
@@ -541,32 +535,32 @@ track program command that affected the variable, and uses the
 number stored in the variable as the index into the named table.
 The two pieces of information combine to determine the track
 that's finally loaded.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Example: `Track $0050 channel 0 Defer Indirect(Countdown[timer]);`
-</indent>
+</p>
 
 **Var** *variable-name* [**:** *index*] ,... **;**
 
-<indent>
+<p style="margin-left: 1em;">
 Defines one or more variable names for use in [Deferred Indirect track loading](#DeferredIndirect).
 The names are arbitrary labels that you assign to
 the variables.  In the final ROM set, variables are simply numbered,
 but it's easier for human readers to keep track of these things if
 you give them a meaningful name.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 A variable name has to start with a letter of the alphabet or an
 underscore character (_), and can contain any mix of letters and
 numbers and underscores after that.  As with almost everything else
 in the scripting language, upper and lower case are interchangeable;
 if you name a variable **X**, you can refer to it later as **X**
 or **x** equally well.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The optional **:**<i>index</i> part lets you specify the numeric
 ID that the variable uses.  The DCS software itself doesn't use
 variable names at all; every variable just has a numeric ID in the ROM.
@@ -580,20 +574,20 @@ might want to refer to the same variables that are already
 used in the original ROM.  The index assignment lets you refer
 to these existing variables in the script, using names you
 assign as aliases for the original numbering.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Note that *var : index* does **not** assign a **value** to the
 variable.  Variables in a DCS program always start with the
 initial value 0, and there's no way to change that.
 It's just the way the original DCS ADSP-2105 control program works.
 This syntax only sets the variable's internal ID number that's
 used within the final ROM.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Exaample:  `Var Timer;`
-</indent>
+</p>
 
 
 ## <a name="TrackPrograms"></a> Track Programs
@@ -776,37 +770,37 @@ attached as normal.
 
 **End;**
 
-<indent>
+<p style="margin-left: 1em;">
 Marks the end of the track program.  When execution reaches this
 point, the track program exits, and any audio playing on the same
 channel is stopped.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The `End;` statement is optional.  If you don't include one in
 a track program, the compiler automatically acts as though one
 is placed immediately before the program's closing curly brace.
 If you do supply an `End;` statement, it must be the last step of
 the track program, since nothing past that point can ever be
 executed.
-</indent>
+</p>
 
 **Play(Channel** *channel-number*, **Stream** *stream-name*, **Repeat** *count* **);**
 
-<indent>
+<p style="margin-left: 1em;">
 Plays an audio stream on the specified channel, for the specified
 number of repeats.  The channel can be omitted if you want to play
 the stream on the same channel that the track program itself uses.
 The repeat count can also be omitted if you only want to play the
 track once:
-</indent>
+</p>
 
 ```
 Play(stream MainTheme);  // play one time on the track program's channel
 Play(MainTheme);         // you can leave out the STREAM keyword when it's the only parameter
 ```
 
-<indent>
+<p style="margin-left: 1em;">
 The stream can be the symbolic name of a stream previously defined
 with the **STREAM** command, or it can be a string giving the name
 of a sound file to play.  If you specify a sound file, the compiler
@@ -816,20 +810,20 @@ using a particular audio file in one **Play()** in one track
 program.  If you're using the same audio file more than once,
 though, you should import it with a **STREAM** command so that
 the same memory can be reused in each reference.
-</indent>
+</p>
 
 ```
 Play("main-theme.mp3");
 ```
 
-<indent>
+<p style="margin-left: 1em;">
 When you specify the stream as a sound file, you can
 optionally include custom encoding parameters that
 override the defaults for this one stream.  Place the new encoding
 parameters in parentheses after the filename. Use the same *name=value*
 pairs as in a **Default encoding parameters** or **STREAM** command.
 See [Encoding Parameters](#EncodingParams) for a list of settings.
-</indent>
+</p>
 
 ```
 Play("main-theme.mp3" (bitrate=96000));
@@ -838,26 +832,26 @@ Play("main-theme.mp3" (bitrate=96000));
 
 **Queue(Track** *track-number* **)**
 
-<indent>
+<p style="margin-left: 1em;">
 Queue a track for execution.  This essentially pretends the the WPC
 board just sent a command matching the specified track number.  It
 loads the track into its channel and starts it executing.  If the
 track uses one of the Deferred modes, DCS sets up the deferred
 track the same way it would if the WPC board had sent the command.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The compiler lets you omit the **Track** keyword, since it's the
 only parameter for this command.  `Queue($0004);` means the same
 thing as `Queue(Track $0004);`.
-</indent>
+</p>
 
 ```
 Queue($0004);   // pretend that the WPC host just send command code $0004` <br>
 Queue(Track $0102);
 ```
 
-<indent>
+<p style="margin-left: 1em;">
 We call this command **Queue()** because it doesn't actually start
 the new track program instantaneously.  Instead, it inserts the
 track number into a memory location where incoming commands from
@@ -874,26 +868,26 @@ track will take effect and will interrupt the current track
 program if it's on the same channel.  If the new track is on
 a different channel, or uses one of the Deferred modes, the
 current program will go on running even after a **Wait()**.
-</indent>
+</p>
 
 **SetChannelTimer(Byte** *number*, **Interval** *frame-count* **);**
 
-<indent>
+<p style="margin-left: 1em;">
 This command can only be used with the 1993a software shipped with
 <i>Indiana Jones</i> and <i>Judge Dredd</i>.  It can't be used
 with any of the later ROM versions.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 This command has two effects.  First, it immediately sends
 the given byte value (a number from 1 to 255, or $FF in hex) to
 the data port, the same as **WriteDataPort()**.  Second, it sets
 up the track program's "channel timer" to *repeatedly* send
 the same data byte at the specified interval, measured in
 DCS frames (one frame equals 7.68 milliseconds).
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 If the byte value is zero, **or** the interval is zero, **or**
 you simply omit the interval, the command **clears** the timer
 instead of setting the timer.  This stops any repeating data
@@ -901,17 +895,17 @@ send that was previously scheduled for the channel.  If the
 byte value is non-zero and the interval is zero, the command
 clears the timer but still sends the byte value once,
 immediately when the command is executed.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 We call this feature a "channel timer" because there's a
 separate timer like this for each channel, and all of them
 can be programmed independently.  The command can only set
 the timer for its own channel (the one that the current
 track program occupies).
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Curiously, the channel timer mechanism is implemented in every
 version of the DCS software, but this command to set it up is
 only available in the 1993a software.  In the later software,
@@ -920,23 +914,23 @@ so you can no longer access the channel timers.  As a rule,
 programmers don't usually bother deleting old code even after
 it's no longer usable, and we seem to have a case of that
 pathology at work here.
-</indent>
+</p>
 
 
 **SetMixingLevel(Channel** *channel-number*, **Level** *number*, **Steps** *interval* **);**<br>
 **SetMixingLevel(Channel** *channel-number*, **Increase** *number*, **Steps** *interval* **);**<br>
 **SetMixingLevel(Channel** *channel-number*, **Decrease** *number*, **Steps** *interval* **);**
 
-<indent>
+<p style="margin-left: 1em;">
 Sets the mixing level on the specified channel.  You can set the
 level to a specific value with the **Level** keyword, or you
 can adjust it relative to its current level with the **Increase**
 and **Decrease** keywords.  The **Channel** can be omitted
 if you want to set the level for the current channel (the one
 that contains the track program).
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The level is a number from -128 to +127.  Anything zero or
 below is silence; +127 is the full reference volume.
 In most cases, it's better not to turn the volume all
@@ -944,28 +938,28 @@ the way up to +127, since that doesn't leave any room to add
 in other sounds that might be playing at the same time in
 other channels.  A setting around $70 seems to be a good
 "full volume" level in most cases.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The reason that negative settings are available is that
 multiple channels can all change the level in *another*
 channel.  When this happens, the contributions from the
 different channels are combined by adding them together.
 That makes negative values useful in some cases, since
 they can cancel out positive values added by other channels.
-</indent>
+</p>
 
 
-<indent>
+<p style="margin-left: 1em;">
 The level scale is roughly logarithmic, which makes it map
 pretty well to the way humans intuitively perceive audio volume.
 In other words, the level sounds like it's adjusting linearly as
 you move across the 0-127 scale.
 You can think of the 0-127 scale as a volume knob with notches
 marked from 0 to 127 rather than the standard 0 to 10.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The optional **Steps** parameter lets you specify a "fade" time
 for the change.  If this is included, the level is smoothly adjusted
 from the current level to the new level over the given interval.
@@ -973,7 +967,7 @@ The **Steps** interval can be specified as a number of DCS
 frames (one frame is equal to 7.68 millisecond), or as a time
 parameter with the suffix **sec** for seconds or **ms** for
 milliseconds.
-</indent>
+</p>
 
 ```
 // this does a 1-second fade-in from silence
@@ -989,7 +983,7 @@ SetMixingLevel(Level 0, Steps 1 sec);
 Wait(stream);
 ```
 
-<indent>
+<p style="margin-left: 1em;">
 It's important to note that the **Steps** interval doesn't
 trigger a pause in the track program.  The fade is handled
 asynchronously by the DCS audio mixer, so the timing has no
@@ -1000,9 +994,9 @@ with the audio mixer, but program execution immediately
 proceeds to the **Play()** command, so the audio track starts
 playing.  As playback proceeds, the audio mixer gradually
 adjusts the mixing level according to the scheduled fade.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 **Setting the mixing level on other channels:**  The most
 common way to use the mixing level is on your own channel,
 as in the example above, to control the mixing level for
@@ -1011,7 +1005,7 @@ a track program can also adjust the mixing level in other
 channels.  The original DCS ROMs often use this feature to
 bring a sound effect to the "foreground" by temporarily
 turning down the volume on the main music track:
-</indent>
+</p>
 
 ```
 Track $0140 channel 2 {
@@ -1031,7 +1025,7 @@ Track $0140 channel 2 {
 };
 ```
 
-<indent>
+<p style="margin-left: 1em;">
 The DCS mixer has a nice scheme for handling these
 cross-channel level adjustments.  When the Channel 2 programs
 sets the mixing level on Channel 0, it doesn't just go in and
@@ -1045,87 +1039,87 @@ to adjust the main music track at the same time that our
 Channel 2 program is running.  The mixer keeps track of
 the two adjustment separately, and makes sure that
 everything is set back to normal at the end.
-</indent>
+</p>
 
 
 **SetVariable(Var** *name*, **Value** *number* **);**
 
-<indent>
+<p style="margin-left: 1em;">
 Note: this command is only allowed in the 1994 and later
 software.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Sets the value of a variable, previously defined with a **VAR**
 statement, to the given numeric value, from 0 to 255 ($FF hex).
 The variable can also be specified as a numeric ID, from 0
 to 79, but it's better to use a symbolic name for readability.
-</indent>
+</p>
 
 ```
 SetVariable(Timer, 3);
 ```
 
-<indent>
+<p style="margin-left: 1em;">
 This is used with the Deferred Indirect mechanism to select
 which table entry will be used when a deferred track based on
 the specified variable is triggered.
 See [Deferred and Deferred Indirect Tracks](#Deferred) for more
 information on how to use this feature.
-</indent>
+</p>
 
 
 **StartDeferred(Channel** *channel-number* **);**
 
-<indent>
+<p style="margin-left: 1em;">
 Triggers the pending deferred track on the given channel.  If
 the channel doesn't have a pending deferred track, the command
 has no effect.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The channel number must be specified, but you can leave out the
 **Channel** keyword if you prefer.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 If the deferred track is on the same channel as the current
 track program, the new (deferred) track program immediately
 replaces the current one, so execution of the current program
 doesn't proceed beyond the **StartDeferred()** command.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 See [Deferred and Deferred Indirect Tracks](#Deferred) for more information
 on how to use this feature.
-</indent>
+</p>
 
 
 **Stop(Channel** *channel-number* **);**
 
-<indent>
+<p style="margin-left: 1em;">
 Stops all activity on the specified channel number and resets the
 channel.  Stops and clears any track program current executing on
 the channel, and stops any audio stream playback in progress.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The compiler lets you omit the keyword **Channel**, since it's
 the only parameter for this statement.  So `Stop(2);` means
 the same thing as `Stop(channel 2);`.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 When this is used on the track program's own channel, it immediately
 ends the track program.  Nothing past this point will be executed.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 Most of the original DCS ROMs define Track $0000 as an "All Stop"
 program that executes a **Stop()** on every channel.  It's worth
 noting that most of the DCS ROMs got it wrong, by coding it like
 this:
-</indent>
+</p>
 
 ```
 Track $0000 channel 0 {
@@ -1138,7 +1132,7 @@ Track $0000 channel 0 {
 };
 ```
 
-<indent>
+<p style="margin-left: 1em;">
 You can see this pattern repeated in most of the original DCS ROMs
 by using DCS Explorer's `--programs` option to show program listings.
 Do you see the error?  Note how the program itself runs on channel 0,
@@ -1147,14 +1141,14 @@ effect of immediately ending the track program, so it doesn't get
 a chance to stop any of the other tracks.  I suppose they included
 this little program out of habit but didn't actually use it enough
 to notice that it doesn't work.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 To simplify the *correct* coding of a similar "All Stop" command,
 the compiler lets you use the special syntax `Stop(*)` to
 mean "stop all of the *other* channels".  With that syntax, you
 could write the program above correctly, and more simply, as:
-</indent>
+</p>
 
 ```
 Track $0000 channel 0 {
@@ -1162,29 +1156,29 @@ Track $0000 channel 0 {
 };
 ```
 
-<indent>
+<p style="margin-left: 1em;">
 Note that the compiler expands `Stop(*)` into a series of Stop()
 commands for the individual channels, since the DCS byte code language
 doesn't have a "stop all" command of its own.
-</indent>
+</p>
 
 
 **WriteDataPort(Byte** *number* **);**
 
-<indent>
+<p style="margin-left: 1em;">
 Writes the given byte value - a number from 0 to 255 ($FF in hex) -
 to the data port.  This sends the byte to the WPC host board.  This
 allows the sound program to let the main pinball program know about
 timed events in the sound playback, or pass requested information
 back to the WPC host.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 The **BYTE** keyword can be omitted if you prefer, since it's the
 only parameter this statement uses.  `WriteDataPort($05)` is the
 same as `WriteDataPort(Byte $05);`.
 
-<indent>
+<p style="margin-left: 1em;">
 The byte values sent by this command are completely arbitrary.
 They don't mean anything by themselves; their only meaning is whatever
 meaning the main pinball program running on the host board assigns
@@ -1198,21 +1192,21 @@ the WPC host sends a track command that simply replies back with
 a byte value.  One use appears to be version queries, where the WPC
 board asks the sound ROM for its version number and the
 sound board sends back a byte or two in reply.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 If you're sending multiple bytes in a row, you should wait a little
 while between bytes to allow the WPC board to process the input.
 I'm not sure if there's a fixed rate limit; it probably depends on
 the game.  A wait of perhaps 25 milliseconds between consecutive
 bytes is probably adequate for any game.
-</indent>
+</p>
 
-<indent>
+<p style="margin-left: 1em;">
 If you're using one of the first two 1993 games for your prototype
 ROM (*Indiana Jones* or *Judge Dredd*), the byte value cannot be
 zero.
-</indent>
+</p>
 
 
 ## <a name="Channels"></a> Channels

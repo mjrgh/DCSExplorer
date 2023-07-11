@@ -139,7 +139,7 @@
 <p>
    The DCS software organizes all of its audio processing
    into "channels".  These aren't stereo channels or
-   surround-sound channels!  The DCS-based pinball machines
+   surround-sound channels, though.  The DCS-based pinball machines
    only had monophonic speaker systems, and the audio
    recordings themselves are purely in mono.  (Later versions
    of DCS used in video games did have stereo and surround
@@ -315,7 +315,7 @@
    to the ROMs in order, U2 through U9.  0 selects U2, 1 selects U3, etc.
 
    <li>The rest of the address - the low-order 20 or 21 bits - is the
-   offset within the selected ROM.
+   offset within the selected chip.
 </ul>
 
 <img class="ex" src="rom-pointer-23.png">
@@ -394,10 +394,8 @@
 
 <p>
    Of the eight ROMs, the only one with any significant internal structure
-   is the first chip, U2.  Its memory map varies slightly from one DCS system
-   software version to the next, but it always contains the elements shown below
-   in Figure 2, in the order shown.   The variability is all in the exact addresses
-   of the elements.
+   is the first chip, U2.  This ROM always contains the following elements,
+   in the order shown (although the byte offset of each element varies by game).
 </p>
 
 <h3>U2 internal layout</h3>
@@ -5615,6 +5613,38 @@ for (int i = 0 ; i < 16 ; ++i) {
       <td>1994</td>
    </tr>
 </table>
+
+<h2>References</h2>
+<p>
+   As far as I'm aware, there are no other public sources of information
+   about DCS format internals.  That's one of the reasons I got started on
+   this project, actually.  Here are the main other references to DCS
+   I've been able to find:
+</p>
+<ul>
+   <li><a href="https://github.com/vpinball/pinmame" target="_blank">PinMame</a>, an
+   open-source emulator for nearly all solid-state pinball machine
+   controllers.  PinMame includes emulation for the DCS hardware,
+   which runs the original DCS ROMs and thus can play back their audio.
+   PinMame's approach to emulation is to provide a virtual hardware
+   environment that directly runs the original ROM software unchanged,
+   so PinMame doesn't need to know anything about how the software
+   works internally.  PinMame is a good resource for details about
+   the DCS hardware platform, but won't tell you anything about the
+   software or the audio data format.
+
+   <li><a href="https://web.archive.org/web/20070929205008/http://pinballhq.com/willy/willy3.htm" target="_blank">Ask Uncle Willy #3, July 7, 1995</a>,
+   an article originally posted to a Usenet newsgroup (and accessible
+   now through the <a href="https://web.archive.org/" target="_blank">Internet Archive Wayback Machine</a>).
+   This is a technical-marketing article that describes the broad
+   outlines of the DCS encoding design, mostly accurately (with a
+   few near misses), but not at an engineering level of detail.
+
+   <li><a href="https://en.wikipedia.org/wiki/Digital_Compression_System" target="_blank">Wikipedia's article on DCS</a>,
+   which has little to say beyond the basics.
+
+</ul>
+
 
 <h2>Copyright and license</h2>
 <p>

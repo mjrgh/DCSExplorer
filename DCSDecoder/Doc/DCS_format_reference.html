@@ -25,8 +25,8 @@
    circuit boards, plenty of information is available elsewhere, including
    schematics published in the pinball service manuals, repair
    guides on various pinball sites, and PinMame's open-source emulation,
-   which reverse-engineered most of the important details that can't be
-   inferred from the schematics.
+   which reverse-engineered most of the important details that aren't
+   contained in the schematics or in the data sheets for the components.
 </p>
 <p>
    This reference guide describes the DCS audio encoding system in detail,
@@ -52,25 +52,33 @@
    reference implementation of the algorithms described here.
 </p>
 <p>
-   Our discussion here is limited to DCS as implemented in the WPC-based pinball
+   This discussion is limited to DCS as implemented in the WPC-based pinball
    machines.  Williams also used the system in their video games of the
    same period, and they continued to develop and enhance DCS for video games
    for some years after the last WPC pinball titles were released, upgrading the
    hardware to faster processors and expanded storage, and adding
-   stereo and surround sound capabilities.  All of that later development
-   is beyond our scope here, though.
+   stereo and surround sound capabilities.  All of that later work
+   is beyond our scope.
 </p>
 <p>
    I find DCS to be a fascinating bit of pinball and technology history.
-   It was cutting-edge for its day, and it's evident in the rapid evolution
-   of the format over its first couple of years how new this all was and
-   how much its creators were learning from practical application of what
-   was until then mostly theory.  It's all the more amazing to me that
-   this little feat of engineering was all for the sake of <i>pinball</i>,
-   of all things!  There's no serious practical reason today for anyone
-   to understand the format; I only looked into it to satisfy my curiosity.
-   Perhaps this reference will do likewise for a few other people who wonder
-   what's inside those audio boards.
+   It was cutting-edge for its day, and it still looks pretty modern decades
+   later, given its similarities to now-standard digital audio
+   formats like MP3.  The designers created a new digital audio format
+   from scratch at a time when the whole idea was just starting to make
+   the transition from theory to practice, and few other
+   examples existed.  It's all the more remarkable that this little feat of
+   engineering  was all for the sake of <i>pinball</i>, of all things.
+   Today, there's no serious reason for anyone to understand the format;
+   the existing pinball ROMs can be played back on any PC using the PinMame
+   emulator, and anyone wishing to create new audio for an old
+   pinball machine wouldn't need to bother encoding new DCS material,
+   as they could just replace the pinball's entire audio system with
+   something modern, such as a Raspberry Pi running an MP3 player.  I
+   only looked into the format's internals to satisfy my curiosity.
+   Perhaps this reference will do the same for a few other people who
+   also wonder what's inside those audio boards, or who think it would
+   be a neat trick to create a new DCS ROM after all this time.
 </p>
    
 
@@ -83,10 +91,9 @@
 
 <p>
    In keeping with the "unofficial" theme, my terminology for DCS's
-   internals is entirely made up.  I have no idea what terms the original DCS
-   developers used.  I should define a few terms that I use throughout
-   this document in a special technical sense that's somewhat different from
-   the ordinary meanings of the words.
+   internals is entirely made up.  I have no idea what terms the DCS
+   developers used.  I should therefore define a few special terms
+   I use here to refer to specific elements of the system.
 </p>
 
 <h3>Tracks and Streams</h3>
@@ -128,11 +135,10 @@
    they actually are "tracks", in the ordinary sense
    of the word as linear audio clips.  The streams, in
    contrast, amount to an implementation detail that's invisible
-   from the outside.  But the streams are obviously of extreme
-   importance  once you get inside the software and the format,
-   so we certainly need a name for them, and we need to be precise
-   about which object type we're talking about  - track or stream -
-   at any given time.
+   from the outside.  But the streams are obviously essential
+   elements once you get inside the software and the format,
+   and they're a completely separate type of object from the
+   track programs, so we need a distinct name for them.
 </p>
 
 <h3>Channels</h3>
@@ -341,8 +347,12 @@
    the original decoder is an artifact of the ADSP-2105 implementation
    that's not relevant to the format itself.  The ADSP-2105 only has a
    14-bit address space for data memory, so it has to go through some
-   extra steps to access the 8MB to 16MB space that the ROMs comprise.
-   None of that is important to the format itself or to encoder/decoder
+   extra steps to access the 8MB to 16MB space that the ROMs comprise,
+   by programming a peripheral hardware device on the circuit board to
+   map a selected section of a selected ROM into the CPU's small memory space.
+   All of the extra bit-shifting work in the ADSP-2105 code relates to
+   programming the memory-mapper device, so it's not part of the
+   format itself, and it's not relevant to new encoder/decoder
    implementations on modern hardware with large address spaces.  My
    native C++ implementation of the decoder, for example, treats each ROM as a
    single, contiguous byte array, which directly corresponds to the simple
@@ -645,12 +655,13 @@
    The loop maintains real-time playback synchronization by
    waiting for the autobuffer read pointer to advance into the next
    buffer section on each loop cycle.  This scheme assumes that
-   the decoder can always fill its half of the buffer faster than
-   the real-time playback can exhaust the other half; as long as
-   that's true, the decoder will simply burn up the time difference
-   on each cycle waiting for the playback pointer to catch up
-   with it.  In practice, the decoder <i>is</i> always fast enough
-   for the assumption to hold, but even if some pathological
+   the decoder software can always fill its half of the buffer faster than
+   the autobuffer reader can exhaust the other half; as long as
+   that's true, the main loop can synchronize with real time
+   simply by burning up the time difference on each cycle waiting for
+   the playback pointer to catch up with the decoder output.
+   In practice, the decoder <i>is</i> always fast enough
+   for this assumption to hold, but even if some pathological
    condition arose where the the decoder fell behind the player,
    it wouldn't be catastrophic: playback would "stutter",
    as the player loops back into a portion of the buffer that
@@ -661,14 +672,13 @@
 <p>
    <b>Saving and restoring the volume setting:</b>  The DCS boards
    don't have any hardware to control the audio volume; the audio
-   amplifier in the analog stage is set at a fixed gain.  Volume
-   control is handled purely in the software, in the digital domain,
+   amplifier in the analog stage is set at a fixed gain.
+   Volume control is handled purely in the software, in the digital domain,
    by applying a scaling factor to the PCM samples.  The master
-   volume setting on the DCS board is simply stored in a RAM location,
+   volume setting on the DCS board is stored in ordinary RAM,
    so the setting is lost every time the sound board CPU resets.  The
-   DCS board doesn't have any non-volatile storage of its own, so it
-   can't do anything to save the value across resets; it has to count
-   on the WPC host to save the setting in a persistent storage
+   DCS board doesn't have any non-volatile storage of its own; it
+   relies on the WPC host to save the setting in a persistent storage
    location and send a "set volume" command after every reset.  The
    WPC software is designed with this requirement in mind, and does,
    in fact, send a volume command to the data port after each sound
@@ -678,7 +688,9 @@
    board to solicit an update on its own, so the volume level after
    a spontaneous reset will be stuck at the default value of $67
    (equivalent to 12 on the 0-31 scale in the user interface)
-   until the user manually adjusts it or activates the operator menu.
+   until the user manually adjusts it, or until the WPC software
+   initiates a sound-board reset for some reason (such as the user
+   entering the operator menu).
 </p>
 
 <h3>ROM catalog</h3>
@@ -1123,7 +1135,8 @@
    represented by the pointer, and interpret them as follows:
 </p>
 <ul>
-   <li>The first byte is the track's channel number, 0-3 or 0-5 (depending the on software version)
+   <li>The first byte is the track's channel number, 0-3 or 0-5 (depending
+   on the software version)
    <li>The second byte is the track type code:
    <ul>
       <li>1 = Byte-code program
@@ -1143,9 +1156,9 @@
    of a series of instructions coded in a special byte-code language
    defined by DCS.  The byte-code language can be thought of as similar
    to a microprocessor's machine code instruction set, but it's
-   <b>not</b> actual ADSP-2105 machine code, or machine code for any
-   other real CPU; it's just a made-up code defined by the DCS
-   software for implementing these track programs.
+   not real machine code for the ADSP-2105 or any other physical
+   CPU.  It's just a made-up language, defined by the DCS software and
+   used only for implementing these track programs.
 </p>
 <p>
    As in a typical CPU instruction set, the byte-code instructions
@@ -1631,7 +1644,7 @@
    <p>
       The window function is constrained, but not specified, by the DCS
       format, or more specifically, by the original decoder implementation.
-      The reference decoders uses a set of pre-defined constant coefficients
+      The reference decoders use pre-defined constant coefficients
       to undo the windowing when reconstructing the signal, and these
       constants constrain the encoder's choice of window coefficients.
       See <a href="#WindowFunc">Encoding Window Function</a> for a specific
@@ -1659,9 +1672,10 @@
    <li>Combine the first 16 samples of the PCM output buffer with
    the 16 samples in the overlap buffer left over from the previous
    frame, using the pre-defined coefficients and the algorithm
-   listed below.  (These are fixed constants of the reference
-   DCS decoder implementation, so new decoders must use the
-   same values.)
+   listed below.  (These are fixed constants defined in the original
+   DCS decoders, so new decoders must use the same values.  All of
+   the original DCS decoder versions from 1993 to 1998 use the same
+   constants.)
    <pre>
 static const float decodingOverlapCoeff[] = {
     0.009644f, 0.056274f, 0.129395f, 0.225952f,
@@ -1693,8 +1707,8 @@ for (int i = 0 ; i < 16 ; ++i) {
 <p>
    Each frame contains 256 PCM samples, representing a time
    window of 8.192ms, but due to the overlap, only 240 samples
-   from each frame are used during playback.  The time
-   between frames during playback is thus 7.68ms.
+   from each frame are used during playback.  Each frame
+   thus takes 7.68ms to play back.
 </p>
 
 <a name="EncodingOverview"></a>
@@ -3870,14 +3884,15 @@ for (int i = 0 ; i < 16 ; ++i) {
 </p>
 <p>
    I call this a "hack" because it's so obviously a quick-and-dirty
-   code change that someone added to achieve some ad hoc objective,
-   without thinking it through properly, and probably without even
-   considering if the objective itself made any sense.
-   The fact that it was only ever used for a single sound effect
-   makes it look even more like the whole idea was misguided from
-   the start.  It creates this weird special-case gotcha for sound
-   designers working with the software, who have to be aware of
-   the non-sensical side effect of the data port write.
+   code change that someone added to achieve an ad hoc objective,
+   creating a bizarre special case instead of thinking it through
+   well enough to find a general-purpose solution to whatever problem
+   they were trying to solve.  No one probably even bothered to stop
+   to think if the problem itself was worth solving the first place.
+   It almost certainly wasn't, given that the hack was only ever used
+   for the one sound effect.  At any
+   rate, sound designers working with the software now have to be
+   aware of the non-sensical side effect of the data port write.
 </p>
 
 <a name="SpecialCommands"></a>
@@ -3918,7 +3933,8 @@ for (int i = 0 ; i < 16 ; ++i) {
    The DCS software clears any buffered bytes if more than 100ms
    elapses between consecutive bytes.  This implies that a sender can
    wait a little longer than 100ms before sending the first byte of
-   a new command if it wants to ensure that the DCS receiver doesn't
+   a new command if it wants to essentially reset the network connection,
+   ensuring that the DCS receiver doesn't
    think it's in the middle of some earlier partially-sent command sequence.
 </p>
 <p>
@@ -3957,8 +3973,9 @@ for (int i = 0 ; i < 16 ; ++i) {
    never got around to mentioning to the game designers.
 
    <li><b>$55 $C2:</b> Get the DCS software's major version number. 
-   The sound board replies with one byte to the data port containing the
-   DCS software's major version number, which is always $01.  (I call
+   The sound board replies by sending one byte to the data port, with
+   the byte value set to the DCS software's major version number,
+   which is always $01.  (I call
    this the "major" version number in the sense of the common software
    industry convention of writing version numbers as dotted pairs
    of the form "major.minor", as in "1.0" or "2.10".)
@@ -3967,8 +3984,9 @@ for (int i = 0 ; i < 16 ; ++i) {
    all.  Note that this is separate from the "audio data version number"
    that the WPC system displays on the DMD when entering the operator
    menu.  That display reflects the version of the audio content, not
-   of the software; some games had later releases that updated the audio
-   ROMs with added sound effects, for example.  The operating system
+   of the software; some games had more than one version of their audio
+   ROMs released, with later versions featuring new or updated
+   sound effects.  The operating system
    doesn't know anything about the audio data version; that's handled through a track
    program, so the command code to retrieve it is idiosyncratic
    per game.
@@ -4186,6 +4204,8 @@ for (int i = 0 ; i < 16 ; ++i) {
    the most frequently used plaintext values with smaller codewords.
    Think of Morse code, with its very short codeword for the letter
    <b>E</b> ("dit") and its long codeword for <b>Q</b> ("dah dah dit dah").
+   Or, if you're familiar with the principles that make Zip compression
+   work, think of Zip files.
 </p>
 <p>
    DCS uses many different Huffman-type codes.  Which code is used
@@ -4194,15 +4214,14 @@ for (int i = 0 ; i < 16 ; ++i) {
 <p>
    All of DCS's Huffman-type codings are pre-defined and permanently fixed,
    and shared across all instances of a given format version.  The original
-   ADSP-2105 software was actually designed to allow the codebooks
-   to be stored as part of the audio ROM data, separately from
-   the program code, so it seems that the designers thought that they
-   might want to be able to vary the codes from game to game, perhaps
-   to choose codings optimized to the specific statistics of each game's
-   audio data.  But this capability was never used.  All of the
-   codebooks for a given format version are fixed across all of the
+   ADSP-2105 software stores the codebooks as data tables in a separate
+   section of the ROM from the program code, which suggests that the
+   designers thought they might want to be able to vary the codes from
+   game to game, perhaps to optimize each game's tables for the specific
+   statistics of that game's audio data.  But this capability was never used.
+   All of the codebooks for a given format version are fixed across all of the
    games using the format.  That allows us to treat the codebooks
-   simply as part of the formats, and thus to list the
+   simply as fixed features of their respective formats, and thus to list the
    codebooks here.
 </p>
 <p>

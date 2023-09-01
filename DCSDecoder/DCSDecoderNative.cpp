@@ -1601,13 +1601,41 @@ void DCSDecoderNative::InitStreamPlayback(Channel &ch)
     // Make a local copy of the 16-byte stream header (if it has a
     // header at all - OS93a Type 1 streams don't have headers)
     ROMPointer p2 = stream.headerPtr;
-    int i = 0;
-    for ( ; i < stream.headerLength ; ++i)
+    unsigned int i = 0;
+    for ( ; i < static_cast<unsigned int>(stream.headerLength) ; ++i)
         stream.header[i] = *p2++;
 
     // zero out any remaining bytes of the local header copy
-    for (; i < 16 ; ++i)
+    for ( ; i < 16 ; ++i)
+    {
+        // Note: this #pragma cruft is to work around a known GCC bug.
+        // GCC incorrectly warns that 'i' is writing outside the array
+        // bounds, even though 'i' is deterministically in bounds due
+        // to the constant 'for' termination condition.  The compiler
+        // can determine this statically, and in fact the whole point
+        // of the warning is that GCC *is* determining i's range
+        // statically, but figures it wrong and thinks 'i' is out of
+        // bounds in some case.  'i' is obviously and provably in
+        // bounds, and GCC is just wrong.  This is a known and long-
+        // standing GCC bug, and the only reliable workaround seems to
+        // be to disable the warning.  The warning could be meaningful
+        // in other contexts, so we don't want to disable it globally
+        // in the makefile.  Instead, e can use a #pragma to disable
+        // it for this one line of code.  It's ugly, but I'd rather
+        // not have spurious warnings, because I actually like to
+        // fix every valid warning, so I don't want a bunch of noise
+        // warnings to accumulate such that I have to get accustomed
+        // to just ignoring them.
+#ifdef __GCC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
         stream.header[i] = 0;
+
+#ifdef __GCC__
+#pragma GCC diagnostic pop
+#endif
+    }
 
     // initialize the frame band type buffer to all zeroes
     memset(stream.bandTypeBuf, 0, sizeof(stream.bandTypeBuf));
@@ -1618,7 +1646,7 @@ void DCSDecoderNative::InitStreamPlayback(Channel &ch)
 // Decompress one frame from the current audio stream using the 1994-1998
 // frame format.  This is the format used by all of the DCS pinball titles
 // except for the first three, all of which were released in 1993 (STTNG,
-// IJTPA, JD).
+// IJTPA, JD).JD
 // 
 // Throughout this subroutine, there are two different "headers" that
 // we refer to many times:

@@ -218,7 +218,8 @@ public:
 	// during the boot phases or if in an error state.
 	bool IsRunning() const { return state == State::Running; }
 
-	// If IsOK() returns false, this returns a descriptive
+	// If IsOK() returns false, this returns a message describing
+	// the error condition, for logging or display to the user
 	std::string GetErrorMessage() const { return errorMessage; }
 
 	// Zip file contents, for LoadROMFromZipFile
@@ -520,24 +521,24 @@ public:
 	// Enable/disable fast boot mode.  The point of fast boot mode is
 	// to let the user optionally bypass the power-up self tests that
 	// many original pinball ROM programs perform, for faster startup.
-	// This simulator doesn't actually perform any of the original
+	// The native decoder doesn't actually perform any of the original
 	// self-tests that the ROM code performs, regardless of the fast
 	// boot option setting, since the tests are really not of much
-	// value in an emulation.  but the simulator does at least play
+	// value in an emulation.  But the simulator does at least play
 	// the startup "bong" for the sake of re-creating the full user
 	// experience (minus the tedious startup test delay).  Fast boot
-	// mode bypasses even the startup bong, allowing playback to
-	// begin almost instantly.
+	// mode bypasses the startup bong, allowing playback to begin
+	// almost instantly.
 	//
 	// Note that fast boot mode has nothing to do with the hard/soft
 	// reset functions.  Fast boot mode only controls whether or not
-	// the simulated startup test proceduer runs (which, again, only
+	// the simulated startup test procedure runs (which, again, only
 	// amounts to the "bong" in this version).  The hard/soft reset
 	// functions, in contrast, simulate the run-time control flow in
 	// the decoder program.
 	//
-	// Set this to true for fast boot (bypass the bong), false for normal
-	// (play the bong at startup).
+	// Set this to true for fast boot (bypassing the bong), false for 
+	// the normal slow boot process (playing the bong at startup).
 	void SetFastBootMode(bool fast) { fastBootMode = fast; }
 
 	// Set the master volume, 0..255.  This has the same effect as
@@ -552,13 +553,16 @@ public:
 	// a Set Volume command sequence (55 AA vol ~vol) through the data
 	// port immediately after a reset.  For convenience in a non-pinball
 	// software environment, we provide this routine, to let the caller
-	// set a volume level that will be applied automatically after a
+	// set a volume level that will be applied automatically after each
 	// reset, so that the main program can set an initial volume without
 	// any consideration for the startup timing, and without having to
-	// set the volume again later if it resets the simulated board.
+	// repeat the volume command later if it resets the simulated board.
 	void SetDefaultVolume(int vol) { defaultVolume = vol; }
 
-	// get the next sample (signed 16-bit PCM)
+	// Get the next sample (signed 16-bit PCM).  To implement audio
+	// playback, the host program can simply call this routine in a
+	// loop, writing each sample retrieved to its hardware audio
+	// playback buffer.
 	int16_t GetNextSample();
 
 	// Hard Boot the decoder.  This starts the simulated hard boot
@@ -924,7 +928,7 @@ public:
 	// version the ROM is using.  We rely instead on known patterns
 	// in the ROM program and data set.  This should be more reliable
 	// because it's what's in the actual ROM program that matters to
-	// us when seleting feature variations.
+	// us when selecting feature variations.
 	enum class GameID
 	{
 		// Unknown - game ID has not yet been detected, or the

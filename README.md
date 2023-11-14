@@ -1,23 +1,28 @@
 # DCS Explorer
 
 This project is the result of some pinball archaeology, an attempt to
-better understand the DCS audio format.  DCS is the name of the audio
-system used in Williams pinball machines, including those from
-sub-brands Bally and Midway, from 1993 through 1998.  DCS stores the
-audio data using a proprietary compressed digital audio format that's
-similar in design to mainstream formats like MP3, AAC, and Vorbis, and
-the player system has some special features tailored to the
-event-driven environment of an arcade game.
+better understand the DCS audio format.  DCS (for Digital Compression
+System) is the sound system used in Williams/&ZeroWidthSpace;Bally/&ZeroWidthSpace;Midway pinball
+machines from 1993 through 1998.  DCS stores the audio data using a
+proprietary compressed digital audio format that's similar in design
+to mainstream formats like MP3, AAC, and Vorbis, and the playback system
+has some special features tailored to the event-driven environment of
+an arcade game.
 
 In the pinball machines, DCS was physically implemented with a
 purpose-built circuit board based on the Analog Devices ADSP-2105
-processor.  But the hardware is only incidental; DCS is really a
-software platform that can be implemented on any CPU that's
-fast enough to do the playback decoding in real time.  Today's
-PCs are plenty fast enough, and even a modern single-board
-computer like a Raspberry Pi can easily handle the job.
-There's no longer any need for a dedicated circuit board with
-a specialized DSP chip.
+processor.  The ADSP-2105 was essentially a general-purpose CPU that
+had some special optimizations tailored to DSP applications.  But the
+hardware is only incidental; DCS is really a software platform that
+can be implemented on any CPU that's fast enough to do the playback
+decoding in real time.  CPU chips today are so much faster than the
+chips of the 1990s that there's no longer any need for specially
+optimized DSP chips like the ADSP-2105.  Any modern PC can easily
+handle the work of decoding DCS in real time, and in fact, even a
+small single-board computer like a Raspberry Pi can do the job without
+breaking a sweat.  This makes it possible to re-create the DCS decoder
+as a portable C++ program, without any special CPU hardware
+requirements or hand-optimized assembly language.
 
 The internal details of the DCS format have never been published
 (until now), so it's always been difficult to find out exactly what's
@@ -44,13 +49,13 @@ libraries, and no dependencies on any system audio interfaces or OS
 services.  It's easy to incorporate into any C++ project, and its
 programming interface is easy to use.  It works with all of the DCS
 pinball titles released from 1993 to 1998.  I've tested representative
-ROMs for every DCS title and validated that they produce PCM output
+ROMs for every DCS pinball machine title and validated that they produce PCM output
 that's bit-for-bit identical to the PinMame emulator's output.  (In
 fact, this cross-checking turned up two small bugs in PinMame's DCS
 emulation, which have since been fixed in the PinMame mainline.
 Having the two completely different emulator designs agree on every
 single bit makes me more confident that both of them are getting it
-exactly right.)  The code is written in a readable style and
+exactly right.)  The code is written in a readable style and is
 extensively commented, in the hopes that it can serve as an
 informational resource to DCS internals for people who can read C++
 code, and as a reference implementation for developing new DCS-related
@@ -91,11 +96,14 @@ should just be a matter of cloning the git repository, opening the
 solution (.sln) file in Visual Studio, and executing a Build Solution
 command.
 
-The DCS Explorer program has some dependencies on Windows for audio
-playback, so it will require additional work to port to Linux or
-any other non-Windows platforms.  Most of the rest of the code should
-be readily portable, although I haven't created build scripts for any
-other platforms or attempted building it anywhere but Windows.
+The DCS Explorer program has some dependencies on Windows APIs for
+audio playback, so it will require additional work to port that
+portion of the program to Linux or any other non-Windows platforms.
+The audio playback feature is the only thing with any OS dependencies,
+though.  Most of the rest of the code should be readily portable
+(although I haven't created build scripts for any other platforms or
+attempted building it anywhere but Windows, so that is for the moment
+an untested claim).
 
 If you want to use DCSDecoder in your own project, you can either use
 the static library (dcsdecoder.lib) that the DCSDecoder sub-project

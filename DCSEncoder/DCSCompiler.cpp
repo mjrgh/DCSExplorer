@@ -177,6 +177,9 @@ bool DCSCompiler::LoadPrototypeROM(const char *romZipName, bool patchMode, std::
 								// yet.  Create a new stream object.
 								auto &stream = streams.emplace_back(streamAddr);
 
+								// Add the new stream to streamsByProtoAddr
+								streamsByProtoAddr[streamAddr] = &stream;
+
 								// store a direct pointer to the stream data in the prototype ROM
 								stream.refName = DCSEncoder::format("%s($07x)", romZipName, streamAddr);
 								stream.data = streamPtr.p;

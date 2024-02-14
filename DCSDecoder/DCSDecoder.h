@@ -1026,14 +1026,16 @@ public:
 		// Who Dunnit, 1995 (no known hacks)
 		WDI,
 		// Video games
-		// NBA Hangtime, 1994
-		NBAHT,
 		// Killer Instinct, 1994
 		KINST,
-		// Mortal Kombat 3, 1994
-		MK3,
 		// Mortal Kombat 2, 1993
 		MK2,
+		// Mortal Kombat 3, 1994
+		MK3,
+		// NBA Hangtime, 1994
+		NBAHT,
+		// Rampage World Tour
+		RMPGWT,
 		// WWF Wrestlemania Arcade, 1993
 		WWFW
 		// end no comma

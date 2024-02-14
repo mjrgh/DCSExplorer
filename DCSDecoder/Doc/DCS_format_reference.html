@@ -12,17 +12,18 @@
 <p>
    This is an unofficial technical reference guide to the internals of DCS audio format used
    in the classic Williams/&ZeroWidthSpace;Bally/&ZeroWidthSpace;Midway pinball machines
-   of the 1990s.  DCS, which stands for Digital Compression System, is
-   a family of proprietary digital audio compression formats that are similar
-   technically to mainstream formats like MP3 and Ogg Vorbis,
-   along with a run-time system tailored to the real-time event-driven playback environment
-   of an arcade game.  The system was originally implemented with purpose-built
+   of the 1990s.  DCS, which stands for Digital Compression System, consists of
+   a family of proprietary digital audio compression formats, along with
+   a run-time system tailored to the real-time event-driven playback environment
+   of an arcade game.  The DCS compression formats are similar in many ways
+   to today's mainstream formats like MP3 and Ogg Vorbis.
+   The system was originally implemented with purpose-built
    circuit boards based on the Analog Devices ADSP-2105, a
    specialized CPU designed for DSP applications.  But we're
    not much concerned here with the hardware; our focus is on the
-   audio format, which was implemented purely in software even on
-   the original 1990s equipment, so it doesn't contain any dependencies on
-   any particular CPU or hardware platform.  For those interested in the
+   audio format, which doesn't have any dependencies on any particular
+   hardware platform.  Even on the original 1990s equipment, the
+   decoders were implemented entirely in software.  For those interested in the
    circuit boards, plenty of information is available elsewhere, including
    schematics published in the pinball service manuals, repair
    guides on various pinball sites, and PinMame's open-source emulation
@@ -33,10 +34,10 @@
    including the procedures for encoding and decoding bit streams in
    each of the compressed audio formats.  It also covers the "track program"
    system that controls playback, and the layout of the DCS audio ROMs.
-   The reference material is detailed enough to facilitate< the creation
-   of new software that works with the format, including playing back
-   material from existing ROMs, and even creating new ROMs with original
-   audio recordings that can be used with the DCS hardware.
+   The reference material includes the complete algorithms and data tables
+   required to encode and decode DCS data streams, track programs, and
+   ROMs.  It goes into enough detail that you could use it to write a
+   complete DCS encoder/decoder from scratch.
 </p>
 <p>
    This documentation is part of my
@@ -261,21 +262,37 @@
    document - it shouldn't really matter how the ADSP-2105 happened
    to store a particular number, because the abstract mathematical value of the
    number is usually what's important, not the particular bit pattern
-   used to store it on one particular machine.
-   But fixed-point numbers inevitably come up in a few places where I
-   have to explain exactly how the original decoder does particular
-   calculations, so I wanted to mention what they are and how to
-   interpret them.
+   used to store it on one particular machine.  But there are cases
+   where you have to use the original fixed-point representation in
+   a calculation if you want to recover a numerically identical result,
+   because any other representation will result in slight differences
+   in the way rounding errors are treated.  The final numerical
+   results in such cases will generally still agree within the
+   respective rounding errors of the two formats used, but
+   they won't always be bit-for-bit identical.  So I wanted to at least
+   mention the fixed-point format and describe how it works.
 </p>
 <p>
    The DCS ADSP-2105 code uses two forms of fixed-point numbers:
    0.16 and 1.15 numbers.  A 0.16 number is a 16-bit integer variable
    where all 16 bits are interpreted as following the binary point.
    The mathematical value of a 0.16 variable is the unsigned integer value
-   divided by 65536.  A 1.15 variable is interpreted as having one bit before
-   the binary point and 15 bits after.  The value of a 1.15 variable
-   is usually the <i>signed</i> integer value divided by 32768, although
-   it's also possible to treat them as unsigned.
+   divided by 65536.  For example, 0x7FFF as a 0.16 number represents
+   the mathematical value 32767/65536, or 0.49998474.  A 1.15 variable
+   is interpreted as having one bit before the binary point and 15 bits
+   after.  The value of a 1.15 variable is usually the <i>signed</i>
+   integer value divided by 32768, although it's also possible to treat
+   them as unsigned.
+</p>
+<p>
+   As far as the bit patterns stored in ADSP-2105 machine registers go,
+   1.15 and 0.16 numbers are indistinguishable from 16-bit integers.
+   They're only fixed-point numbers by virtue of being treated that
+   way by the code that manipulates them.  You can't tell from looking
+   at a particular value stored in a register if it's meant to be
+   interpreted as a 16-bit signed integer, a
+   16-bit unsigned integer, or as one of the fixed-point types; you just
+   have to look at the code to see how the value is interpreted.
 </p>
 
 <a name="Alignment"></a>

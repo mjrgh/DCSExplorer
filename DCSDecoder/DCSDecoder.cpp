@@ -158,6 +158,14 @@ dcsGameInfo[] ={
 	{ DCSDecoder::GameID::ToM, "Theatre of Magic", "Theatre of Magic" },
 	{ DCSDecoder::GameID::WCS, "World Cup Soccer", "World Cup Soccer" },
 	{ DCSDecoder::GameID::WDI, "Who Dunnit", "WDI Pinball" },
+	// Added some video game roms
+	{ DCSDecoder::GameID::NBAHT, "NBA Hangtime", "NBA HANGTIME GAME SOUND ROMS" },
+	{ DCSDecoder::GameID::NBAHT, "NBA Hangtime (Hack)", "NBA SUPER HANGTIME" },
+	{ DCSDecoder::GameID::KINST, "Killer Instinct", "Killer Instinct (c)" },
+	{ DCSDecoder::GameID::MK3, "Mortal Kombat 3", "Mortal Kombat III(c) 1994 Williams - DWF" },
+	{ DCSDecoder::GameID::MK2, "Mortal Kombat 2", "Mortal Kombat II (c) 1993 Williams - DWF" },
+	{ DCSDecoder::GameID::WWFW, "WWF Wrestelmania Arcade", "WWF Video (c) 1993 Williams Electronics Games, Inc." },
+	// comma on end.
 };
 
 // Infer the game ID from a siganture string

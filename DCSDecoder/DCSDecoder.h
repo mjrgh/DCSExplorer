@@ -1024,7 +1024,19 @@ public:
 		WCS,
 
 		// Who Dunnit, 1995 (no known hacks)
-		WDI
+		WDI,
+		// Video games
+		// NBA Hangtime, 1994
+		NBAHT,
+		// Killer Instinct, 1994
+		KINST,
+		// Mortal Kombat 3, 1994
+		MK3,
+		// Mortal Kombat 2, 1993
+		MK2,
+		// WWF Wrestlemania Arcade, 1993
+		WWFW
+		// end no comma
 	};
 
 	// infer the game ID from a ROM U2 signature string

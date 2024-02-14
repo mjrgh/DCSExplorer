@@ -130,6 +130,7 @@ static const struct
 	const char *regex;			// regex pattern to apply to a U2 ROM signature to identify the game
 }
 dcsGameInfo[] ={
+	// Pinball game roms
 	{ DCSDecoder::GameID::AFM, "Attack from Mars", "Attack from Mars" },
 	{ DCSDecoder::GameID::CC, "Cactus Canyon", "Cactus Canyon" },
 	{ DCSDecoder::GameID::CP, "The Champion Pub", "Champion Pub" },
@@ -158,6 +159,15 @@ dcsGameInfo[] ={
 	{ DCSDecoder::GameID::ToM, "Theatre of Magic", "Theatre of Magic" },
 	{ DCSDecoder::GameID::WCS, "World Cup Soccer", "World Cup Soccer" },
 	{ DCSDecoder::GameID::WDI, "Who Dunnit", "WDI Pinball" },
+	// Video game roms
+	{ DCSDecoder::GameID::KINST, "Killer Instinct", "Killer Instinct (c)" },
+	{ DCSDecoder::GameID::MK2, "Mortal Kombat 2", "Mortal Kombat II (c) 1993 Williams - DWF" },
+	{ DCSDecoder::GameID::MK3, "Mortal Kombat 3", "Mortal Kombat III(c) 1994 Williams - DWF" },
+	{ DCSDecoder::GameID::NBAHT, "NBA Hangtime", "NBA HANGTIME GAME SOUND ROMS" },
+	{ DCSDecoder::GameID::NBAHT, "NBA Hangtime (Hack)", "NBA SUPER HANGTIME" },
+	{ DCSDecoder::GameID::RMPGWT, "Rampage World Tour", "WMS Rampage II Video" },
+	{ DCSDecoder::GameID::WWFW, "WWF Wrestelmania Arcade", "WWF Video (c) 1993 Williams Electronics Games, Inc." },
+	// comma on end.
 };
 
 // Infer the game ID from a siganture string

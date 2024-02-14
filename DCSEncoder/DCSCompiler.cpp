@@ -124,7 +124,7 @@ bool DCSCompiler::LoadPrototypeROM(const char *romZipName, bool patchMode, std::
 				auto &track = tracks.emplace(std::piecewise_construct, std::forward_as_tuple(i), std::forward_as_tuple()).first->second;
 
 				// mark is as not coming from the script, so that the script can replace it
-				track.fromRom = false;
+				track.fromRom = true;
 
 				// store the basic information
 				track.trackNo = i;
@@ -176,6 +176,9 @@ bool DCSCompiler::LoadPrototypeROM(const char *romZipName, bool patchMode, std::
 								// This stream hasn't been imported into our stream list
 								// yet.  Create a new stream object.
 								auto &stream = streams.emplace_back(streamAddr);
+
+								// Add the new stream to streamsByProtoAddr
+								streamsByProtoAddr[streamAddr] = &stream;
 
 								// store a direct pointer to the stream data in the prototype ROM
 								stream.refName = DCSEncoder::format("%s($07x)", romZipName, streamAddr);

@@ -790,11 +790,11 @@ public:
 	// hardware platform that the ROM was formatted for, which is
 	// necessary because the DCS-95 ROMs and earlier ROMs use slightly
 	// different addressing formats.
-	ROMPointer MakeROMPointer(uint32_t linearAddress);
+	ROMPointer MakeROMPointer(uint32_t linearAddress) const;
 
 	// Get the current offset from a ROM pointer.  This returns the
 	// offset of the current address from the base of the ROM.
-	uint32_t ROMPointerOffset(ROMPointer rp) { return static_cast<uint32_t>(rp.p - ROM[rp.chipSelect].data); }
+	uint32_t ROMPointerOffset(ROMPointer rp) const { return static_cast<uint32_t>(rp.p - ROM[rp.chipSelect].data); }
 
 	// Hardware version.  This reflects the target hardware platform that
 	// the loaded ROM was designed to work with.  We need to know which
@@ -936,6 +936,10 @@ public:
 		// recognizable as one of the known DCS titles.
 		Unknown,
 
+		//
+		// DCS Pinball ROMs
+		//
+
 		// Attack from Mars, 1995 (no known hacks)
 		AFM,
 
@@ -1010,11 +1014,18 @@ public:
 
 		// Tales of the Arabian Nights, 1996
 		// 
-		// Unique hack: IRQ2 handler handles command code 03 E7 by sending
-		// byte $11 to the host via the data port (contradicting the track
-		// program for track 03E7, which sends byte $10 instead - likely a
-		// last-minute bug-fix patch by an intern who didn't know that the
-		// right way to fix it was to fix the track program).
+		// Unique hack: IRQ2 handler processes command 03 E7 by sending
+		// byte $11 to the host via the data port.  This processing is
+		// hard-coded into the IRQ2 handler and bypasses the normal track
+		// program invocation.  There is a track program 03E7 in this ROM,
+		// which if invoked sends byte $10 instead, but because of the
+		// IRQ2 hack the track program is never invoked.  This has the
+		// distinct appearance of a last-minute bug-fix patch, perhaps
+		// by a summer intern whose work was never reviewed (because
+		// surely the cleaner and much simpler way to fix it would have
+		// been to edit the track program for 03E7).  When TOTAN is
+		// detected, we apply the same special handling in our IRQ2
+		// handler to obtain the identical behavior to the original.
 		TOTAN,
 
 		// Theatre of Magic, 1995 (no known hacks)
@@ -1025,20 +1036,29 @@ public:
 
 		// Who Dunnit, 1995 (no known hacks)
 		WDI,
-		// Video games
+
+
+		//
+		// DCS video game ROMs
+		//
+
 		// Killer Instinct, 1994
 		KINST,
+
 		// Mortal Kombat 2, 1993
 		MK2,
+
 		// Mortal Kombat 3, 1994
 		MK3,
+
 		// NBA Hangtime, 1994
 		NBAHT,
+
 		// Rampage World Tour
 		RMPGWT,
+
 		// WWF Wrestlemania Arcade, 1993
-		WWFW
-		// end no comma
+		WWFW,
 	};
 
 	// infer the game ID from a ROM U2 signature string
@@ -1050,7 +1070,7 @@ public:
 	// Get the game ID for the loaded game.  This will only
 	// return value information after the U2 ROM image has been
 	// loaded.
-	GameID GetGameID() { return gameID; }
+	GameID GetGameID() const { return gameID; }
 
 	// Get the version information.  This will only return
 	// valid information after the U2 ROM image has been loaded,

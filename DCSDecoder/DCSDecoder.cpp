@@ -63,7 +63,7 @@ void DCSDecoder::AddROM(int n, const uint8_t *data, size_t size)
 	}
 }
 
-DCSDecoder::ROMPointer DCSDecoder::MakeROMPointer(uint32_t linearAddress)
+DCSDecoder::ROMPointer DCSDecoder::MakeROMPointer(uint32_t linearAddress) const
 {
 	// Figure the chip select, based on the hardware version.
 	// For the DCS-95 boards, the chip select portion of the address 
@@ -130,7 +130,7 @@ static const struct
 	const char *regex;			// regex pattern to apply to a U2 ROM signature to identify the game
 }
 dcsGameInfo[] ={
-	// Pinball game roms
+	// Pinball roms
 	{ DCSDecoder::GameID::AFM, "Attack from Mars", "Attack from Mars" },
 	{ DCSDecoder::GameID::CC, "Cactus Canyon", "Cactus Canyon" },
 	{ DCSDecoder::GameID::CP, "The Champion Pub", "Champion Pub" },
@@ -159,6 +159,7 @@ dcsGameInfo[] ={
 	{ DCSDecoder::GameID::ToM, "Theatre of Magic", "Theatre of Magic" },
 	{ DCSDecoder::GameID::WCS, "World Cup Soccer", "World Cup Soccer" },
 	{ DCSDecoder::GameID::WDI, "Who Dunnit", "WDI Pinball" },
+
 	// Video game roms
 	{ DCSDecoder::GameID::KINST, "Killer Instinct", "Killer Instinct (c)" },
 	{ DCSDecoder::GameID::MK2, "Mortal Kombat 2", "Mortal Kombat II (c) 1993 Williams - DWF" },
@@ -167,7 +168,6 @@ dcsGameInfo[] ={
 	{ DCSDecoder::GameID::NBAHT, "NBA Hangtime (Hack)", "NBA SUPER HANGTIME" },
 	{ DCSDecoder::GameID::RMPGWT, "Rampage World Tour", "WMS Rampage II Video" },
 	{ DCSDecoder::GameID::WWFW, "WWF Wrestelmania Arcade", "WWF Video (c) 1993 Williams Electronics Games, Inc." },
-	// comma on end.
 };
 
 // Infer the game ID from a siganture string

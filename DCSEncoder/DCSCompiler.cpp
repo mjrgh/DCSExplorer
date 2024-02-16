@@ -107,7 +107,8 @@ bool DCSCompiler::LoadPrototypeROM(const char *romZipName, bool patchMode, std::
 
 	// note the number of channels supported in the prototype firmware
 	numChannels = decoder.GetNumChannels();
-	maxChannelNumber = numChannels - 1;
+	
+	// maxChannelNumber = numChannels - 1;
 
 	// if we're in patch mode, load all of the tracks and streams from the old ROM
 	if (patchMode)

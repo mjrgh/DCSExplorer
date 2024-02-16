@@ -147,9 +147,11 @@ rote translation of the old machine code.
 
 Once I understood the format well enough to decode it fully with an
 original program, I realized that I also understood it well enough to
-*encode* new material in the format.  That led to the final piece of
-this project, my DCS Encoder, which can create original DCS ROMs with
-new audio material.
+encode new material in the format. That led to the final piece of this
+project, my DCS Encoder, which can create original DCS ROMs with new
+audio material.
+
+
 
 ## Links to other DCS documentation
 

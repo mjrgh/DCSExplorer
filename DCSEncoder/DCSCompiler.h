@@ -72,7 +72,7 @@ public:
 	// Load the prototype ROM set.  This is the first step in compiling a
 	// new ROM, and it should be completed before creating any new objects
 	// (tracks, streams, etc) for the new ROM set.  The prototype ROM
-	// provides the ADSP-2105 program that's trasnfered to the new ROM as
+	// provides the ADSP-2105 program that's transferred to the new ROM as
 	// its main control program, so it determines the target hardware type
 	// that the new ROM set will run on.
 	// 
@@ -395,6 +395,9 @@ public:
 
 	// number of channels supported by the prototype firmware
 	int numChannels = 0;
+
+	// maximum channel number - channels are numbered 1..(N-1), so this
+	// is one less than the number of channels
 	int maxChannelNumber = 0;
 
 	// U2 ROM signature specified in the script, if any.  If this is

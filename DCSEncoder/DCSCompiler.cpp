@@ -721,7 +721,7 @@ void DCSCompiler::ParseScript(const char *filename, DCSTokenizer::ErrorLogger &l
 			int channel = tokenizer.RequireSymbol("channel") ? tokenizer.ReadInt().ival : 0;
 
 			// it's an error if it's out of range
-			if (channel < 0 || channel >= maxChannelNumber)
+			if (channel < 0 || channel > maxChannelNumber)
 			{
 				tokenizer.Error(EError, "Channel number %d is invalid "
 					"(the prototype firmware version supports channels 0-%d)", channel, maxChannelNumber);

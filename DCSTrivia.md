@@ -22,11 +22,13 @@ specifies which special command it is.
 
 For the four-byte commands, the third byte is a parameter, and the
 fourth byte is always the bitwise NOT (all bits inverted) of the third
-byte.  The fourth byte is just there as a sort of checksum to validate
-that the sequence was received correctly.  I guess when the messages
-get up to a whopping four bytes long, there's too much of a chance of
-transmission error in such a primitive network setup, so they had
-to add some error detection.
+byte.  (In the command list below, we use the C++ tilde notation for a
+bitwise NOT, ~x, to denote the bit-inverted byte.)  That inverted
+fourth byte is just there as a sort of checksum to validate that the
+sequence was received correctly.  I guess when the messages get up to
+a whopping four bytes long, there's too much of a chance of
+transmission error in such a primitive network setup, so they had to
+add some error detection.
 
 Here are the special command sequences:
 
@@ -38,7 +40,7 @@ by a scaling factor that's derived from the 0 to 255 setting, using a
 log curve that makes the scale sound roughly linear to a human ear.
 At 255, the scaling factor is 1.0, so you get the reference level of
 the recordings; lower volumes attenuate the PCM amplitude along that
-log curve.  The 0-255 scale corresponds very straightforwardly to the
+log curve.  The 0-255 scale corresponds straightforwardly to the
 0-31 scale displayed in the operator menus when you use the volume
 controls inside the coin door, by multiplying the displayed value
 by 8.  When the display shows 31, the software sends 31*8 = 248 ($F8)
@@ -96,7 +98,7 @@ the story behind it, the code suggests that this command was meant to
 do something parallel to the $55 $AB series of commands, in that
 it's similarly arrayed across the audio channels, and it seems to have
 similar data structures for something like a volume level and some
-timers.  But the code never does anything with the data structure
+timers.  But the code never does anything with the data structures
 apart from populate them when one of these commands is received, so I
 have no idea what the command was meant to do.  It's another of
 those never-used features lying dormant in the code.
@@ -150,10 +152,10 @@ is always to reboot all of your PCs and network routers and cable TV
 boxes, even if you're calling about the fridge.  At any rate, those
 255 consecutive resets aren't noticeable because a reset only takes a
 few milliseconds.  This is ancient embedded software, thankfully, not
-Windows.  And the reason you don't 255 startup "bongs" every time you
+Windows.  And the reason you don't hear 255 startup "bongs" every time you
 enter the operator menu is that the WPC software uses that feature of
 the boot loader we mentioned earlier, where the boot loader bypasses
-the startup tests if it receives a byte on the data port within 256ms
+the startup tests if it receives a byte on the data port within 250ms
 after a reset.  The WPC software knows about this (obviously; the two
 systems were designed together as a set), and it sends an otherwise
 meaningless byte to the sound board after these soft resets to let it

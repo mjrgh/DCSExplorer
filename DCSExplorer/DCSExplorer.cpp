@@ -105,14 +105,14 @@ public:
 	{
 		// if the write pointer will bump into the read pointer, discard the oldest
 		// sample at the read pointer
-		if (((writeIdx + 1) % _countof(buf)) == readIdx)
-			readIdx = (readIdx + 1) % _countof(buf);
+		if (((writeIdx + 1) % (int)_countof(buf)) == readIdx)
+			readIdx = (readIdx + 1) % (int)_countof(buf);
 
 		// store the sample
 		buf[writeIdx] = s;
 
 		// advance the write pointer
-		writeIdx = (writeIdx + 1) % _countof(buf);
+		writeIdx = (writeIdx + 1) % (int)_countof(buf);
 	}
 
 	// are any samples available?
@@ -125,7 +125,7 @@ public:
 		if (IsSampleAvailable())
 		{
 			s = buf[readIdx];
-			readIdx = (readIdx + 1) % _countof(buf);
+			readIdx = (readIdx + 1) % (int)_countof(buf);
 		}
 		return s;
 	}
@@ -217,7 +217,7 @@ public:
 
 	virtual void ClearDataPort() override { }
 	
-	virtual void BootTimerControl(bool set)
+	virtual void BootTimerControl(bool set) override
 	{
 		// flag whether or not the boot timer is running, and note the new expiry
 		bootTimerRunning = set;
@@ -689,7 +689,7 @@ int main(int argc, char **argv)
 				"ROM U2 catalog offset: $%05lx\n"
 				"Maximum track number: %02x %02x\n"
 				"Number of audio channels: %d\n",
-				decoder->GetSoftBootOffset(), catalogOfs, (maxTrackNum >> 8) & 0xFF, maxTrackNum & 0xFF,
+				decoder->GetSoftBootOffset(), catalogOfs, (maxTrackNum >> 8) & 0xFFu, maxTrackNum & 0xFFu,
 				decoder->GetNumChannels());
 		}
 
@@ -1606,7 +1606,7 @@ static void IdleTask(void*)
 		}
 		else if (c >= 32 && c < 128)
 		{
-			if (kbBufLen + 1 < _countof(kbBuf))
+			if (kbBufLen + 1 < (int)_countof(kbBuf))
 			{
 				printf("%c", c);
 				kbBuf[kbBufLen++] = c;
@@ -1993,7 +1993,7 @@ void TraceAndDisassemble(FILE *fp, const uint8_t *code, Annotations &annotations
 	// process the work queue
 	while (workQueue.size() != 0)
 	{
-		// take the next item off thee queue
+		// take the next item off the queue
 		uint16_t addr = workQueue.front();
 		workQueue.pop_front();
 
@@ -2003,7 +2003,7 @@ void TraceAndDisassemble(FILE *fp, const uint8_t *code, Annotations &annotations
 		for (; addr < 0x4000 && !reachable[addr] ; ++addr)
 		{
 			// mark this address as reachable
-			reachable[addr] = 1;
+			reachable[addr] = true;
 
 			// figure other addresses reachable from here
 			uint32_t op = ReadOpcode(code + addr*4);
@@ -2308,9 +2308,9 @@ static void Disassemble(FILE *fp, const uint8_t *u2, uint16_t offset, uint16_t l
 		for (int limit = 128 ; limit != 0 && !IsJUMP(p) ; --limit, p += 4);
 
 		// If we found the JUMP table, copy it.  Copy up to four vectors
-		// ($0004, $0008, $000C, $0010, or until we run out of JUMP or RTI
+		// ($0004, $0008, $000C, $0010), or until we run out of JUMP or RTI
 		// instructions to copy.  Note that the patch table only contains
-		// one opcode per vector, even though each each vector has 4 opcode
+		// one opcode per vector, even though each vector has 4 opcode
 		// slots.  The three other slots are left unpopulated.
 		uint8_t *dst = code + (4 * 4);
 		for (int limit = 4 ; limit != 0 && IsRTI(p) || IsJUMP(p) ; --limit, p += 4, dst += 4*4)
@@ -2444,7 +2444,7 @@ static void Disassemble(FILE *fp, const uint8_t *u2, uint16_t offset, uint16_t l
 				}
 				else if (initOverlaySub == 0)
 				{
-					// This is the second unique call taret we've seen, so it's the
+					// This is the second unique call target we've seen, so it's the
 					// initialization subroutine.
 					initOverlaySub = target;
 

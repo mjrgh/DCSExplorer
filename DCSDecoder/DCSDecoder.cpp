@@ -4,6 +4,7 @@
 // DCS Decoder - base class and client interface
 //
 
+#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -167,10 +168,10 @@ dcsGameInfo[] ={
 	{ DCSDecoder::GameID::NBAHT, "NBA Hangtime", "NBA HANGTIME GAME SOUND ROMS" },
 	{ DCSDecoder::GameID::NBAHT, "NBA Hangtime (Hack)", "NBA SUPER HANGTIME" },
 	{ DCSDecoder::GameID::RMPGWT, "Rampage World Tour", "WMS Rampage II Video" },
-	{ DCSDecoder::GameID::WWFW, "WWF Wrestelmania Arcade", "WWF Video (c) 1993 Williams Electronics Games, Inc." },
+	{ DCSDecoder::GameID::WWFW, "WWF Wrestlemania Arcade", "WWF Video (c) 1993 Williams Electronics Games, Inc." },
 };
 
-// Infer the game ID from a siganture string
+// Infer the game ID from a signature string
 DCSDecoder::GameID DCSDecoder::InferGameID(const char *signature)
 {
 	// search the game list for a game matching the signature
@@ -566,7 +567,7 @@ std::string DCSDecoder::GetVersionInfo(HWVersion *hw, OSVersion *os) const
 	case OSVersion::OS94:
 		// There's no official version number in the OS94 releases, but
 		// they must be 1.01, by process of elimination.  We can safely
-		// assume that the the earliest OS93 releases must be 1.00, and
+		// assume that the earliest OS93 releases must be 1.00, and
 		// 1.03 is taken by the first labeled DCS-95 release.  That
 		// leaves 1.02 for the earliest unlabeled DCS-95 release, and
 		// thus leaves only 1.01 for the OS94 build.
@@ -1080,7 +1081,10 @@ std::vector<DCSDecoder::Opcode> DCSDecoder::DecompileTrackProgram(uint16_t track
 			instr = "}";
 
 			// pop the loop stack
-			loopStack.pop_back();
+			if (loopStack.size() != 0) // Workaround: WWF Wrestlemania track 0x1204 may be corrupt(?)
+				loopStack.pop_back();
+			else
+				assert(!"empty loop stack pop");
 			break;
 
 		case 0x10:
@@ -1201,7 +1205,10 @@ std::string DCSDecoder::ExplainTrackProgram(uint16_t trackNumber, const char *li
 			}
 
 			// reduce the loop indent
-			loopIndent = loopIndent.substr(2);
+			if (loopIndent.size() != 0) // Workaround: WWF Wrestlemania track 0x1204 may be corrupt(?)
+				loopIndent = loopIndent.substr(2);
+			else
+				assert(!"invalid reduce loop indent");
 		}
 
 		// construct the line
@@ -1694,7 +1701,7 @@ int16_t DCSDecoder::Bong::GetNextSample()
 	// attenuate the decay envelope every 31 samples (about 1ms)
 	if (envelopeSamples++ >= 31)
 	{
-		// figure the new attentuation level (this is a fixed-point 1.15
+		// figure the new attenuation level (this is a fixed-point 1.15
 		// fraction calculation, based on the DCS ROM boot code - it's
 		// essentially a multiply by 0.996, to form an exponential
 		// attenuation envelope)

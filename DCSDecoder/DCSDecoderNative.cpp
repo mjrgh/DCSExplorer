@@ -9,7 +9,6 @@
 // designed to work with all of the pinball ROMs for the DCS boards.
 //
 
-#include <assert.h>
 #include <string.h>
 #include <memory>
 #include <list>
@@ -140,7 +139,7 @@ void DCSDecoderNative::MainLoop()
         // Get the track pointer from the index
         uint32_t trackOfs = U24BE(catalog.trackIndex + cmd*3);
 
-        // ignore it if it it's invalid (high byte 0xFF)
+        // ignore it if it's invalid (high byte 0xFF)
         if ((trackOfs & 0xFF0000) == 0xFF0000)
             continue;
 
@@ -824,7 +823,7 @@ void DCSDecoderNative::DecoderImpl93::TransformFrame(int volShift)
 //
 
 // Load a track
-void DCSDecoderNative::LoadTrack(int ch, ROMPointer trackPtr)
+void DCSDecoderNative::LoadTrack(int ch, const ROMPointer &trackPtr)
 {
     // store the new program pointer
     channel[ch].trackPtr = trackPtr;
@@ -1239,7 +1238,7 @@ void DCSDecoderNative::ExecTrack(int curChannel)
 // onto the looping stack, recording the current track playback position
 // and initializing the new stack element's loop counter to the value
 // specified in the opcode.
-void DCSDecoderNative::Channel::PushPos(uint16_t counter, ROMPointer pos)
+void DCSDecoderNative::Channel::PushPos(uint16_t counter, const ROMPointer &pos)
 {
     loopStack.emplace_back(counter, pos);
 }
@@ -1385,7 +1384,7 @@ bool DCSDecoderNative::IsStreamPlaying(int channelNo)
 //
 // Directly load an audio stream into a channel
 //
-void DCSDecoderNative::LoadAudioStream(int streamChannelNum, ROMPointer streamPtr, int mixingLevel)
+void DCSDecoderNative::LoadAudioStream(int streamChannelNum, const ROMPointer &streamPtr, int mixingLevel)
 {
     // validate the channel number
     if (streamChannelNum >= 0 && streamChannelNum < MAX_CHANNELS)
@@ -1406,7 +1405,7 @@ void DCSDecoderNative::LoadAudioStream(int streamChannelNum, ROMPointer streamPt
     }
 }
 
-void DCSDecoderNative::LoadAudioStream(int streamChannel, int sourceProgramChannelNum, int loopCounter, ROMPointer streamPtr)
+void DCSDecoderNative::LoadAudioStream(int streamChannel, int sourceProgramChannelNum, int loopCounter, const ROMPointer &streamPtr)
 {
     // load the channel into the stream
     InitChannelStream(channel[streamChannel], streamPtr);
@@ -1484,7 +1483,7 @@ void DCSDecoderNative::AddTrackCommand(uint16_t trackNum)
 //
 // Get information on a stream
 //
-DCSDecoderNative::StreamInfo DCSDecoderNative::GetStreamInfo(ROMPointer streamPtr)
+DCSDecoderNative::StreamInfo DCSDecoderNative::GetStreamInfo(const ROMPointer &streamPtr)
 {
     // remember the starting point of the stream, so that we can calculate
     // the total byte length when we reach the end of the stream
@@ -1670,7 +1669,7 @@ void DCSDecoderNative::InitStreamPlayback(Channel &ch)
 //     header corresponds to one band of samples in the input.  The
 //     frame header bytes specify the bit width and bit encoding of
 //     the samples for the corresponding block ("band") of inputs.
-//     To interpret the input samples, we need the correesponding byte
+//     To interpret the input samples, we need the corresponding byte
 //     from each header: the stream header byte to get the "scale" of 
 //     the samples, which is the multiplication factor applied to the
 //     stream input value to form the final value in the output; and
@@ -2279,7 +2278,7 @@ void DCSDecoderNative::DecoderImpl94x::DecompressFrame(Channel &channel, uint16_
 // format for "Type 1" streams (marked by bit $80 set in the first byte of
 // the stream header).  So we have to further specialize the decoders into
 // OS93a and OS93b sub-types.  (Indiana Jones used the same software as
-// Judge Dredd, so in principal it also needs the special OS93a Type 1
+// Judge Dredd, so in principle it also needs the special OS93a Type 1
 // stream decoder, but the original IJTPA ROMs don't actually contain any
 // Type 1 streams.  Modded IJTPA ROMs could conceivably add some.)
 // 

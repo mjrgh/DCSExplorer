@@ -107,7 +107,6 @@
 
 #pragma once
 #include <stdint.h>
-#include <stdarg.h>
 #include <string>
 #include <list>
 #include <vector>
@@ -197,7 +196,7 @@ public:
 	class MinHost : public Host
 	{
 		virtual void ReceiveDataPort(uint8_t data) override { }
-		virtual void ClearDataPort() override { };
+		virtual void ClearDataPort() override { }
 		virtual void BootTimerControl(bool set) override { }
 	};
 
@@ -757,11 +756,11 @@ public:
 		bool operator==(const uint8_t *p) const { return this->p == p; }
 
 		// pointer arithmetic
-		ROMPointer operator+(int ofs) { return ROMPointer(chipSelect, p + ofs); }
-		ROMPointer operator-(int ofs) { return ROMPointer(chipSelect, p - ofs); }
+		ROMPointer operator+(int ofs) const { return ROMPointer(chipSelect, p + ofs); }
+		ROMPointer operator-(int ofs) const { return ROMPointer(chipSelect, p - ofs); }
 
 		// dereferencing
-		uint8_t operator *() { return *p; }
+		uint8_t operator *() const { return *p; }
 		void operator++() { ++p; }
 		void operator--() { --p; }
 		ROMPointer operator++(int) { ROMPointer orig(chipSelect, p); ++p; return orig; }
@@ -794,7 +793,7 @@ public:
 
 	// Get the current offset from a ROM pointer.  This returns the
 	// offset of the current address from the base of the ROM.
-	uint32_t ROMPointerOffset(ROMPointer rp) const { return static_cast<uint32_t>(rp.p - ROM[rp.chipSelect].data); }
+	uint32_t ROMPointerOffset(const ROMPointer &rp) const { return static_cast<uint32_t>(rp.p - ROM[rp.chipSelect].data); }
 
 	// Hardware version.  This reflects the target hardware platform that
 	// the loaded ROM was designed to work with.  We need to know which
@@ -849,14 +848,14 @@ public:
 		// not yet detected
 		Unknown,
 
-		// invalid - deteection attempted and failed
+		// invalid - detection attempted and failed
 		Invalid, 
 
 		// OS93a - DCS hardware with first 1993 software release.  This
 		// was used for exactly two games: Indiana Jones: The Pinball
 		// Adventure, and Judge Dredd.  The 1993 titles use a different
 		// audio frame format from the 1994+ titles, so a customized
-		// decomperssion algorithm is needed for these titles.  They
+		// decompression algorithm is needed for these titles.  They
 		// also use a slightly different implementation (vs the 1994+
 		// software) of the algorithm that transforms the frequency-
 		// domain data contained in the compressed audio stream to

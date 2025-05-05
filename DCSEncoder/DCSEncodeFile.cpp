@@ -58,7 +58,7 @@ bool DCSEncoder::EncodeFile(const char *filename, DCSAudio &dcsObj,
     {
         loader.Load(&fileData, filename);
     }
-    catch (std::exception e)
+    catch (std::exception &e)
     {
         return Status(OpenStreamStatus::Error,
             format("Error loading file \"%s\": %s", filename, e.what()).c_str());

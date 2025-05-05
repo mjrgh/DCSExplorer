@@ -434,7 +434,7 @@ uint8_t DCSDecoder::CheckROMs()
 				// Start by presuming it's the 1994 software, then search for
 				// the instruction sequence above.  If we find it, override
 				// the presumption.  The sequence should be in the mid-$0100
-				// range, in the ROM segement loaded from U2 $01000.
+				// range, in the ROM segment loaded from U2 $01000.
 				osVersion = OSVersion::OS94;
 				const uint8_t *p = ROM[0].data + 0x1000 + (0x0100 * 4);
 				if (SearchForOpcodes("380026 3C1005 0C00C0", p, 0x180*4) >= 0)
@@ -497,7 +497,7 @@ uint8_t DCSDecoder::CheckROMs()
 		}
 	}
 
-	// We could't find a valid ROM index in the designated U2 index.
+	// We couldn't find a valid ROM index in the designated U2 index.
 	// This is equivalent to a ROM U2 checksum failure, because it
 	// means that the U2 image isn't valid.
 	return 2;
@@ -822,7 +822,7 @@ bool DCSDecoder::GetTrackInfo(uint16_t trackNumber, TrackInfo &ti)
 			break;
 
 		case 0x0D:
-			// commands with no parameters and no timng effects
+			// commands with no parameters and no timing effects
 			break;
 
 		case 0x02:
@@ -1526,7 +1526,7 @@ void DCSDecoder::SoftBoot()
 	if (hwVersion == HWVersion::Unknown)
 		CheckROMs();
 
-	// initialiaze the underlying decoder
+	// initialize the underlying decoder
 	if (Initialize())
 		state = State::Running;
 	else
@@ -1966,4 +1966,3 @@ DCSDecoder::RegistrationMap &DCSDecoder::GetRegistrationMap()
 	static RegistrationMap *regMap = new RegistrationMap();
 	return *regMap;
 }
-

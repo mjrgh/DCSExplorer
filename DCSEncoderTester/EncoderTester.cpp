@@ -80,7 +80,7 @@ static DWORD WINAPI DecoderThreadMain(void *lparam)
 	{
 		virtual void ReceiveDataPort(uint8_t) override { }
 		virtual void ClearDataPort() override { }
-		virtual void BootTimerControl(bool) { }
+		virtual void BootTimerControl(bool) override { }
 	} hostIfc;
 	DCSDecoderNative decoder(&hostIfc);
 	decoder.InitStandalone(DCSDecoder::OSVersion::OS95);
@@ -202,7 +202,7 @@ int main(int argc, char **argv)
 	// keep tracks we've decoded in memory, in case we want to replay them
 	struct Track
 	{
-		Track(const std::string name, uint8_t *stream) : name(name), stream(stream) { }
+		Track(const std::string &name, uint8_t *stream) : name(name), stream(stream) { }
 		std::string name;
 		std::unique_ptr<uint8_t> stream;
 	};
@@ -342,7 +342,6 @@ int main(int argc, char **argv)
 
 					// get the next token
 					std::match_results<std::string::const_iterator> m2;
-					bool ok = true;
 					if (std::regex_match(params, m2, std::regex("^\\s*([a-z]+)=([\\d.]+)\\b(.*)$", icase)))
 					{
 						// get this parameter

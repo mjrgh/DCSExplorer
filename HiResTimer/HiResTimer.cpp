@@ -4,20 +4,7 @@
 // Windows high-resolution timer
 //
 
-#define _CRT_RAND_S
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <memory>
-#include <unordered_map>
-#include <unordered_set>
-#include <list>
 #include <Windows.h>
-#include <timeapi.h>
-#include <time.h>
-#include <realtimeapiset.h>
 #include "HiResTimer.h"
 
 // for timeGetTime()

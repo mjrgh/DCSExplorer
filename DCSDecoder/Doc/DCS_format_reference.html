@@ -12,22 +12,28 @@
 <p>
    This is an unofficial technical reference guide to the internals of DCS audio format used
    in the classic Williams/&ZeroWidthSpace;Bally/&ZeroWidthSpace;Midway pinball machines
-   of the 1990s.  DCS, which stands for Digital Compression System, consists of
+   of the 1990s.  DCS (initials for Digital Compression System) consists of
    a family of proprietary digital audio compression formats, along with
    a run-time system tailored to the real-time event-driven playback environment
-   of an arcade game.  The DCS compression formats are similar in many ways
-   to today's mainstream formats like MP3 and Ogg Vorbis.
-   The system was originally implemented with purpose-built
-   circuit boards based on the Analog Devices ADSP-2105, a
-   specialized CPU designed for DSP applications.  But we're
-   not much concerned here with the hardware; our focus is on the
-   audio format, which doesn't have any dependencies on any particular
-   hardware platform.  Even on the original 1990s equipment, the
-   decoders were implemented entirely in software.  For those interested in the
-   circuit boards, plenty of information is available elsewhere, including
-   schematics published in the pinball service manuals, repair
-   guides on various pinball sites, and PinMame's open-source emulation
-   of the original hardware.
+   of an arcade game.  The DCS bit-stream formats are similar in their
+   broad outlines to standard formats like MP3 and Vorbis, but only <i>similar</i>.
+   They're not in any way compatible with any of the standard formats, and they're not
+   based on or derived from any of them.  The DCS formats were entirely original, designed
+   from the ground up, before any of today's formats even existed.
+</p>
+<p>
+   The DCS decoders found in the 1990s pinball machines were implemented with
+   dedicated circuit boards based on the Analog Devices ADSP-2105.  That was a
+   specialized CPU designed just for DSP applications, so it was a good fit
+   for the job at the time.  But there's nothing about DCS itself that's tied
+   to that particular hardware.  DCS was an entirely software system that
+   happened to run on ADSP-2105.  General-purpose CPUs have become so much
+   faster since the 1990s that equivalent software can now easily be implemented
+   on just about any modern processor, even including relatively low-end machines
+   like a Raspberry Pi or Pico.  This reference is all about the <i>formats</i>,
+   which aren't tied to the original hardware, so we don't cover the old hardware
+   in any detail here.  If the hardware is your main interest, you can find
+   much better information on that elsewhere on the web (see <a href="#References">References</a>),
 </p>
 <p>
    This reference guide describes the DCS audio encoding system in detail,
@@ -53,30 +59,28 @@
    reference implementation of the algorithms described here.
 </p>
 <p>
-   This discussion is limited to DCS as implemented in the WPC-based pinball
-   machines.  Williams also used the system in their video games of the
-   same period, and they continued to develop and enhance DCS for video games
-   for some years after the last WPC pinball titles were released, upgrading the
-   hardware to faster processors and expanded storage, and adding
-   stereo and surround sound capabilities.  All of that later work
-   is beyond our scope.
+   The formats covered here are limited to those implemented in the WPC-based
+   pinball machines.  Williams continued to develop DCS for use in video
+   games for several years after its last pinball machines, expanding it
+   to include stereo and surround sound capabilities.  I only looked at
+   the pinball games, though, so this reference stops at the 1998 version,
+   which was still monophonic.
 </p>
 <p>
    I find DCS to be a fascinating bit of pinball and technology history.
-   It was cutting-edge for its day, and it still looks pretty modern decades
-   later, given its similarities to now-standard digital audio
+   It was cutting-edge for its day, and it still looks pretty modern now,
+   decades later, given its similarities to mainstream digital audio
    formats like MP3.  The designers created a new digital audio format
-   from scratch at a time when the whole idea was just starting to make
-   the transition from theory to practice, and few other
+   from scratch at a time when the whole idea of lossy audio compression
+   was just starting to make the transition from theory to practice, when few other
    examples existed.  It's all the more remarkable that this little feat of
    engineering  was all for the sake of <i>pinball</i>, of all things.
    Today, there's no serious reason for anyone to understand the format;
    the existing pinball ROMs can be played back on any PC using the PinMame
    emulator, and anyone wishing to create new audio for an old
-   pinball machine wouldn't need to bother encoding new DCS material,
-   as they could just replace the pinball's entire audio system with
-   something modern, such as a Raspberry Pi running an MP3 player.  I
-   only looked into the format's internals to satisfy my curiosity.
+   pinball machine would probably just replace the machine's entire
+   audio system with more modern hardware that can play back MP3 files.
+   I only looked into the format's internals to satisfy my curiosity.
    Perhaps this reference will do the same for a few other people who
    also wonder what's inside those audio boards, or who think it would
    be a neat trick to create a new DCS ROM after all this time.
@@ -92,9 +96,11 @@
 
 <p>
    In keeping with the "unofficial" theme, my terminology for DCS's
-   internals is entirely made up.  I have no idea what terms the DCS
-   developers used.  I should therefore define a few special terms
-   I use here to refer to specific elements of the system.
+   internals is entirely made up.  This section defines some terms
+   that I use throughout the rest of the document to refer to specific
+   elements of the system.  Note that these probably aren't the "real"
+   names for the elements that the original engineers used; they're
+   just what made sense to me as I figured out how the system works.
 </p>
 
 <h3>Tracks and Streams</h3>
@@ -116,7 +122,7 @@
    this document.  But I wanted to mention them up-front because of
    the potential confusion about what a "track" is.  In an everyday,
    non-technical context, an audio "track" would probably be understood
-   as something like a single MP3 file - a simple audio clip that you
+   as something like a single MP3 file: a linear audio clip that you
    load into a player for playback from start to end.  DCS has
    simple linear audio clips like that as well, but I call those
    "streams", to distinguish them from the miniature procedural
@@ -136,10 +142,10 @@
    they actually are "tracks", in the ordinary sense
    of the word as linear audio clips.  The streams, in
    contrast, amount to an implementation detail that's invisible
-   from the outside.  But the streams are obviously essential
-   elements once you get inside the software and the format,
-   and they're a completely separate type of object from the
-   track programs, so we need a distinct name for them.
+   from the outside.  But we're looking at how the system works
+   on the inside, and from that perspective, the streams
+   become distinct entities, so I needed to given them their
+   own name.
 </p>
 
 <h3>Channels</h3>
@@ -153,13 +159,14 @@
    features, but that never made it into any DCS pinball games.)
 </p>
 <p>
-   What I call
-   "channels" throughout this document are just
+   What I call "channels" throughout this document are the
    internal data structures that keep track of the individual audio
-   clips that are currently active.  The software has
-   multiple channels purely to allow playing multiple clips
-   simultaneously, to be mixed together while still in the
-   digital domain to form the mono output signal.
+   clips that are currently playing.  The purpose of the channels
+   is that they allow the software to play back more than one clip
+   at a time, to overlay multiple effects simultaneously: music
+   and a voice clip and a sound effect, for example.  The sounds
+   playing in the different channels are all mixed together, still
+   in the digital domain, to form the final mono output signal.
    These are channels in the sense of a recording studio's
    mixing console, where the engineer combines
    separate recordings of the vocals and instruments and
@@ -181,7 +188,8 @@
    software makes room in its memory structures for
    eight channels, but none of the pinball titles use more
    than six.  Perhaps the extra channels were used in video
-   games, or were just included for future expansion.)
+   games released in the same time-frame, or maybe they
+   were just included for future use.)
 </p>
    
 
@@ -206,13 +214,13 @@
 <p>
    DCS is Big-Endian.
    All multi-byte integer types in the DCS software and ROM data are
-   arranged in big-endian order (most significant byte first).  This was
-   undoubtedly chosen for convenience of implementation on the original
-   ADSP-2105 processor platform, since that processor uses
-   big-endian conventions.  (It's also the convention that Williams
+   arranged in big-endian order, with the most significant byte first.
+   This was undoubtedly chosen for convenience of implementation on the
+   original ADSP-2105 processor platform, since that processor uses
+   big-endian conventions.  It's also the convention that Williams
    used in all of their other software that I've encountered, which is a
    nice bit of consistency, especially considering that the concept of
-   Endianness wasn't all that well defined in the 8-bit days.)
+   Endianness wasn't all that well defined in the 8-bit days.
 </p>
 
    
@@ -257,23 +265,28 @@
    The original ADSP-2105 implementation of the decoder makes heavy
    use of something called fixed-point numbers, which are a way to
    represent fractional values (and perform arithmetic on them)
-   using only integer variables.  I've <i>mostly</i>
+   using only integer operations.  I've <i>mostly</i>
    tried to keep this sort of ADSP-2105-specific detail out of this
    document - it shouldn't really matter how the ADSP-2105 happened
    to store a particular number, because the abstract mathematical value of the
    number is usually what's important, not the particular bit pattern
    used to store it on one particular machine.  But there are cases
    where you have to use the original fixed-point representation in
-   a calculation if you want to recover a numerically identical result,
-   because any other representation will result in slight differences
-   in the way rounding errors are treated.  The final numerical
-   results in such cases will generally still agree within the
-   respective rounding errors of the two formats used, but
-   they won't always be bit-for-bit identical.  So I wanted to at least
-   mention the fixed-point format and describe how it works.
+   a calculation if you want to arrive at a numerically identical result,
+   because any other computer representation of the same numbers might
+   result in slight differences in the output of a calculation, due
+   to rounding errors when fractional values have to be rounded to
+   fit the particular computer format chosen.
+   The final numerical results in such cases will generally still agree
+   <i>within the respective rounding errors</i> of the formats involved,
+   but they won't always be numerically identical.  For testing purposes
+   in particular, it's important to be able to reproduce results that
+   are truly identical, so that there's no question that the new program
+   is yielding the same results as the original.  So I wanted to at
+   least mention the fixed-point format and describe how it works.
 </p>
 <p>
-   The DCS ADSP-2105 code uses two forms of fixed-point numbers:
+   The DCS ADSP-2105 code uses two forms of fixed-point numbers, known as
    0.16 and 1.15 numbers.  A 0.16 number is a 16-bit integer variable
    where all 16 bits are interpreted as following the binary point.
    The mathematical value of a 0.16 variable is the unsigned integer value
@@ -281,18 +294,21 @@
    the mathematical value 32767/65536, or 0.49998474.  A 1.15 variable
    is interpreted as having one bit before the binary point and 15 bits
    after.  The value of a 1.15 variable is usually the <i>signed</i>
-   integer value divided by 32768, although it's also possible to treat
-   them as unsigned.
+   integer value divided by 32768, which means that it can range between
+   -1.0 and +0.9999694.  It's also possible to treat a 1.15 value as
+   unsigned, giving it a range from 0 to +1.9999695 (65535/32768).
+   The original DCS software mostly uses the signed interpretation,
+   but treats these values as unsigned in a few cases.
 </p>
 <p>
-   As far as the bit patterns stored in ADSP-2105 machine registers go,
-   1.15 and 0.16 numbers are indistinguishable from 16-bit integers.
-   They're only fixed-point numbers by virtue of being treated that
-   way by the code that manipulates them.  You can't tell from looking
-   at a particular value stored in a register if it's meant to be
-   interpreted as a 16-bit signed integer, a
-   16-bit unsigned integer, or as one of the fixed-point types; you just
-   have to look at the code to see how the value is interpreted.
+   As far as the bit patterns stored in ADSP-2105 machine registers and
+   memory location go, 1.15 and 0.16 numbers are indistinguishable from
+   16-bit integers.  You can't tell by looking at an arbitrary memory
+   location whether it contains an integer, a 1.15 number, a 1.16 number,
+   or something else entirely (an ASCII character, say).  A value stored
+   in a memory location is only a fixed-point number when the software
+   interprets it that way, and you can only tell if the software is
+   going to treat it that way by examining the software code itself.
 </p>
 
 <a name="Alignment"></a>
@@ -322,7 +338,7 @@
    contiguous address space.  The size of this space varies by hardware
    version: for the DCS-93 boards, it's a 23-bit address space, capable
    of spanning 8MB; for the DCS-95 boards, it's a 24-bit space, which
-   can in principle address 16MB.
+   can address 16MB.
 </p>
 <p>
    A linear pointer is stored within the ROM as a sequence of 3 bytes.
@@ -391,8 +407,8 @@
    hardware version.  The original DCS-93 audio-only boards use
    512KB (512Kb x 8) chips, and the DCS-95 audio/video boards
    use 1MB (1Mb x 8) chips.  The DCS-95 boards were designed in such
-   a way that they could be configured at the factory (via a soldered
-   jumper) to accept either 1MB or 2MB chips, but all of the boards
+   a way that they could be configured at the factory, via a soldered
+   jumper, to accept either 1MB or 2MB chips.  All of the boards
    shipped originally in pinball machines apparently use the 1MB
    configuration.  (Williams also used DCS boards in its video
    games of the same era, so it's possible that the 2MB configuration
@@ -562,19 +578,29 @@
    is that it allows the WPC host to reset the sound board at any
    time, under program control, without having to go through the
    full power-on self-test procedure.  The WPC host has access to
-   a hardware port that allows it to assert a reset signal on the
-   ADSP-2015 CPU, which forces the CPU into its hard boot mode
-   as though it had just been powered on.  The WPC software
-   exercises this authority at certain times, such as whenever
-   the user enters or exits the operator menu, presumably to
-   return the sound board to initial conditions just in case it
-   was in a wedged state due to a software fault.  At such times,
-   the host sends a data byte immediately after asserting the reset
-   to instruct the sound board to bypass the power-on tests and
-   resume decoder operation immediately.  The whole reset process
-   is imperceptibly quick when the self-tests are skipped, so the
-   reset can be used freely to ensure the board is in a good state any
-   time no audio is playing.
+   a hardware port (separate from the communications port that's
+   used to send the command bytes) that allows the WPC host to
+   assert a hard reset signal on the ADSP-2015 CPU, which forces
+   the CPU into its initial boot mode, exactly as though it had
+   just been power cycled.  The WPC software exercises this
+   authority at certain times, such as whenever the user enters
+   or exits the operator menu.  (The forced reset at every operator
+   menu invocation is presumably a just-in-case fault-tolerance
+   feature, so that if the sound board ever gets itself into a
+   bad state where it's not playing audio properly, the problem
+   will be fixed as soon as the operator goes into the menu system
+   to see what's wrong.)  Normally, a hard reset would trigger
+   the time-consuming self-test procedure, but you wouldn't want
+   to wait for that if you were doing a just-in-case reset.  So
+   when the host wants to reset the sound board without waiting
+   for a self-test, it asserts the hard reset signal, and then
+   immediately writes a data byte to the command port.  The
+   sound board notices the command port byte during the 250ms
+   delay period and skips the self tests, going straight into
+   its main decoder loop.  When the self tests aren't involved,
+   the whole hard reset procedure only takes a few milliseconds,
+   making it harmless to execute at any time, as long as you don't
+   care that any previously playing audio track will be canceled.
 </p>
 
 <h4>Startup bong</h4>
@@ -591,9 +617,9 @@
 <h3>Boot sector signature string</h3>
 <p>
     The section at the very beginning of U2 that contains the hard reset
-    boot program also contains a "signature" string: plain text
-    that identifies the ROM set, perhaps so that somebody in possession of a
-    loose chip of uncertain origin can read the first few dozen bytes of
+    boot program also contains a "signature" string: human-readable plain text
+    that identifies the ROM set, probably so that somebody in possession of
+    a loose ROM chip of uncertain origin can read the first few dozen bytes of
     the ROM and see what's there.  The signature string starts at byte offset
     4 and runs for up to about 70 bytes.  It consists of free-form
     ASCII text in the printable character range (code points 32 through 126),
@@ -618,10 +644,12 @@
    <li>Initialize: set up interrupt handlers, load additional program
    code from the "overlays" section, initialize RAM data structures,
    load static data tables from ROM, set the global audio volume to
-   the default value of $67, start the DAC "autobuffer"
-   (an asynchronous, DMA-like mechanism that reads one word at a time
-   from memory at regular clock intervals and transmits it to the DAC,
-   incrementing a read pointer register through a circular buffer cycle)
+   the default value of $67, start the DAC "autobuffer" (this is a
+   special feature of the ADSP-2105 that's similar to what would today
+   be called a DMA controller; it's a hardware peripheral that reads
+   one word at a time from a specified memory address range, at regular
+   clock intervals, transmitting the data to the DAC, and incrementing the
+   read pointer register through a circular buffer cycle)
 
    <li>Loop forever:
    <ul>
@@ -664,20 +692,33 @@
 
 <p>
    The hardware autobuffer that feeds samples to the DAC is
-   exactly twice the size of one audio frame (one frame is 240
-   samples).  The decoder uses the buffer according to
-   the common double-buffering idiom, where
-   the playback hardware reads samples from one half of the
-   buffer while the decoder software simultaneously writes samples
-   into the other half of the buffer.  The reader and writer
-   swap halves at start of each new frame.
+   480 words, which is twice the size of one audio frame, which
+   is 240 words.  The decoder uses the buffer according to
+   the widely used double-buffering idiom: the algorithm is
+   contrived so that the software decoder is populating one
+   half of the buffer while the hardware transfer mechanism is
+   reading from the other half.  When the decoder finishes filling
+   its half of the frame, it stops and waits for the autobuffer
+   read location to cross over into the half of the buffer that
+   the decoder just completed, and then starts decoding the next
+   frame into the other half of the buffer.  So the decoder and
+   the autobuffer reader each swap which half of the buffer
+   they're working on at each frame boundary.
 </p>
 <p>   
-   The loop maintains real-time playback synchronization by
+   The decoder loop maintains real-time playback synchronization by
    waiting for the autobuffer read pointer to advance into the next
-   buffer section on each loop cycle.  This scheme assumes that
-   the decoder software can always fill its half of the buffer faster than
-   the autobuffer reader can exhaust the other half; as long as
+   buffer section on each loop cycle.  The autobuffer advances its
+   read pointer according to a hardware clock that's programmed
+   to match the samples-per-second rate defined by the DCS format,
+   and each frame has a fixed number of samples (240), so it always
+   takes the same amount of time for the autobuffer to work through a frame.
+   In contrast, the decoder takes a varying amount of time to decode a frame,
+   since the decoding work depends to some extent on the frame contents.
+   So the decoder has to periodically bring itself into sync with real
+   time, which it does by waiting for the autobuffer to "catch up"
+   with it at each frame boundary.   This scheme assumes that the
+   decoder is always faster than real-time playback; as long as
    that's true, the main loop can synchronize with real time
    simply by burning up the time difference on each cycle waiting for
    the playback pointer to catch up with the decoder output.
@@ -686,21 +727,24 @@
    condition arose where the the decoder fell behind the player,
    it wouldn't be catastrophic: playback would "stutter",
    as the player loops back into a portion of the buffer that
-   it already played through once, and would eventually return
+   it already played through once, but it would eventually return
    to normal once the decoder finished with the slow frame.
 </p>
 
 <p>
-   <b>Saving and restoring the volume setting:</b>  The DCS boards
-   don't have any hardware to control the audio volume; the audio
-   amplifier in the analog stage is set at a fixed gain.
-   Volume control is handled purely in the software, in the digital domain,
-   by applying a scaling factor to the PCM samples.  The master
-   volume setting on the DCS board is stored in ordinary RAM,
-   so the setting is lost every time the sound board CPU resets.  The
-   DCS board doesn't have any non-volatile storage of its own; it
-   relies on the WPC host to save the setting in a persistent storage
-   location and send a "set volume" command after every reset.  The
+   <b>Volume control:</b>  The audio volume is controlled entirely
+   in the digital domain, by applying a scaling factor to the amplitude
+   of the PCM samples.  The DCS hardware uses a fixed-gain amplifier,
+   so once the PCM stream is converted to an analog signal through
+   the DAC, that signal is played back at a fixed gain level.
+</p>
+<p>
+   <b>Saving and restoring the volume setting:</b>  The DCS software
+   stores the current audio volume in a volatile RAM location.  The
+   DCS board doesn't have any form of non-volatile memory, so this
+   setting is lost every time a CPU reset occurs.  The DCS board thus
+   depends upon the host to save the volume setting across resets
+   and transmit it via the data port.  The
    WPC software is designed with this requirement in mind, and does,
    in fact, send a volume command to the data port after each sound
    board reset that it initiates.  If the sound board resets on
@@ -1589,7 +1633,9 @@
    within the overall sequence consisting of some manageable
    fixed number of samples (256 in the case of DCS).  Each
    frame is transformed into the frequency domain,
-   using a discrete Fourier-like transform.  The samples,
+   using a discrete integral transform, either a discrete Fourier
+   transform or one of the related transforms, such as the
+   discrete cosine transform.  The samples,
    now in the frequency domain, are then re-quantized with a
    reduced number of bits that varies from sample to sample,
    trading off compression against how much of the original
@@ -1608,7 +1654,13 @@
    at lower resolution than was used to collect the original
    PCM samples and thus requires less space to store.  Some
    additional compression is gained from entropic coding of
-   the resulting samples.
+   the resulting samples.   In sophisticated encoders, the
+   re-quantization step is driven by a "psycho-acoustic" model,
+   which attempts to determine which portions of the signal
+   are more and less audible to a human listener, so that
+   it can preferentially allocate bits to the parts of the signal
+   that are the most audible, and discard the portions that are
+   inaudible or barely audible.
 </p>
 
 <a name="Frames"></a>
@@ -2041,7 +2093,7 @@ for (int i = 0 ; i < 16 ; ++i) {
    The FFT is one of those textbook algorithms that's
    extensively documented and has many good open-source versions
    available, so I'll leave it to the reader to choose an
-   implementation.  I personally like the Cookey-Tukey
+   implementation.  I personally like the Cooley-Tukey
    iterative in-place algorithm, since it's simple enough
    to code by hand.  But if you prefer
    a ready-to-use library that someone else has already
@@ -2155,15 +2207,16 @@ for (int i = 0 ; i < 16 ; ++i) {
    yields small numerical differences due to accumulated rounding errors in the
    intermediate steps; so to the extent that the algorithms differ
    from the closed-form expressions they purport to implement, this
-   is the one that truly represents the inversion of the decoder
+   is the one that truly represents the inverse of the decoder
    transform.
 </p>
 <p>
    It's understandable why they went
    to the added trouble in the original decoders: those were running
    on a low-horsepower embedded platform, so they had to use every
-   trick to make the software run faster.  Modern equipment is so
-   much faster that the difference is probably barely noticeable.
+   trick they could to make the software run faster.  Modern equipment
+   is so much faster that any speed difference between algorithms 3
+   and 4 will be negligible.
 </p>
 <p>
    <b>Working buffers:</b>  The algorithm uses two buffers:
@@ -3036,8 +3089,9 @@ for (int i = 0 ; i < 16 ; ++i) {
 </p>
 <p>
    During encoding, the input to the bit-stream encoder consists of
-   <b>255</b> of the 256 elements from the output of the
-   (see <a href="#EncodingTransform">Encoding Transform</a>):
+   <b>255</b> of the 256 elements from the output of the discrete Fourier
+   transform step that's common to all encodings (see
+   <a href="#EncodingTransform">Encoding Transform</a>):
 </p>
 <ul>
    <li>Copy element [0] in the DFT array to element [1] in the array (overwriting element [1])
@@ -4010,7 +4064,7 @@ for (int i = 0 ; i < 16 ; ++i) {
    sound effects.  The operating system
    doesn't know anything about the audio data version; that's handled through a track
    program, so the command code to retrieve it is idiosyncratic
-   per game.
+   per game.  See <a href="#DCSOSVersions">DCS Software Versions</a>.
 
    <li><b>$55 $C3:</b> Get the DCS software's minor version number.
    The sound board replies with one byte to the data
@@ -4031,7 +4085,7 @@ for (int i = 0 ; i < 16 ; ++i) {
    because it seems that they at least recompiled the software for
    almost every release, resulting in small differences (probably
    trivial and with no function impact) even among releases with the
-   same $55C3 label.
+   same $55C3 label.  See <a href="#DCSOSVersions">DCS Software Versions</a>.
 
    <li><b>$55 $BA-$C1 <i>param</i> ~<i>param</i>:</b> Mystery command,
    implemented only in some of the later DCS-95 games, that doesn't do
@@ -5457,6 +5511,142 @@ for (int i = 0 ; i < 16 ; ++i) {
     };</pre>
 
 
+<a name="DCSOSVersions"></a>
+<h3>DCS Software Versions</h3>
+
+<p>
+   The DCS firmware (which I sometimes call the "DCS OS", for Operating
+   System) was revised several times over the DCS pinball years.  The
+   pinball machine DMD menus never display a version number for the OS
+   software as far as I've seen, but the Williams engineers apparently
+   did assign version labels internally.  At least, that's my inference,
+   arising mostly from a command that was added to the cross-board
+   communications protocol in a 1996 release.  The new command's
+   only function is to send back a byte pair to the host, which
+   is always one of $01 $03, $01 $04,
+   or $01 $05, with later release dates correlating with a higher
+   value for the second byte.  To my eye, these are very obviously
+   meant to represent versions 1.03, 1.04, and 1.05, respectively.
+   (The "new command" I'm talking about is actually two commands,
+   $55 $C2 and $55 $C3.  See <a href="#SpecialCommands">Special
+   command codes</a>.)
+</p>
+<p>
+   If this really is a version number, what happened to the versions
+   before 1.03?  Remember that this command was only added in the 1996
+   software, so it actually makes sense that it would start somewhere
+   other than 1.0, since there were earlier releases going back to
+   1993.  A straightforward explanation is that the Williams
+   engineers had been assigning version numbers all along, probably
+   starting at 1.00 for the first 1993 release, and then incremented
+   a couple of times for releases in 1994 and 1995.  When they
+   added the new command, they simply had it report the version
+   that they had been using internally.  Further, a version
+   number of 1.03 for the 1996 release aligns well with an assumption
+   that the original 1993 software was labeled 1.00, because we
+   can identify just about three functionally distinct versions
+   when we look at the games released from 1993 to 1996 - implying
+   releases that were internally labeled 1.00, 1.01, and 1.02.
+   There wasn't anything embedded in the firmware in these versions
+   to suggest which of these early version labels goes with which game,
+   but we can make educated guesses by working backwards along the
+   pinball game release timeline and looking for functional changes
+   in the firmware substantial enough to warrant a version
+   number bump.  Obviously, the last of the games that lacked the
+   version-query command should be labeled 1.02, and we can decide
+   where to draw the line for 1.01 and 1.00 according to how
+   different the firmware is in each earlier game.  The list of pinball
+   titles below shows the version numbers that I came up with by
+   applying this procedure.
+</p>
+<p>
+   There is one hiccup in the pre-1.03 timeline that I should mention.
+   There are actually <i>four</i> functionally distinguishable
+   versions of the firmware between 1993 and 1996, but we only have
+   three version labels available (1.00, 1.01, 1.02) if we assume that
+   the first release was internally labeled 1.00.  This implies one of
+   two things.  One possibility is that the first version was actually
+   labeled something like "0.9", which is common practice, especially
+   among open-source developers, to label versions that are approaching
+   a first release but aren't quite there yet.  The other possibility,
+   which I consider more likely given the era, is that the engineers
+   didn't follow a rigorously formalized release process, and assigning
+   version labels was something of an afterthought that was done
+   informally and perhaps even a little haphazardly.  Even in the
+   later releases that do contain formal version stamps embedded in
+   the software (via the $55 $C2/$C3 commands), we can see slightly
+   different builds that were released under the same nominal version
+   number, which suggests that the engineers never observed a truly
+   formal release process.
+</p>
+<p>
+   Anyway, my solution to the problem of assigning three labels to
+   four functional releases is to split the 1.00 label into two
+   sub-releases, 1.0a and 1.0b.  I chose this approach because the
+   first three games released in 1993 (<i>Judge Dredd</i>, <i>Indiana
+   Jones: The Pinball Adventure</i>, and <i>Star Trek: The Next Generation</i>)
+   clearly constituted two variants of an early version, and
+   everything that followed had very different software.
+   It might be even better to call those two early releases 0.91 and 0.92;
+   the overhaul that followed was so massive that it makes me think that
+   the engineers might have considered these early versions to be more
+   prototypes than real finished products.  But those versions were in
+   fact sold to paying customers, which makes them production releases,
+   and it seems like poor form to ship production software under a
+   zero-dot label.
+</p>
+<table class="data">
+   <tr>
+      <th>Version</th>
+      <th>Hardware</th>
+      <th>First Released</th>
+      <th>Stream Format</th>
+   </tr>
+   <tr>
+      <td>1.0a</td>
+      <td>DCS audio board</td>
+      <td>1993</td>
+      <td>1993a</td>
+   </tr>
+   <tr>
+      <td>1.0b</td>
+      <td>DCS audio board</td>
+      <td>1993</td>
+      <td>1993b</td>
+   </tr>
+   <tr>
+      <td>1.01</td>
+      <td>DCS audio board</td>
+      <td>1993</td>
+      <td>1994</td>
+   </tr>
+   <tr>
+      <td>1.02</td>
+      <td>DCS-95 A/V board</td>
+      <td>1995</td>
+      <td>1994</td>
+   </tr>
+   <tr>
+      <td>1.03</td>
+      <td>DCS-95 A/V board</td>
+      <td>1995</td>
+      <td>1994</td>
+   </tr>
+   <tr>
+      <td>1.04</td>
+      <td>DCS-95 A/V board</td>
+      <td>1997</td>
+      <td>1994</td>
+   </tr>
+   <tr>
+      <td>1.05</td>
+      <td>DCS-95 A/V board</td>
+      <td>1997</td>
+      <td>1994</td>
+   </tr>
+</table>   
+
+
 <a name="VersionByTitle"></a>
 <h3>DCS Software Versions by Pinball Title</h3>
 
@@ -5466,9 +5656,12 @@ for (int i = 0 ; i < 16 ; ++i) {
    two "Pinball 2000" titles aren't included because they use a
    later DCS implementation that's not covered by this reference.
    The software version numbers are somewhat my own invention,
-   but they were reasonably inferred from information in the ROMs.
-   See <a href="#StreamFormatVersions">Stream Format Versions</a> for
-   details on what the "Stream Format" column signifies.
+   but they were reasonably inferred from information in the ROMs,
+   as described <a href="#DCSOSVersions">above</a>.  The Stream
+   Format Version column indicates the binary format type used
+   in the game's encoded audio streams; see
+   <a href="#StreamFormatVersions">Stream Format Versions</a> for
+   details.
 </p>
 
 <table class="data">
@@ -5654,6 +5847,7 @@ for (int i = 0 ; i < 16 ; ++i) {
    </tr>
 </table>
 
+<a name="References"></a>
 <h2>References</h2>
 <p>
    As far as I'm aware, there are no other public sources of information
@@ -5673,6 +5867,28 @@ for (int i = 0 ; i < 16 ; ++i) {
    the DCS hardware platform, but won't tell you anything about the
    software or the audio data format.
 
+   <li><a href="https://www.edcheung.com/album/album07/Pinball/wpc_sound.htm">WPC DCS Sound and CPU FPGA Project,</a>
+   by Ed Cheung, is probably the deepest and most comprehensive analysis of the
+   DCS hardware you're likely to find on the web.  The project involved creating
+   an FPGA that simulates the original Williams-designed custom chips on the DCS boards
+   (known as ASICs, for Application-Specific ICs, and PALs, for Programmable Array Logic chips).
+   Those chips implement a lot of the physical wiring and gate logic that makes the
+   DCS boards function at the hardware level, and they're completely undocumented,
+   so Ed's FPGA project required extensive black-box reverse-engineering of the
+   ASIC and PALs to reconstruct their internal logic.  The project page has a lot
+   of information about how the custom chips work that's extremely useful if you're
+   repairing DCS boards or trying to create replicas.
+
+   <li>The <b>WPC Schematic Manual</b> is one of the original service manuals that Williams
+   published and shipped with the games.  This manual included full schematics of the
+   DCS boards, although it's only meant to be used as a repair guide, so it doesn't
+   contain any information on the inner workings of the sound system, and importantly
+   has no information on the custom chips (the ASIC and PALs) that implement a lot of
+   the hardware functionality of the boards.  Used print copies are often available
+   on eBay and other auction sites, and PDF versions are available online,
+   including official copies on the <a href="https://www.planetarypinball.com/" target="_blank">Planetary Pinball</a>
+   store site.
+
    <li><a href="https://web.archive.org/web/20070929205008/http://pinballhq.com/willy/willy3.htm" target="_blank">Ask Uncle Willy #3, July 7, 1995</a>,
    an article originally posted to a Usenet newsgroup (and accessible
    now through the <a href="https://web.archive.org/" target="_blank">Internet Archive Wayback Machine</a>).
@@ -5688,7 +5904,7 @@ for (int i = 0 ; i < 16 ; ++i) {
 
 <h2>Copyright and license</h2>
 <p>
-   Copyright 2023 by Michael J Roberts
+   Copyright 2023, 2025 by Michael J Roberts
 </p>
 <p>
    This document is released under a <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">

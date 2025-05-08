@@ -93,8 +93,18 @@ containing original audio material.
 
 The git repository includes all dependencies.  Building on Windows
 should just be a matter of cloning the git repository, opening the
-solution (.sln) file in Visual Studio, and executing a Build Solution
-command.
+solution (.sln) file in Visual Studio, and executing a **Build > Build Solution**
+command from the main menu.
+
+This project requires the Visual Studio "workload" called **Desktop development with C++**.
+(A workload is VS's term for a pre-selected group of installation components.)
+If you're installing Visual Studio for the first time, the installer
+will offer a list of available workloads; be sure that **Desktop development with C++**
+is included.  If you've previously installed Visual Studio and didn't 
+include that workload, go to the VS main menu and select **Tools > Get Tools and Features**.
+That will bring up the installer dialog allowing you to install additional
+workloads.  This workload should set up your system with all of the
+required C++ build tools and system libraries.
 
 The DCS Explorer program has some dependencies on Windows APIs for
 audio playback, so it will require additional work to port that

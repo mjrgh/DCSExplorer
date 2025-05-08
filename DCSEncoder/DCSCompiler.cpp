@@ -43,7 +43,7 @@ DCSCompiler::DCSCompiler() : decoder(&decoderHostIfc)
 	sprintf_s(longDateStr, "%s %d, %04d", month[tm.tm_mon], tm.tm_mday, tm.tm_year + 1900);
 	sprintf_s(medDateStr, "%02d-%.3s-%04d", tm.tm_mday, month[tm.tm_mon], tm.tm_year + 1900);
 
-	// clear the variables-by-number and deferred-indirect-tables-by-number lists
+	// clear the variables-by-number lists
 	memset(varsByNumber, 0, sizeof(varsByNumber));
 
 	// Set the desired stream types to "any" in the default compression parameters.

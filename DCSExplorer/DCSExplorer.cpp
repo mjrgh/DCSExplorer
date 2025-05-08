@@ -105,14 +105,14 @@ public:
 	{
 		// if the write pointer will bump into the read pointer, discard the oldest
 		// sample at the read pointer
-		if (((writeIdx + 1) % (int)_countof(buf)) == readIdx)
-			readIdx = (readIdx + 1) % (int)_countof(buf);
+		if (((writeIdx + 1) % static_cast<int>(_countof(buf))) == readIdx)
+			readIdx = (readIdx + 1) % static_cast<int>(_countof(buf));
 
 		// store the sample
 		buf[writeIdx] = s;
 
 		// advance the write pointer
-		writeIdx = (writeIdx + 1) % (int)_countof(buf);
+		writeIdx = (writeIdx + 1) % static_cast<int>(_countof(buf));
 	}
 
 	// are any samples available?
@@ -125,7 +125,7 @@ public:
 		if (IsSampleAvailable())
 		{
 			s = buf[readIdx];
-			readIdx = (readIdx + 1) % (int)_countof(buf);
+			readIdx = (readIdx + 1) % static_cast<int>(_countof(buf));
 		}
 		return s;
 	}
@@ -1606,7 +1606,7 @@ static void IdleTask(void*)
 		}
 		else if (c >= 32 && c < 128)
 		{
-			if (kbBufLen + 1 < (int)_countof(kbBuf))
+			if (kbBufLen + 1 < static_cast<int>(_countof(kbBuf)))
 			{
 				printf("%c", c);
 				kbBuf[kbBufLen++] = c;

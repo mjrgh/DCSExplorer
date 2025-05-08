@@ -189,7 +189,7 @@ DCSDecoder::GameID DCSDecoder::InferGameID(const char *signature)
 
 const char *DCSDecoder::GetGameTitle(GameID id)
 {
-	// Search the game list for the ID.  Note that this isn't particulary
+	// Search the game list for the ID.  Note that this isn't particularly
 	// efficient - if we wanted it to be, we could create an unordered_map
 	// keyed on the game ID.  But there's no reason to go to even that
 	// slight amount of trouble, as it's hard to imagine any scenario
@@ -472,7 +472,7 @@ uint8_t DCSDecoder::CheckROMs()
 				// of elimination, if we assume that the numbering started
 				// at 1.00 and that the nominal versions were increased by
 				// .01 for each numbered revision.  The three original 1993
-				// titles are thus nominall 1.00, which leaves us with 1.01
+				// titles are thus nominal 1.00, which leaves us with 1.01
 				// and 1.02 unaccounted for.  Since there was one release
 				// for the DCS-95 boards that didn't have 55C2/55C3 coding,
 				// that must have been the one immediately preceding 1.03,
@@ -481,8 +481,8 @@ uint8_t DCSDecoder::CheckROMs()
 				// three 1993 titles.
 				//
 				//   1.00 = 1993 titles (IJTPA, JD, STTNG) [inferred]
-				//   1.01 = original DCS board titles, 1994-1995 [infererd]
-				//   1.02 = DCS-95 releases, 1995-1996 [infererd]
+				//   1.01 = original DCS board titles, 1994-1995 [inferred]
+				//   1.02 = DCS-95 releases, 1995-1996 [inferred]
 				//   1.03 }
 				//   1.04 } DCS-95 releases, 1996-1998 [explicitly numbered]
 				//   1.05 }
@@ -554,7 +554,7 @@ std::string DCSDecoder::GetVersionInfo(HWVersion *hw, OSVersion *os) const
 
 	case OSVersion::OS93a:
 		// This is the earliest release, which isn't officially labeled
-		// anywhere in the ocde, so we'll call it 1.0a.
+		// anywhere in the code, so we'll call it 1.0a.
 		s = "Software 1.0a (1993)";
 		break;
 
@@ -1080,11 +1080,14 @@ std::vector<DCSDecoder::Opcode> DCSDecoder::DecompileTrackProgram(uint16_t track
 			// loop end - pop playback position
 			instr = "}";
 
-			// pop the loop stack
-			if (loopStack.size() != 0) // Workaround: WWF Wrestlemania track 0x1204 may be corrupt(?)
+			// Pop the loop stack.  Note that we can't count on the track being
+			// well-formed: there's at least one example (WWF Wrestlemania, track
+			// 0x1204) of an 0x0F instruction with no matching 0x0E.  The original
+			// decoders silently accept these, so we'll do the same.
+			if (loopStack.size() != 0)
 				loopStack.pop_back();
 			else
-				assert(!"empty loop stack pop");
+				instr = "LoopEnd";
 			break;
 
 		case 0x10:
@@ -1193,7 +1196,7 @@ std::string DCSDecoder::ExplainTrackProgram(uint16_t trackNumber, const char *li
 			// indent, before the closing '}'.  The wait is executed within
 			// the loop, so it maps better visually to show it indented with
 			// the loop contents.  Show the hex opcode at this point.
-			if (ele.delayCount != 0)
+			if (ele.delayCount != 0 && loopIndent.size() != 0)
 			{
 				// show the wait with the hex opcode comment for the loop ending
 				program += linePrefix + format("%-60s    %s\n",
@@ -1204,11 +1207,14 @@ std::string DCSDecoder::ExplainTrackProgram(uint16_t trackNumber, const char *li
 				comment = "";
 			}
 
-			// reduce the loop indent
-			if (loopIndent.size() != 0) // Workaround: WWF Wrestlemania track 0x1204 may be corrupt(?)
+			// Reduce the loop indent.  Note that we can't absolutely count
+			// on the loop indent being non-zero, as there's at least one
+			// production example (WWF Wrestlemania track 0x1204) of a
+			// loop-end (0x0F) opcode with no matching loop-start (0x0E).
+			if (loopIndent.size() != 0)
 				loopIndent = loopIndent.substr(2);
 			else
-				assert(!"invalid reduce loop indent");
+				comment += " Unmatched loop end opcode (0x0F)";
 		}
 
 		// construct the line

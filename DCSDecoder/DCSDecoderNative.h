@@ -4,6 +4,7 @@
 // DCS Decoder - universal native decoder.  This subclass implements
 // a DCS audio player in portable C++ code.
 //
+#pragma once
 #include <memory>
 #include "DCSDecoder.h"
 
@@ -94,9 +95,9 @@ public:
     // way to determine the natural level of a stream.  Levels
     // around 0x64 seem to be typical in practice, with variation
     // from about 0x60 to 0x70.
-    void LoadAudioStream(int channel, ROMPointer streamPtr, int mixingLevel);
+    void LoadAudioStream(int channel, const ROMPointer &streamPtr, int mixingLevel);
 
-    // is a steram currently playing in the given channel?
+    // is a stream currently playing in the given channel?
     bool IsStreamPlaying(int channel);
 
     // Get information on a stream.  Note that this is relatively
@@ -119,7 +120,7 @@ public:
         // stream header
         uint8_t header[16];
     };
-    StreamInfo GetStreamInfo(ROMPointer streamPtr);
+    StreamInfo GetStreamInfo(const ROMPointer &streamPtr);
 
     // Clear all tracks
     void ClearTracks();
@@ -192,14 +193,14 @@ protected:
 
     // Load a track.  This selects the track as the active track for a
     // designated channel.
-    void LoadTrack(int channel, ROMPointer track);
+    void LoadTrack(int channel, const ROMPointer &track);
 
     // Execute a track.  This interprets and executes an active track's 
     // byte-code program.
     void ExecTrack(int curChannel);
 
     // Load an audio stream
-    void LoadAudioStream(int streamChannel, int sourceProgramChannel, int loopCount, ROMPointer streamPtr);
+    void LoadAudioStream(int streamChannel, int sourceProgramChannel, int loopCount, const ROMPointer &streamPtr);
 
     // Set up a channel object with a new stream
     struct Channel;
@@ -229,7 +230,7 @@ protected:
     {
     public: 
         ROMBitPointer() { }
-        ROMBitPointer(ROMPointer p) : p(p) { }
+        ROMBitPointer(const ROMPointer &p) : p(p) { }
 
         // some operations map directly to the underlying ROM pointer
         bool IsNull() const { return p.IsNull(); }
@@ -590,14 +591,14 @@ protected:
         // the usual special case that 0 means loop forever.
         struct LoopPos
         {
-            LoopPos(uint16_t counter, ROMPointer pos) : counter(counter), pos(pos) { }
+            LoopPos(uint16_t counter, const ROMPointer &pos) : counter(counter), pos(pos) { }
             uint16_t counter;
             ROMPointer pos;
         };
         std::list<LoopPos> loopStack;
 
         // push/pop a loop position
-        void PushPos(uint16_t counter, ROMPointer pos);
+        void PushPos(uint16_t counter, const ROMPointer &pos);
         void PopPos(ROMPointer &pos);
 
         // Opcodes of Mystery, $10, $11, $12

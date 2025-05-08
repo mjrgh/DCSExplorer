@@ -190,9 +190,9 @@ bool DCSDecoderEmulated::Initialize()
 	adsp2105_execute(INT_MAX);
 	
 	// Un-patch that first initialization routine instruction we
-	// pathced earlier.  It's always CNTR=$0102, opcode 3C 10 25.
+	// patched earlier.  It's always CNTR=$0102, opcode 3C 10 25.
 	// Reset the program pointer back to that point, so that we
-	// continue into the initizliation code when we reenter the
+	// continue into the initialization code when we reenter the
 	// interpreter.
 	PM[mainLoopEntry] = 0x3C1025;
 
@@ -329,9 +329,9 @@ bool DCSDecoderEmulated::Initialize()
 
 	// Search for the master volume level variable.  This is the byte value
 	// of the last 55AA command.  All of the ROM versions have an identical
-	// rouitine that derives the PCM volume level multiplier from this value,
+	// routine that derives the PCM volume level multiplier from this value,
 	// so we can find the memory location by searching for the routine's
-	// signature.  The ROM code recalcualtes the multiplier based on the
+	// signature.  The ROM code recalculates the multiplier based on the
 	// master volume variable on every pass of the main loop, so we can
 	// change the volume at any time simply by poking a new value into the
 	// variable's DM() location.
@@ -352,7 +352,7 @@ bool DCSDecoderEmulated::Initialize()
 
 void DCSDecoderEmulated::IRQ2Handler()
 {
-	// diretcly invoke the IRQ2 handler via a recursive call to the interpreter
+	// directly invoke the IRQ2 handler via a recursive call to the interpreter
 	adsp2100_host_invoke_irq(ADSP2100_IRQ2, 0, INT_MAX);
 }
 

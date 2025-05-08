@@ -188,7 +188,7 @@ int main(int argc, char **argv)
 		Logger(bool quietMode) : quietMode(quietMode) { }
 		bool quietMode;
 
-		void Status(const char *msg, bool pending)
+		virtual void Status(const char *msg, bool pending) override
 		{
 			// suppress status messages in quiet mode
 			if (!quietMode)

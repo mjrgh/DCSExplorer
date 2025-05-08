@@ -9,7 +9,6 @@
 // designed to work with all of the pinball ROMs for the DCS boards.
 //
 
-#include <assert.h>
 #include <string.h>
 #include <memory>
 #include <list>
@@ -140,7 +139,7 @@ void DCSDecoderNative::MainLoop()
         // Get the track pointer from the index
         uint32_t trackOfs = U24BE(catalog.trackIndex + cmd*3);
 
-        // ignore it if it it's invalid (high byte 0xFF)
+        // ignore it if it's invalid (high byte 0xFF)
         if ((trackOfs & 0xFF0000) == 0xFF0000)
             continue;
 
@@ -393,7 +392,7 @@ static const uint16_t ifftCoefficients[] ={
 // errors in the respective intermediate calculations.)
 // 
 // The basic transform that the algorithm implements is a real-valued
-// discrete Fourer transform (RDFT).
+// discrete Fourier transform (RDFT).
 //
 void DCSDecoderNative::DecoderImpl94x::TransformFrame(int volShift)
 {
@@ -732,7 +731,7 @@ void DCSDecoderNative::DecoderImpl93::TransformFrame(int volShift)
         i1[1] = static_cast<uint16_t>(yi - xi);
     }
 
-    // IFFT.  This the Cooley-Tukey iteratve in-place IFFT algorithm.  The
+    // IFFT.  This the Cooley-Tukey iterative in-place IFFT algorithm.  The
     // outer loop stops one iteration short of the full IFFT, leaving the data
     // arranged in two partitions, with the even-numbered outputs representing
     // the IFFT of the lower half of the inputs, and the odd-numbered outputs
@@ -786,7 +785,7 @@ void DCSDecoderNative::DecoderImpl93::TransformFrame(int volShift)
         frameBuf[I4] = static_cast<uint16_t>(static_cast<int32_t>(SIGNED(frameBuf[bitRev9[I1++]])) >> volShift);
 
     // The first 16 PCM samples of output are formed from combining the new
-    // decompressed frame with overlapping samples from the previos frame.
+    // decompressed frame with overlapping samples from the previous frame.
     uint16_t *outp = decoder->outputBuffer;
     uint16_t *ovp = decoder->overlapBuffer;
     const uint16_t *cp1 = overlapCoefficients;
@@ -802,7 +801,7 @@ void DCSDecoderNative::DecoderImpl93::TransformFrame(int volShift)
         *outp++ = RoundMultiplyResult(a, 0);
     }
 
-    // The remaining 224 PCM samples come directly from the decomrpessed frame
+    // The remaining 224 PCM samples come directly from the decompressed frame
     for (int i = 0 ; i < 0xE0 ; ++i, i3 += 2)
         *outp++ = *i3;
 
@@ -824,7 +823,7 @@ void DCSDecoderNative::DecoderImpl93::TransformFrame(int volShift)
 //
 
 // Load a track
-void DCSDecoderNative::LoadTrack(int ch, ROMPointer trackPtr)
+void DCSDecoderNative::LoadTrack(int ch, const ROMPointer &trackPtr)
 {
     // store the new program pointer
     channel[ch].trackPtr = trackPtr;
@@ -1239,7 +1238,7 @@ void DCSDecoderNative::ExecTrack(int curChannel)
 // onto the looping stack, recording the current track playback position
 // and initializing the new stack element's loop counter to the value
 // specified in the opcode.
-void DCSDecoderNative::Channel::PushPos(uint16_t counter, ROMPointer pos)
+void DCSDecoderNative::Channel::PushPos(uint16_t counter, const ROMPointer &pos)
 {
     loopStack.emplace_back(counter, pos);
 }
@@ -1385,7 +1384,7 @@ bool DCSDecoderNative::IsStreamPlaying(int channelNo)
 //
 // Directly load an audio stream into a channel
 //
-void DCSDecoderNative::LoadAudioStream(int streamChannelNum, ROMPointer streamPtr, int mixingLevel)
+void DCSDecoderNative::LoadAudioStream(int streamChannelNum, const ROMPointer &streamPtr, int mixingLevel)
 {
     // validate the channel number
     if (streamChannelNum >= 0 && streamChannelNum < MAX_CHANNELS)
@@ -1396,7 +1395,7 @@ void DCSDecoderNative::LoadAudioStream(int streamChannelNum, ROMPointer streamPt
         // cancel any running track program
         ch.trackPtr.Clear();
 
-        // laod the stream, using the stream channel as the program channel
+        // load the stream, using the stream channel as the program channel
         LoadAudioStream(streamChannelNum, streamChannelNum, 1, streamPtr);
 
         // set a default mixing level
@@ -1406,7 +1405,7 @@ void DCSDecoderNative::LoadAudioStream(int streamChannelNum, ROMPointer streamPt
     }
 }
 
-void DCSDecoderNative::LoadAudioStream(int streamChannel, int sourceProgramChannelNum, int loopCounter, ROMPointer streamPtr)
+void DCSDecoderNative::LoadAudioStream(int streamChannel, int sourceProgramChannelNum, int loopCounter, const ROMPointer &streamPtr)
 {
     // load the channel into the stream
     InitChannelStream(channel[streamChannel], streamPtr);
@@ -1484,7 +1483,7 @@ void DCSDecoderNative::AddTrackCommand(uint16_t trackNum)
 //
 // Get information on a stream
 //
-DCSDecoderNative::StreamInfo DCSDecoderNative::GetStreamInfo(ROMPointer streamPtr)
+DCSDecoderNative::StreamInfo DCSDecoderNative::GetStreamInfo(const ROMPointer &streamPtr)
 {
     // remember the starting point of the stream, so that we can calculate
     // the total byte length when we reach the end of the stream
@@ -1494,7 +1493,7 @@ DCSDecoderNative::StreamInfo DCSDecoderNative::GetStreamInfo(ROMPointer streamPt
     Channel ch;
     InitChannelStream(ch, streamPtr);
 
-    // intialize playback on the channel
+    // initialize playback on the channel
     InitStreamPlayback(ch);
 
     // decode all of the frames - this will advance the pointer until it
@@ -1670,7 +1669,7 @@ void DCSDecoderNative::InitStreamPlayback(Channel &ch)
 //     header corresponds to one band of samples in the input.  The
 //     frame header bytes specify the bit width and bit encoding of
 //     the samples for the corresponding block ("band") of inputs.
-//     To interpret the input samples, we need the correesponding byte
+//     To interpret the input samples, we need the corresponding byte
 //     from each header: the stream header byte to get the "scale" of 
 //     the samples, which is the multiplication factor applied to the
 //     stream input value to form the final value in the output; and
@@ -1862,7 +1861,7 @@ void DCSDecoderNative::DecoderImpl94x::DecompressFrame(Channel &channel, uint16_
             outputCount /= 2;
         }
 
-        // Get the current band type code.  This is intepreted according
+        // Get the current band type code.  This is interpreted according
         // to the format type code in the main stream header:
         // 
         // Format type 0:
@@ -2279,7 +2278,7 @@ void DCSDecoderNative::DecoderImpl94x::DecompressFrame(Channel &channel, uint16_
 // format for "Type 1" streams (marked by bit $80 set in the first byte of
 // the stream header).  So we have to further specialize the decoders into
 // OS93a and OS93b sub-types.  (Indiana Jones used the same software as
-// Judge Dredd, so in principal it also needs the special OS93a Type 1
+// Judge Dredd, so in principle it also needs the special OS93a Type 1
 // stream decoder, but the original IJTPA ROMs don't actually contain any
 // Type 1 streams.  Modded IJTPA ROMs could conceivably add some.)
 // 
@@ -2480,7 +2479,7 @@ void DCSDecoderNative::DecoderImpl93::DecompressFrame(Channel &channel, uint16_t
                 // forward the low 16 bits of the last product as well, because
                 // they moved the initial multiplier load outside of the loop,
                 // rather than repeating it on each loop as they do in all of the
-                // other cases.  I looks like it was meant to be an optimization:
+                // other cases.  It looks like it was meant to be an optimization:
                 // "it's the same value every time, so let's just load it once."
                 // But it changes the meaning of the loop subtly, and I think
                 // unintentionally.  On each loop iteration after the first, the
@@ -2505,7 +2504,7 @@ void DCSDecoderNative::DecoderImpl93::DecompressFrame(Channel &channel, uint16_t
                 // design to use my "fixed" version, but the higher priority is
                 // exact replication of the original implementation, even if it
                 // means replicating its bugs, because that's the only way to be
-                // certain the the new decoder isn't adding new bugs of its own.
+                // certain the new decoder isn't adding new bugs of its own.
                 //
                 // This whole code block clearly *should* have been written:
                 //
@@ -2536,7 +2535,7 @@ void DCSDecoderNative::DecoderImpl93::DecompressFrame(Channel &channel, uint16_t
                 break;
 
             case 2:
-                // sutype 2: repeat the previous output with an increment
+                // subtype 2: repeat the previous output with an increment
                 for (uint16_t i = 0 ; i < nSamples ; ++i)
                 {
                     prvInput += prvInputDelta;
@@ -3019,11 +3018,11 @@ void DCSDecoderNative::DecoderImpl93a::DecompressFrame(Channel &channel, uint16_
         else
         {
             // Zero bits per input, so the inputs are coded implicitly as
-            // all zero values, without using any bits in the bit steram.
+            // all zero values, without using any bits in the bit stream.
             // Since the outputs are additive, adding zero doesn't change
             // the frame buffer, so we can just skip this block of outputs.
             // There are twice as many outputs as inputs per band, since
-            // each bit-stream input represets two frame samples.
+            // each bit-stream input represents two frame samples.
             outBufIndex += numInputs * 2;
         }
     }
@@ -3261,7 +3260,7 @@ void DCSDecoderNative::SetMasterVolume(int vol)
         // On a modern platform, we could express that more clearly (and more
         // compactly) with floats, but the results diverge from the original
         // a little bit, especially at lower values of 'vol', due to rounding
-        // errors in the 1.15 version.  For for the sake of strict replication
+        // errors in the 1.15 version.  For the sake of strict replication
         // of the original behavior, we'll use the same fixed-point arithmetic
         // calculation.
         uint16_t s = vol;
@@ -3356,7 +3355,7 @@ void DCSDecoderNative::IRQ2Handler()
             // straight out of the original equipment.  The TOTAN IRQ2
             // handler specifically checks for command code $03E7 and
             // responds by sending $11 back on the data port, rather
-            // then queueing the command to the track sequencer as
+            // than queueing the command to the track sequencer as
             // normal.  It's almost certainly a last-minute bug fix
             // by a naive intern who didn't understand how the track
             // sequencer works, because TOTAN *also* has a standard
@@ -3375,7 +3374,7 @@ void DCSDecoderNative::IRQ2Handler()
         else
         {
             // It's a two-byte command, which is a track number to be
-            // loaded on the next main loop invcoation.  Queue it for
+            // loaded on the next main loop invocation.  Queue it for
             // processing in the main loop.
             commandQueue.emplace_back(dataPortWord);
 

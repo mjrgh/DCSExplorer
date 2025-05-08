@@ -188,7 +188,7 @@ for implementing the lossy compression steps.  We can only guess that
 they used something like the techniques you'd see in a modern MP3
 encoder.  My own encoder's compression algorithm is much more
 simple-minded.  It doesn't use any human perceptual modeling, the way
-that MP3 and Vorbis encoders do, but rather simply tries to keep the
+that MP3 and Vorbis encoders do, but rather simply tries to keep
 the round-trip quantization errors below a chosen threshold.  This
 works better than I would have expected; it seems to produce decent
 fidelity at compression rates similar to what we see in the original
@@ -295,4 +295,3 @@ additional redundancy improves the accuracy of mechanical format
 recognition.  The only header information that can every really vary
 is the format type, and that does contain vital information that a
 reader needs in order to properly interpret the stream data.
-

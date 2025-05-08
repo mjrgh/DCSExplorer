@@ -10,7 +10,7 @@
 // suitable for embedding directly in a DCS ROM. 
 // 
 // The encoder can produce two format families: the 1993 format, used
-// in the the first DCS pinball titles (the 1993 titles Indiana Jones,
+// in the first DCS pinball titles (the 1993 titles Indiana Jones,
 // Judge Dredd, and Star Trek: The Next Generation), and the 1994+
 // format, used in all subsequent DCS pinball games.  Between the two
 // format families, all of the DCS titles are covered, so you can use
@@ -522,7 +522,7 @@ bool DCSEncoder::EncodeDCSFile(const char *filename, DCSAudio &dcsObj,
             DCSDecoder::MinHost hostifc;
             DCSDecoderNative decoder(&hostifc);
 
-            // figure the DCSDeocder OS version corersponding to the source format
+            // figure the DCSDecoder OS version corresponding to the source format
             DCSDecoder::OSVersion sourceOSVer;
             switch (formatVersion)
             {
@@ -1553,7 +1553,7 @@ DCSEncoder::BandTestResult DCSEncoder::FindBestBandEncoding(
             int stored = (scaled + refVal) & mask;
 
             // figure the reconstructed value
-            float reconstructed = static_cast<float>((stored - refVal) * scaleFactor) / 32768.0f;
+            float reconstructed = (static_cast<float>(stored - refVal) * scaleFactor) / 32768.0f;
 
             // figure the quantization error - the difference between the
             // reconstructed value and the original value - and add it to

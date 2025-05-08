@@ -4,6 +4,7 @@
 // DCS Decoder - base class and client interface
 //
 
+#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -167,10 +168,10 @@ dcsGameInfo[] ={
 	{ DCSDecoder::GameID::NBAHT, "NBA Hangtime", "NBA HANGTIME GAME SOUND ROMS" },
 	{ DCSDecoder::GameID::NBAHT, "NBA Hangtime (Hack)", "NBA SUPER HANGTIME" },
 	{ DCSDecoder::GameID::RMPGWT, "Rampage World Tour", "WMS Rampage II Video" },
-	{ DCSDecoder::GameID::WWFW, "WWF Wrestelmania Arcade", "WWF Video (c) 1993 Williams Electronics Games, Inc." },
+	{ DCSDecoder::GameID::WWFW, "WWF Wrestlemania Arcade", "WWF Video (c) 1993 Williams Electronics Games, Inc." },
 };
 
-// Infer the game ID from a siganture string
+// Infer the game ID from a signature string
 DCSDecoder::GameID DCSDecoder::InferGameID(const char *signature)
 {
 	// search the game list for a game matching the signature
@@ -188,7 +189,7 @@ DCSDecoder::GameID DCSDecoder::InferGameID(const char *signature)
 
 const char *DCSDecoder::GetGameTitle(GameID id)
 {
-	// Search the game list for the ID.  Note that this isn't particulary
+	// Search the game list for the ID.  Note that this isn't particularly
 	// efficient - if we wanted it to be, we could create an unordered_map
 	// keyed on the game ID.  But there's no reason to go to even that
 	// slight amount of trouble, as it's hard to imagine any scenario
@@ -433,7 +434,7 @@ uint8_t DCSDecoder::CheckROMs()
 				// Start by presuming it's the 1994 software, then search for
 				// the instruction sequence above.  If we find it, override
 				// the presumption.  The sequence should be in the mid-$0100
-				// range, in the ROM segement loaded from U2 $01000.
+				// range, in the ROM segment loaded from U2 $01000.
 				osVersion = OSVersion::OS94;
 				const uint8_t *p = ROM[0].data + 0x1000 + (0x0100 * 4);
 				if (SearchForOpcodes("380026 3C1005 0C00C0", p, 0x180*4) >= 0)
@@ -471,7 +472,7 @@ uint8_t DCSDecoder::CheckROMs()
 				// of elimination, if we assume that the numbering started
 				// at 1.00 and that the nominal versions were increased by
 				// .01 for each numbered revision.  The three original 1993
-				// titles are thus nominall 1.00, which leaves us with 1.01
+				// titles are thus nominal 1.00, which leaves us with 1.01
 				// and 1.02 unaccounted for.  Since there was one release
 				// for the DCS-95 boards that didn't have 55C2/55C3 coding,
 				// that must have been the one immediately preceding 1.03,
@@ -480,8 +481,8 @@ uint8_t DCSDecoder::CheckROMs()
 				// three 1993 titles.
 				//
 				//   1.00 = 1993 titles (IJTPA, JD, STTNG) [inferred]
-				//   1.01 = original DCS board titles, 1994-1995 [infererd]
-				//   1.02 = DCS-95 releases, 1995-1996 [infererd]
+				//   1.01 = original DCS board titles, 1994-1995 [inferred]
+				//   1.02 = DCS-95 releases, 1995-1996 [inferred]
 				//   1.03 }
 				//   1.04 } DCS-95 releases, 1996-1998 [explicitly numbered]
 				//   1.05 }
@@ -496,7 +497,7 @@ uint8_t DCSDecoder::CheckROMs()
 		}
 	}
 
-	// We could't find a valid ROM index in the designated U2 index.
+	// We couldn't find a valid ROM index in the designated U2 index.
 	// This is equivalent to a ROM U2 checksum failure, because it
 	// means that the U2 image isn't valid.
 	return 2;
@@ -553,7 +554,7 @@ std::string DCSDecoder::GetVersionInfo(HWVersion *hw, OSVersion *os) const
 
 	case OSVersion::OS93a:
 		// This is the earliest release, which isn't officially labeled
-		// anywhere in the ocde, so we'll call it 1.0a.
+		// anywhere in the code, so we'll call it 1.0a.
 		s = "Software 1.0a (1993)";
 		break;
 
@@ -566,7 +567,7 @@ std::string DCSDecoder::GetVersionInfo(HWVersion *hw, OSVersion *os) const
 	case OSVersion::OS94:
 		// There's no official version number in the OS94 releases, but
 		// they must be 1.01, by process of elimination.  We can safely
-		// assume that the the earliest OS93 releases must be 1.00, and
+		// assume that the earliest OS93 releases must be 1.00, and
 		// 1.03 is taken by the first labeled DCS-95 release.  That
 		// leaves 1.02 for the earliest unlabeled DCS-95 release, and
 		// thus leaves only 1.01 for the OS94 build.
@@ -821,7 +822,7 @@ bool DCSDecoder::GetTrackInfo(uint16_t trackNumber, TrackInfo &ti)
 			break;
 
 		case 0x0D:
-			// commands with no parameters and no timng effects
+			// commands with no parameters and no timing effects
 			break;
 
 		case 0x02:
@@ -1079,8 +1080,14 @@ std::vector<DCSDecoder::Opcode> DCSDecoder::DecompileTrackProgram(uint16_t track
 			// loop end - pop playback position
 			instr = "}";
 
-			// pop the loop stack
-			loopStack.pop_back();
+			// Pop the loop stack.  Note that we can't count on the track being
+			// well-formed: there's at least one example (WWF Wrestlemania, track
+			// 0x1204) of an 0x0F instruction with no matching 0x0E.  The original
+			// decoders silently accept these, so we'll do the same.
+			if (loopStack.size() != 0)
+				loopStack.pop_back();
+			else
+				instr = "LoopEnd";
 			break;
 
 		case 0x10:
@@ -1189,7 +1196,7 @@ std::string DCSDecoder::ExplainTrackProgram(uint16_t trackNumber, const char *li
 			// indent, before the closing '}'.  The wait is executed within
 			// the loop, so it maps better visually to show it indented with
 			// the loop contents.  Show the hex opcode at this point.
-			if (ele.delayCount != 0)
+			if (ele.delayCount != 0 && loopIndent.size() != 0)
 			{
 				// show the wait with the hex opcode comment for the loop ending
 				program += linePrefix + format("%-60s    %s\n",
@@ -1200,8 +1207,14 @@ std::string DCSDecoder::ExplainTrackProgram(uint16_t trackNumber, const char *li
 				comment = "";
 			}
 
-			// reduce the loop indent
-			loopIndent = loopIndent.substr(2);
+			// Reduce the loop indent.  Note that we can't absolutely count
+			// on the loop indent being non-zero, as there's at least one
+			// production example (WWF Wrestlemania track 0x1204) of a
+			// loop-end (0x0F) opcode with no matching loop-start (0x0E).
+			if (loopIndent.size() != 0)
+				loopIndent = loopIndent.substr(2);
+			else
+				comment += " Unmatched loop end opcode (0x0F)";
 		}
 
 		// construct the line
@@ -1519,7 +1532,7 @@ void DCSDecoder::SoftBoot()
 	if (hwVersion == HWVersion::Unknown)
 		CheckROMs();
 
-	// initialiaze the underlying decoder
+	// initialize the underlying decoder
 	if (Initialize())
 		state = State::Running;
 	else
@@ -1694,7 +1707,7 @@ int16_t DCSDecoder::Bong::GetNextSample()
 	// attenuate the decay envelope every 31 samples (about 1ms)
 	if (envelopeSamples++ >= 31)
 	{
-		// figure the new attentuation level (this is a fixed-point 1.15
+		// figure the new attenuation level (this is a fixed-point 1.15
 		// fraction calculation, based on the DCS ROM boot code - it's
 		// essentially a multiply by 0.996, to form an exponential
 		// attenuation envelope)
@@ -1959,4 +1972,3 @@ DCSDecoder::RegistrationMap &DCSDecoder::GetRegistrationMap()
 	static RegistrationMap *regMap = new RegistrationMap();
 	return *regMap;
 }
-

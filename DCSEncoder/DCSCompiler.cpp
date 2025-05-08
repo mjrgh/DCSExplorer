@@ -37,15 +37,14 @@ DCSCompiler::DCSCompiler() : decoder(&decoderHostIfc)
 
 	// format date strings in various formats, for substitutions in script text
 	static const char *month[] ={ "January", "February", "March", "April", "May", "June",
-		"July", "Auguest", "September", "October", "November", "December" };
+		"July", "August", "September", "October", "November", "December" };
 	sprintf_s(dateStr, "%02d/%02d/%04d", tm.tm_mon + 1, tm.tm_mday, tm.tm_year + 1900);
 	sprintf_s(shortDateStr, "%02d/%02d/%02d", tm.tm_mon + 1, tm.tm_mday, tm.tm_year % 100);
 	sprintf_s(longDateStr, "%s %d, %04d", month[tm.tm_mon], tm.tm_mday, tm.tm_year + 1900);
 	sprintf_s(medDateStr, "%02d-%.3s-%04d", tm.tm_mday, month[tm.tm_mon], tm.tm_year + 1900);
 
-	// clear the variables-by-number and deferred-indirect-tables-by-number lists
+	// clear the variables-by-number lists
 	memset(varsByNumber, 0, sizeof(varsByNumber));
-	memset(diByNumber, 0, sizeof(diByNumber));
 
 	// Set the desired stream types to "any" in the default compression parameters.
 	// This tells the encoder to try each supported stream type for the prototype
@@ -770,7 +769,7 @@ void DCSCompiler::ParseScript(const char *filename, DCSTokenizer::ErrorLogger &l
 			auto tok = tokenizer.Read();
 			if (tok.IsKeyword("defer"))
 			{
-				// defererd or deferred indierct - these track types don't have any program steps
+				// deferred or deferred indirect - these track types don't have any program steps
 				track->steps.clear();
 
 				// check for DEFER INDIRECT
@@ -2826,7 +2825,6 @@ bool DCSCompiler::GenerateROM(const char *outZipFile,
 		{
 			// prefix "*" means that we should use the same name as
 			// the corresponding prototype chip, if there is one
-			const char *prevName = nullptr;
 			for (auto &r : protoZipData)
 			{
 				if (r.chipNum == rom.chipNum)

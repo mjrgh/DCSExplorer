@@ -35,7 +35,6 @@
 
 #pragma once
 #include <unordered_map>
-#include <string>
 #include "DCSDecoder.h"
 
 // include ADSP-2101 and ADSP-2105 sub-implementations
@@ -59,7 +58,7 @@ public:
 	// ADSP-2105 opcode interpreter or discrepancies in the virtual
 	// DCS hardware environment we provide for the ROM code.)
 	DCSDecoderEmulated(Host *host, bool enableSpeedup);
-	virtual ~DCSDecoderEmulated();
+	virtual ~DCSDecoderEmulated() override;
 
 	// set the master volume
 	virtual void SetMasterVolume(int vol) override;

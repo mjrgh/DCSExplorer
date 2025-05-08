@@ -553,7 +553,7 @@ int main(int argc, char **argv)
 	{
 		ProgramBuildDate buildDate;
 		printf(
-			"DCS Explorer   Version 1.0, Build %s\n"
+			"DCS Explorer   Version 1.1, Build %s\n"
 			"(c)%s Michael J Roberts / BSD 3-clause license / NO WARRANTY\n"
 			"\n"
 			"Usage: dcsexplorer [options] <rom-zip-file>\n"

@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 	{
 		ProgramBuildDate buildDate;
 		printf(
-			"DCS Encoder   Version 1.0, Build %s\n"
+			"DCS Encoder   Version 1.1, Build %s\n"
 			"(c)%s Michael J Roberts / BSD 3-clause license / NO WARRANTY\n"
 			"\n"
 			"Usage: dcsencoder [options] <prototypeRom> <scriptFile>\n"

@@ -107,6 +107,7 @@
 
 #pragma once
 #include <stdint.h>
+#include <stdarg.h>
 #include <string>
 #include <list>
 #include <vector>

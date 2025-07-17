@@ -1200,9 +1200,7 @@
    represented by the pointer, and interpret them as follows:
 </p>
 <ul>
-   <li>The first byte is the track's channel number, 0-3 or 0-5 (depending
-   on the software version)
-   <li>The second byte is the track type code:
+   <li>The first byte is the track type code:
    <ul>
       <li>1 = Byte-code program
       <li>2 = Deferred track
@@ -1211,13 +1209,21 @@
       encounters any other value, on the assumption that something in its memory
       state is corrupted
    </ul>
+   <li>The second byte is the track's channel number, 0-3 or 0-5 (depending
+   on the software version)
 </ul>
+
+<p>
+   Every type of track starts with those two header bytes.  The
+   remaining bytes vary, depending on the type code.
+</p>
 
 <h3>Byte-code programs</h3>
 
 <p>
    A track with type code 1 contains a byte-code program, starting at
-   the first byte after the track type code byte.  The program consists
+   the third byte of the track (that is, the next byte after the track
+   type code and channel number).  The program consists
    of a series of instructions coded in a special byte-code language
    defined by DCS.  The byte-code language can be thought of as similar
    to a microprocessor's machine code instruction set, but it's
@@ -1477,7 +1483,8 @@
 <p>
    Type codes 2 and 3 are deferred tracks.   These tracks don't have associated
    byte-code programs; the payload is simply a UINT16 value, stored as two
-   bytes in big-endian format, immediately following the track type code byte.
+   bytes in big-endian format, immediately following the track type code and
+   channel number bytes.
 </p>
 <p>
    Loading a deferred track doesn't affect the currently playing stream or

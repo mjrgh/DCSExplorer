@@ -782,13 +782,16 @@
    slot serves as the end marker.
 </p>
 <p>
-   The DCS software doesn't contain any assumptions that the table
-   is in any particular order, so other applications should likewise
-   make no such assumptions.  In practice, though, all of the DCS ROMs
-   order the entries by chip number, so the entry for
-   U2 is always in the first slot, U3 is always in the second
-   slot, and so forth.
-</p>   
+   The original DCS software doesn't appear to contain any assumptions that
+   the table is in any particular order, so new implementations should assume
+   that the table might be in random order.  However, all of the DCS ROMs
+   I've examined do happen to order the entries by chip number: the entry for U2 is
+   always in the first slot, U3 is always in the second slot, and so forth.  So
+   it's probably a good idea when creating new ROMs to use that same fixed ordering,
+   just in case there are any legacy implementations out there with hidden dependencies
+   on the standard ordering that were never noticed because they were never tested
+   with anything else.
+</p>
 <p>
    Each entry consists of three 16-bit
    integer fields (in big-endian byte order, as in all DCS integer types).
@@ -807,14 +810,23 @@
       <td>Size</td>
       <td>
          The size of the ROM chip, in units of 4KB (hence 128 for a 512K
-         ROM, or 256 for a 1MB ROM); zero in this field marks the end of the table
+         ROM, or 256 for a 1MB ROM).  Zero in this field marks the end of the table.
       </td>
    </tr>
    <tr>
       <td>2</td>
       <td>UINT16</td>
-      <td>Chip#</td>
-      <td>The chip number, 0 to 7, corresponding to ROM U2 to U9</td>
+      <td>ROM Bank Select</td>
+      <td>
+         The "ROM Bank Select" code, which is equal to the chip number shifted
+         left by 8 bits.  The chip number is 0 for U2, 1 for U3, and so on;
+         for example, U3 is represented by $0100.
+         To recover the chip number, shift the UINT16 value right by 8 bits.
+         (The value is stored in this peculiar format for the convenience of
+         the original ADSP-2015 implementation, which used this format for the
+         hardware register that selected which ROM was mapped into the CPU
+         address space.)
+      </td>
    </tr>
    <tr>
       <td>4</td>
@@ -1462,11 +1474,12 @@
    the software for the DCS-95 boards.  The handlers load some data based
    on the operand bytes into internal memory structures associated with
    the channel, but these memory locations are never used anywhere else
-   in the code, so the instructions ultimately cannot have any effect.
-   The handlers must represent some planned feature that was started
-   but abandoned before it was finished.  The data structures
-   involved are also written by the $55BA series of <a href="#SpecialCommands">special command codes</a>,
-   so the two are probably related.
+   in the code, so the instructions ultimately have no effect on playback.
+   These opcodes are presumably part of some planned feature that was
+   eventually abandoned before it was fully coded.  The data structures
+   involved are also written by the $55BA series of
+   <a href="#SpecialCommands">special command codes</a>, so the two are
+   probably related.
 </p>
 
 <p>
@@ -4106,8 +4119,8 @@ for (int i = 0 ; i < 16 ; ++i) {
    timers.  It also seems to be related to mystery opcodes $10-$12,
    in that those opcodes write to the same data structures as the
    $55BA et seq. command handler.  Despite all of the work that
-   evidently went into setting all this up, the data structure
-   involved don't actually do anything - there's nothing else in
+   evidently went into setting all this up, the data structures
+   involved don't actually do anything:  there's nothing else in
    the code that ever accesses them.  The only effect the commands
    and opcodes have is to write some bytes to some memory locations
    that are otherwise unused.

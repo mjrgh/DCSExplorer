@@ -874,20 +874,41 @@
    compute the checksum of U2 and then plug the result into the ROM
    catalog entry for U2, because doing so changes the contents of U2
    and thus changes its checksum.  You can repeat that process forever
-   and it'll never converge.  One way to solve this is to reserve two spare
-   bytes (one at an even address, one at an odd address)
-   elsewhere in the U2 space to use as free variables for satisfying the
-   checksum constraint.  First, set the checksum field in the catalog
-   entry representing U2 to hand-picked
-   values, say $0000, then add up all of the bytes in the ROM <i>except</i>
-   the spare bytes, then set the spare bytes to the unique values that, when
-   added to the all-of-the-other-bytes total, yield the hand-picked checksum
-   value chosen earlier.  (These unique values are easy to figure for DCS's simple
-   linear checksum calculation: just subtract the all-of-the-other-bytes
-   totals from your chosen checksum bytes mod 256.)   The software that
-   Williams used to create the DCS ROMs probably used this exact
-   procedure, because the U2 checksums are in fact always zero.
+   and it'll never converge.  One way to solve this is to reserve two "fixup"
+   bytes, one at an even address, one at an odd address, elsewhere in the U2
+   space to use as free variables for satisfying the checksum constraint,
+   patching them with the correct values to make the checksums come out right.
+   Here's the procedure:
 </p>
+<ul>
+   <li>Reserve two consecutive bytes somewhere in the ROM address space.
+   These two bytes will be used as our checksum fixup bytes, so they must
+   be reserved for this use, and can't be used for anything else.
+   You can reserve space for these anywhere that's not used for some
+   other purpose, such as at the end of the track index, or at the end
+   of the ROM catalog, after the $0000 that flags the last entry.
+
+   <li>Set the checksum field in the catalog entry representing U2 to
+   a hand-picked value.  The actual value doesn't matter, but it's simplest to
+   use $0000.  (That's also what the original Williams ROM compiler appeared
+   to do, since the checksums for U2 are in fact always zero in all of the
+   original DCS ROMs.)
+
+   <li>Use the normal checksum computation procedure to add up all of the bytes
+   in the ROM <i>except</i> the designated fixup bytes reserved in the first step.
+
+   <li>Set the fixup bytes to the unique values that, when added to the
+   all-of-the-other-bytes totals, yield the hand-picked checksum value chosen
+   earlier (as I said, I'd use $0000).  These unique values are easy to figure
+   for DCS's simple linear checksum calculation: just subtract the
+   all-of-the-other-bytes totals from your chosen checksum bytes, and take
+   the result mod 256.  Remember that there's an even-address checksum
+   and an odd-address checksum, so you'd set the fixup byte at the even address
+   according to the even-address checksum, and the fixup byte at the odd address
+   according to the odd-address checksum.   For example, if the even byte of the
+   all-of-the-other-bytes checksum comes out to $FF, you'd set the even-address
+   fixup byte to $01, because $FF + $01 mod 256 comes out to $00.
+</ul>
       
 
 

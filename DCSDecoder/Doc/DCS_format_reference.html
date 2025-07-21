@@ -1173,6 +1173,15 @@
    Unused space at the end of a DCS ROM is typically filled
    with $FF bytes.
 </p>
+<p>
+   If you're creating a new ROM, it shouldn't matter what's stored
+   in unused areas, as properly working decoders should never try
+   to read from unused regions in the first place.  But it might
+   still be a good idea to follow the example of the original production
+   ROMs and use $FF fill, as it would make it a little easier for humans
+   inspecting a ROM's contents to recognize the familiar pattern for
+   unused regions.
+</p>
 
 <h3>U3-U9 internal layout</h3>
 

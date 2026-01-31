@@ -207,7 +207,7 @@ const char *DCSDecoder::GetGameTitle(GameID id)
 uint32_t DCSDecoder::FindCatalog(const uint8_t *u2, size_t u2size)
 {
 	// try the known offsets
-	static const uint32_t offsets[] ={ 0x3000, 0x4000, 0x6000 };
+	static const uint32_t offsets[] ={ 0x3000, 0x4000, 0x6000, 0x9000 };
 	for (int i = 0 ; i < static_cast<int>(_countof(offsets)); ++i)
 	{
 		// The catalog always starts with the three-UINT16 entry
@@ -293,7 +293,7 @@ uint8_t DCSDecoder::CheckROMs()
 	// have the right location and thus know which system version
 	// this is.  The odds of random data matching the checksum
 	// are low.
-	static const uint32_t offsets[] ={ 0x3000, 0x4000, 0x6000 };
+	static const uint32_t offsets[] ={ 0x3000, 0x4000, 0x6000, 0x9000 };
 	for (int i = 0 ; i < static_cast<int>(_countof(offsets)); ++i)
 	{
 		// Try interpreting the data at this offset as though it
@@ -341,7 +341,7 @@ uint8_t DCSDecoder::CheckROMs()
 			// For the DCS95 ROMs, where the table is at offset $06000,
 			// the chip selects are shifted left by one more bit due
 			// to the smaller ROM banking window on the DCS95 boards.
-			if (offsets[i] == 0x6000)
+			if (offsets[i] == 0x6000 || offsets[i] == 0x9000)
 				chipSel >>= 1;
 
 			// if the chip select looks valid, compare the length
@@ -370,7 +370,7 @@ uint8_t DCSDecoder::CheckROMs()
 			// version can be determined from the location of the catalog:
 			// if it's $06000, it's for the DCS-95 boards, otherwise it's
 			// for the original DCS audio board.
-			if (offsets[i] == 0x6000)
+			if (offsets[i] == 0x6000 || offsets[i] == 0x9000)
 			{
 				// Offset $06000 is always used for the DCS-95 board.  This 
 				// also means that the software must be the 1995 version 

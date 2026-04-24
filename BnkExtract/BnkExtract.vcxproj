@@ -149,6 +149,11 @@
   <ItemGroup>
     <ClCompile Include="BnkExtract.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DCSDecoder\DCSDecoder.vcxproj">
+      <Project>{0E7A7B73-7B39-4C7E-BE58-E485DBC6DF63}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

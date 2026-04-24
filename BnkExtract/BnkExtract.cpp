@@ -14,7 +14,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <algorithm>
 #include <filesystem>
 
 #include "../DCSDecoder/DCSDecoder.h"
@@ -155,7 +154,6 @@ struct Track {
     int      trackNum;
     uint32_t streamAddr;   // file offset into BNK (points 2 bytes before DCS header)
     uint8_t  nFrames;      // frame count from playlist entry byte[16]
-    size_t   streamBytes;  // length derived from next-addr method
 };
 
 // ---------------------------------------------------------------------------
@@ -247,30 +245,15 @@ int main(int argc, char *argv[])
         if (nFrames == 0) continue;
 
         Track t;
-        t.trackNum    = i;
-        t.streamAddr  = streamAddr;
-        t.nFrames     = nFrames;
-        t.streamBytes = 0;  // filled below
+        t.trackNum   = i;
+        t.streamAddr = streamAddr;
+        t.nFrames    = nFrames;
         tracks.push_back(t);
     }
 
     if (tracks.empty()) {
         printf("ERROR: no valid tracks found in BNK\n");
         return 1;
-    }
-
-    // Derive stream byte lengths from sorted addresses
-    {
-        std::vector<uint32_t> addrs;
-        for (auto &t : tracks) addrs.push_back(t.streamAddr);
-        std::sort(addrs.begin(), addrs.end());
-        addrs.erase(std::unique(addrs.begin(), addrs.end()), addrs.end());
-
-        for (auto &t : tracks) {
-            auto it = std::upper_bound(addrs.begin(), addrs.end(), t.streamAddr);
-            size_t end = (it != addrs.end()) ? *it : bnkSize;
-            t.streamBytes = end - t.streamAddr;
-        }
     }
 
     printf("Found %zu tracks\n\n", tracks.size());
@@ -306,13 +289,15 @@ int main(int argc, char *argv[])
 
         // BNK streams start with 2 non-frame-count lead bytes; the decoder
         // expects [U16 BE nFrames][16-byte header][compressed data].
-        // Build a patched copy: replace the 2-byte lead with the real frame count.
+        // Build a patched copy: replace the 2-byte lead with the real frame count,
+        // and give the decoder everything from there to end-of-file — it stops
+        // after nFrames frames regardless of buffer size.
         if (t.streamAddr + BNK_STREAM_LEAD_BYTES >= bnkSize) {
             printf("  SKIP $%04X  (stream out of range)\n", t.trackNum);
             ++nSkip;
             continue;
         }
-        const size_t headerAndDataLen = t.streamBytes - BNK_STREAM_LEAD_BYTES;
+        const size_t headerAndDataLen = bnkSize - (t.streamAddr + BNK_STREAM_LEAD_BYTES);
         std::vector<uint8_t> streamBuf(2 + headerAndDataLen);
         streamBuf[0] = 0;
         streamBuf[1] = t.nFrames;  // BE16 frame count (fits in 1 byte; high byte = 0)

@@ -272,8 +272,8 @@ int main(int argc, char *argv[])
     DCSDecoder::MinHost host;
     DCSDecoderNative decoder(&host);
     decoder.InitStandalone(DCSDecoder::OSVersion::OS95);
+    decoder.SetDefaultVolume(0xFF);
     decoder.SoftBoot();
-    decoder.SetMasterVolume(0xFF);
 
     // --- extract each track ---
     int nOk = 0, nError = 0, nSkip = 0;

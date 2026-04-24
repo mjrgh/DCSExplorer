@@ -143,7 +143,7 @@ static bool writeWav(const char *path, DCSDecoder *decoder, uint16_t nFrames)
 
         // Cancel looping one frame before end so it tapers cleanly
         if (frame + 2 >= nFrames)
-            decoder->ClearTracks();
+            decoder->SoftBoot();
     }
 
     ok = (fclose(fp) == 0) && ok;

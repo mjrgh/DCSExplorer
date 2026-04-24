@@ -140,10 +140,6 @@ static bool writeWav(const char *path, DCSDecoder *decoder, uint16_t nFrames)
         for (int si = 0; si < 240; ++si)
             buf[si] = decoder->GetNextSample();
         ok = (fwrite(buf, sizeof(buf), 1, fp) == 1);
-
-        // Cancel looping one frame before end so it tapers cleanly
-        if (frame + 2 >= nFrames)
-            decoder->SoftBoot();
     }
 
     ok = (fclose(fp) == 0) && ok;
@@ -155,10 +151,9 @@ static bool writeWav(const char *path, DCSDecoder *decoder, uint16_t nFrames)
 // ---------------------------------------------------------------------------
 
 struct Track {
-    int     trackNum;
+    int      trackNum;
     uint32_t streamAddr;   // file offset into BNK
-    size_t  streamBytes;   // length derived from next-addr method
-    uint16_t nFrames;      // from first 2 bytes of stream data (BE uint16)
+    size_t   streamBytes;  // length derived from next-addr method
 };
 
 // ---------------------------------------------------------------------------
@@ -246,13 +241,9 @@ int main(int argc, char *argv[])
         uint32_t streamAddr = read_be24(bnk.data() + playlistOff + BNK_STREAM_ADDR_OFF);
         if (streamAddr == 0 || streamAddr >= bnkSize) continue;
 
-        uint16_t nFrames = read_be16(bnk.data() + streamAddr);
-        if (nFrames == 0) continue;  // skip anomalous/null entries
-
         Track t;
-        t.trackNum   = i;
-        t.streamAddr = streamAddr;
-        t.nFrames    = nFrames;
+        t.trackNum    = i;
+        t.streamAddr  = streamAddr;
         t.streamBytes = 0;  // filled below
         tracks.push_back(t);
     }
@@ -310,12 +301,21 @@ int main(int argc, char *argv[])
         // Load stream into decoder
         const uint8_t *streamData = bnk.data() + t.streamAddr;
         DCSDecoder::ROMPointer streamPtr(0, streamData);
+
+        // Use GetStreamInfo for the authoritative frame count
+        auto info = decoder.GetStreamInfo(streamPtr);
+        if (info.nFrames <= 0) {
+            printf("  SKIP $%04X  (GetStreamInfo returned 0 frames)\n", t.trackNum);
+            ++nSkip;
+            continue;
+        }
+
         decoder.SoftBoot();
         decoder.LoadAudioStream(0, streamPtr, 0x64);
 
-        bool ok = writeWav(filename, &decoder, t.nFrames);
+        bool ok = writeWav(filename, &decoder, (uint16_t)info.nFrames);
         if (ok) {
-            printf("  OK   $%04X  %5u frames  %s\n", t.trackNum, t.nFrames, filename);
+            printf("  OK   $%04X  %5d frames  %s\n", t.trackNum, info.nFrames, filename);
             ++nOk;
         } else {
             printf("  ERR  $%04X  %s\n", t.trackNum, filename);

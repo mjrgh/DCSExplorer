@@ -27,9 +27,10 @@ static const size_t BNK_COUNT_OFFSET      = 0x80;  // LE uint16 - number of inde
 static const size_t BNK_INDEX_OFFSET      = 0x86;  // LE uint32 per slot, relative to DATA_BASE
 static const size_t BNK_DATA_BASE         = 0x5FA; // start of playlist + stream data
 static const size_t BNK_PLAYLIST_STRIDE   = 18;    // bytes per playlist program entry
-static const size_t BNK_STREAM_ADDR_OFF   = 11;    // offset within playlist entry: 3-byte BE stream addr
-static const size_t BNK_FRAME_COUNT_OFF   = 16;    // offset within playlist entry: byte DCS frame count
-static const size_t BNK_STREAM_LEAD_BYTES = 2;     // stream data starts with 2 non-frame-count bytes to skip
+static const size_t BNK_STREAM_ADDR_OFF   = 11;    // offset within playlist entry: 3-byte BE relative stream addr
+// The stored addr is relative to the addr field's own file position (var_start = playlistOff + BNK_STREAM_ADDR_OFF).
+// absolute_stream_addr = stored_BE24 + var_start
+// The stream at absolute_stream_addr is standard DCS format: [U16 BE nFrames][16-byte header][packed bits]
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -152,8 +153,7 @@ static bool writeWav(const char *path, DCSDecoder *decoder, uint16_t nFrames)
 
 struct Track {
     int      trackNum;
-    uint32_t streamAddr;   // file offset into BNK (points 2 bytes before DCS header)
-    uint8_t  nFrames;      // frame count from playlist entry byte[16]
+    uint32_t streamAddr;   // absolute file offset of DCS stream: [U16 nFrames][16-byte hdr][data]
 };
 
 // ---------------------------------------------------------------------------
@@ -238,16 +238,16 @@ int main(int argc, char *argv[])
         size_t playlistOff = BNK_DATA_BASE + rel;
         if (playlistOff + BNK_PLAYLIST_STRIDE > bnkSize) continue;
 
-        uint32_t streamAddr = read_be24(bnk.data() + playlistOff + BNK_STREAM_ADDR_OFF);
-        if (streamAddr == 0 || streamAddr >= bnkSize) continue;
-
-        uint8_t nFrames = bnk[playlistOff + BNK_FRAME_COUNT_OFF];
-        if (nFrames == 0) continue;
+        // The stored address is relative to the address field's own file position.
+        size_t varStart = playlistOff + BNK_STREAM_ADDR_OFF;
+        uint32_t storedAddr = read_be24(bnk.data() + varStart);
+        if (storedAddr == 0) continue;
+        uint32_t streamAddr = storedAddr + (uint32_t)varStart;
+        if (streamAddr + 18 >= bnkSize) continue;
 
         Track t;
         t.trackNum   = i;
         t.streamAddr = streamAddr;
-        t.nFrames    = nFrames;
         tracks.push_back(t);
     }
 
@@ -287,32 +287,22 @@ int main(int argc, char *argv[])
         snprintf(filename, sizeof(filename), "%s/%s_%04X.wav",
             outDir.c_str(), name.c_str(), t.trackNum);
 
-        // BNK streams start with 2 non-frame-count lead bytes; the decoder
-        // expects [U16 BE nFrames][16-byte header][compressed data].
-        // Build a patched copy: replace the 2-byte lead with the real frame count,
-        // and give the decoder everything from there to end-of-file — it stops
-        // after nFrames frames regardless of buffer size.
-        if (t.streamAddr + BNK_STREAM_LEAD_BYTES >= bnkSize) {
-            printf("  SKIP $%04X  (stream out of range)\n", t.trackNum);
+        // Stream at streamAddr is standard DCS format: [U16 BE nFrames][16-byte hdr][data]
+        DCSDecoder::ROMPointer streamPtr(0, bnk.data() + t.streamAddr);
+
+        auto info = decoder.GetStreamInfo(streamPtr);
+        if (info.nFrames <= 0) {
+            printf("  SKIP $%04X  (GetStreamInfo returned 0 frames)\n", t.trackNum);
             ++nSkip;
             continue;
         }
-        const size_t headerAndDataLen = bnkSize - (t.streamAddr + BNK_STREAM_LEAD_BYTES);
-        std::vector<uint8_t> streamBuf(2 + headerAndDataLen);
-        streamBuf[0] = 0;
-        streamBuf[1] = t.nFrames;  // BE16 frame count (fits in 1 byte; high byte = 0)
-        memcpy(streamBuf.data() + 2,
-               bnk.data() + t.streamAddr + BNK_STREAM_LEAD_BYTES,
-               headerAndDataLen);
-
-        DCSDecoder::ROMPointer streamPtr(0, streamBuf.data());
 
         decoder.SoftBoot();
         decoder.LoadAudioStream(0, streamPtr, 0x64);
 
-        bool ok = writeWav(filename, &decoder, t.nFrames);
+        bool ok = writeWav(filename, &decoder, (uint16_t)info.nFrames);
         if (ok) {
-            printf("  OK   $%04X  %5d frames  %s\n", t.trackNum, t.nFrames, filename);
+            printf("  OK   $%04X  %5d frames  %s\n", t.trackNum, info.nFrames, filename);
             ++nOk;
         } else {
             printf("  ERR  $%04X  %s\n", t.trackNum, filename);

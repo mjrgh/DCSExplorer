@@ -154,6 +154,7 @@ static bool writeWav(const char *path, DCSDecoder *decoder, uint16_t nFrames)
 struct Track {
     int      trackNum;
     uint32_t streamAddr;   // absolute file offset of DCS stream: [U16 nFrames][16-byte hdr][data]
+    uint8_t  mixLevel;     // mixing level from playlist entry byte[6]
 };
 
 // ---------------------------------------------------------------------------
@@ -248,6 +249,7 @@ int main(int argc, char *argv[])
         Track t;
         t.trackNum   = i;
         t.streamAddr = streamAddr;
+        t.mixLevel   = bnk[playlistOff + 6];  // byte[6] = channel mixing level
         tracks.push_back(t);
     }
 
@@ -271,6 +273,7 @@ int main(int argc, char *argv[])
     DCSDecoderNative decoder(&host);
     decoder.InitStandalone(DCSDecoder::OSVersion::OS95);
     decoder.SoftBoot();
+    decoder.SetMasterVolume(0xFF);
 
     // --- extract each track ---
     int nOk = 0, nError = 0, nSkip = 0;
@@ -298,7 +301,7 @@ int main(int argc, char *argv[])
         }
 
         decoder.SoftBoot();
-        decoder.LoadAudioStream(0, streamPtr, 0x64);
+        decoder.LoadAudioStream(0, streamPtr, t.mixLevel);
 
         bool ok = writeWav(filename, &decoder, (uint16_t)info.nFrames);
         if (ok) {

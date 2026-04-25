@@ -162,7 +162,7 @@ static std::vector<StreamRef> parseProgram(
                 uint32_t abs  = stored + (uint32_t)vs;
                 if (abs + 18 < bnkSize) {
                     uint16_t nf = read_be16(bnk + abs);
-                    if (nf > 0 && nf <= 2000)
+                    if (nf > 0)
                         result.push_back({ abs, curMix, loop });
                 }
             }

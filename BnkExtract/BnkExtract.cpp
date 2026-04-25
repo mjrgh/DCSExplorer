@@ -27,10 +27,11 @@ static const size_t BNK_COUNT_OFFSET      = 0x80;  // LE uint16 - number of inde
 static const size_t BNK_INDEX_OFFSET      = 0x86;  // LE uint32 per slot, relative to DATA_BASE
 static const size_t BNK_DATA_BASE         = 0x5FA; // start of playlist + stream data
 static const size_t BNK_PLAYLIST_STRIDE   = 18;    // bytes per playlist program entry
-static const size_t BNK_STREAM_ADDR_OFF   = 11;    // offset within playlist entry: 3-byte BE relative stream addr
-// The stored addr is relative to the addr field's own file position (var_start = playlistOff + BNK_STREAM_ADDR_OFF).
-// absolute_stream_addr = stored_BE24 + var_start
-// The stream at absolute_stream_addr is standard DCS format: [U16 BE nFrames][16-byte header][packed bits]
+// Stream addresses are found by scanning for the fix_stream_addr pattern:
+//   [2 lead bytes] 01 00 [3-byte BE relative addr] 01
+// absolute_stream_addr = stored_BE24 + var_start  (var_start = position after "01 00")
+// The stream at that address is standard DCS format: [U16 BE nFrames][16-byte header][packed bits]
+// The slot->stream mapping uses rel/18 as index into the ordered stream table.
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -229,27 +230,45 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Collect valid tracks
+    // Build stream table by scanning for the fix_stream_addr pattern:
+    // [2 lead bytes] 01 00 [3-byte BE relative addr] 01
+    // absolute_addr = stored_BE24 + var_start
+    struct StreamEntry { uint32_t absAddr; uint8_t mixLevel; };
+    std::vector<StreamEntry> streamTable;
+    {
+        const uint8_t *p = bnk.data();
+        for (size_t k = 2; k + 6 < bnkSize; ++k) {
+            if (p[k] != 0x01 || p[k+1] != 0x00) continue;
+            if (p[k+5] != 0x01) continue;
+            size_t varStart = k + 2;
+            uint32_t stored = read_be24(p + varStart);
+            if (stored == 0) continue;
+            uint32_t absAddr = stored + (uint32_t)varStart;
+            if (absAddr + 18 >= bnkSize) continue;
+            // Validate: first 2 bytes at absAddr should be a plausible frame count
+            uint16_t nf = read_be16(p + absAddr);
+            if (nf == 0 || nf > 2000) continue;
+            StreamEntry se;
+            se.absAddr  = absAddr;
+            se.mixLevel = p[k - 3];  // byte[6] of 18-byte entry = 3 bytes before "01 00"
+            streamTable.push_back(se);
+            k += 5;  // skip past this match
+        }
+    }
+
+    // Collect valid tracks: slot -> stream via rel/18 as index into streamTable
     std::vector<Track> tracks;
     for (int i = 0; i < (int)slotCount; ++i) {
         uint32_t rel = read_le32(bnk.data() + BNK_INDEX_OFFSET + i * 4);
         if (rel == 0xFFFFFFFF) continue;
-        if (i == 0 && rel == 0) continue;  // slot 0 unused sentinel
 
-        size_t playlistOff = BNK_DATA_BASE + rel;
-        if (playlistOff + BNK_PLAYLIST_STRIDE > bnkSize) continue;
-
-        // The stored address is relative to the address field's own file position.
-        size_t varStart = playlistOff + BNK_STREAM_ADDR_OFF;
-        uint32_t storedAddr = read_be24(bnk.data() + varStart);
-        if (storedAddr == 0) continue;
-        uint32_t streamAddr = storedAddr + (uint32_t)varStart;
-        if (streamAddr + 18 >= bnkSize) continue;
+        size_t streamIdx = rel / BNK_PLAYLIST_STRIDE;
+        if (streamIdx >= streamTable.size()) continue;
 
         Track t;
         t.trackNum   = i;
-        t.streamAddr = streamAddr;
-        t.mixLevel   = bnk[playlistOff + 6];  // byte[6] = channel mixing level
+        t.streamAddr = streamTable[streamIdx].absAddr;
+        t.mixLevel   = streamTable[streamIdx].mixLevel;
         tracks.push_back(t);
     }
 

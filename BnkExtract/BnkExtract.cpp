@@ -24,14 +24,21 @@
 // ---------------------------------------------------------------------------
 
 static const size_t BNK_COUNT_OFFSET      = 0x80;  // LE uint16 - number of index slots
-static const size_t BNK_INDEX_OFFSET      = 0x86;  // LE uint32 per slot, relative to DATA_BASE
-static const size_t BNK_DATA_BASE         = 0x5FA; // start of playlist + stream data
-static const size_t BNK_PLAYLIST_STRIDE   = 18;    // bytes per playlist program entry
-// Stream addresses are found by scanning for the fix_stream_addr pattern:
-//   [2 lead bytes] 01 00 [3-byte BE relative addr] 01
-// absolute_stream_addr = stored_BE24 + var_start  (var_start = position after "01 00")
-// The stream at that address is standard DCS format: [U16 BE nFrames][16-byte header][packed bits]
-// The slot->stream mapping uses rel/18 as index into the ordered stream table.
+static const size_t BNK_INDEX_OFFSET      = 0x86;  // LE uint32 per slot, relative to data base
+// Data base (playlist table start) = BNK_INDEX_OFFSET + slotCount * 4  (computed at runtime)
+static const size_t BNK_PLAYLIST_STRIDE   = 18;    // bytes per playlist entry
+static const size_t BNK_PROGRAM_HDR       = 2;     // bytes before DCS bytecode in each playlist entry
+// Each playlist entry: [2-byte prefix: type, channel] [DCS track program bytecode]
+// Bytecode format: [U16 BE countPrefix][U8 opcode][args] ...
+//   0x00 = Stop
+//   0x01 = Play  [U8 ch][U24 BE relative stream addr][U8 loop]
+//   0x07-0x09 = Mixing level set   [U8 ch][U8 val]
+//   0x0A-0x0C = Mixing level fade  [U8 ch][U8 val][U16 steps]
+//   0x0D = NOP
+//   0x0E = Loop start  [U8 count]
+//   0x0F = Loop end
+// Stream addr in opcode 0x01 is relative to its own 3-byte field position.
+// Stream is standard DCS: [U16 BE nFrames][16-byte header][packed bits]
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -105,58 +112,87 @@ static std::map<int, std::string> parseLst(const char *lstPath)
 }
 
 // ---------------------------------------------------------------------------
-// WAV writer  -  mirrors the approach in DCSExplorer.cpp
+// Track entry - one or more streams played sequentially
 // ---------------------------------------------------------------------------
 
-static bool writeWav(const char *path, DCSDecoder *decoder, uint16_t nFrames)
-{
-    // Two extra frames ensures playback tapers to silence
-    nFrames += 2;
-
-    FILE *fp = nullptr;
-    if (fopen_s(&fp, path, "wb") != 0 || fp == nullptr) {
-        printf("  ERROR: cannot open output file \"%s\" (errno %d)\n", path, errno);
-        return false;
-    }
-
-    // 44-byte RIFF/WAV header  (31250 Hz, mono, 16-bit PCM)
-    uint8_t hdr[44];
-    memset(hdr, 0, sizeof(hdr));
-    uint32_t dataBytes = (uint32_t)nFrames * 240 * 2;
-    memcpy(&hdr[0], "RIFF\0\0\0\0WAVEfmt ", 16);
-    *reinterpret_cast<uint32_t*>(&hdr[4])  = dataBytes + 44 - 8;
-    *reinterpret_cast<uint32_t*>(&hdr[16]) = 16;
-    *reinterpret_cast<uint16_t*>(&hdr[20]) = 1;
-    *reinterpret_cast<uint16_t*>(&hdr[22]) = 1;
-    *reinterpret_cast<uint32_t*>(&hdr[24]) = 31250;
-    *reinterpret_cast<uint32_t*>(&hdr[28]) = 31250 * 2;
-    *reinterpret_cast<uint16_t*>(&hdr[32]) = 2;
-    *reinterpret_cast<uint16_t*>(&hdr[34]) = 16;
-    memcpy(&hdr[36], "data", 4);
-    *reinterpret_cast<uint32_t*>(&hdr[40]) = dataBytes;
-
-    bool ok = (fwrite(hdr, 44, 1, fp) == 1);
-
-    for (uint16_t frame = 0; frame < nFrames && ok; ++frame) {
-        int16_t buf[240];
-        for (int si = 0; si < 240; ++si)
-            buf[si] = decoder->GetNextSample();
-        ok = (fwrite(buf, sizeof(buf), 1, fp) == 1);
-    }
-
-    ok = (fclose(fp) == 0) && ok;
-    return ok;
-}
-
-// ---------------------------------------------------------------------------
-// Track entry
-// ---------------------------------------------------------------------------
+struct StreamRef {
+    uint32_t absAddr;   // absolute file offset of DCS stream
+    uint8_t  mixLevel;
+    uint8_t  loopCount; // 0 = play once (stored as 1 in bytecode), >1 = repeat N times
+};
 
 struct Track {
-    int      trackNum;
-    uint32_t streamAddr;   // absolute file offset of DCS stream: [U16 nFrames][16-byte hdr][data]
-    uint8_t  mixLevel;     // mixing level from playlist entry byte[6]
+    int                   trackNum;
+    std::vector<StreamRef> streams;
 };
+
+// ---------------------------------------------------------------------------
+// Parse DCS track program bytecode from a BNK playlist entry.
+// Returns list of stream references in play order (infinite loops unwound once).
+// poff = file offset of the 18-byte entry; bnkSize guards reads.
+// ---------------------------------------------------------------------------
+static std::vector<StreamRef> parseProgram(
+    const uint8_t *bnk, size_t bnkSize, size_t poff)
+{
+    std::vector<StreamRef> result;
+    size_t p = poff + BNK_PROGRAM_HDR;  // skip 2-byte prefix
+
+    // Default mix level from byte[6] of entry (before bytecode)
+    uint8_t defaultMix = (poff + 6 < bnkSize) ? bnk[poff + 6] : 0x64;
+    uint8_t curMix = defaultMix;
+
+    int loopDepth = 0;
+    for (int guard = 0; guard < 4096 && p + 2 < bnkSize; ++guard) {
+        uint16_t cp  = (uint16_t)((bnk[p] << 8) | bnk[p+1]);  p += 2;
+        if (cp == 0xFFFF) break;
+        if (p >= bnkSize) break;
+        uint8_t op = bnk[p++];
+
+        switch (op) {
+        case 0x00:  // Stop
+            return result;
+
+        case 0x01:  // Play stream
+            if (p + 4 >= bnkSize) return result;
+            {
+                uint8_t  ch   = bnk[p++];  (void)ch;
+                size_t   vs   = p;
+                uint32_t stored = read_be24(bnk + p);  p += 3;
+                uint8_t  loop = bnk[p++];
+                uint32_t abs  = stored + (uint32_t)vs;
+                if (abs + 18 < bnkSize) {
+                    uint16_t nf = read_be16(bnk + abs);
+                    if (nf > 0 && nf <= 2000)
+                        result.push_back({ abs, curMix, loop });
+                }
+            }
+            break;
+
+        case 0x07: case 0x08: case 0x09:  // Mix level set
+            if (p + 1 < bnkSize) { p++; curMix = bnk[p++]; }
+            break;
+
+        case 0x0A: case 0x0B: case 0x0C:  // Mix level fade
+            if (p + 3 < bnkSize) { p++; curMix = bnk[p++]; p += 2; }
+            break;
+
+        case 0x0D:  // NOP
+            break;
+
+        case 0x0E:  // Loop start
+            if (p < bnkSize) { p++; loopDepth++; }
+            break;
+
+        case 0x0F:  // Loop end
+            loopDepth = (loopDepth > 0) ? loopDepth - 1 : 0;
+            break;
+
+        default:
+            return result;  // unknown opcode — stop parsing
+        }
+    }
+    return result;
+}
 
 // ---------------------------------------------------------------------------
 // main
@@ -204,7 +240,7 @@ int main(int argc, char *argv[])
     fclose(fp);
 
     // --- validate header ---
-    if (bnkSize < BNK_DATA_BASE + 18) {
+    if (bnkSize < 0x100) {
         printf("ERROR: file too small to be a valid BNK\n");
         return 1;
     }
@@ -230,45 +266,24 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Build stream table by scanning for the fix_stream_addr pattern:
-    // [2 lead bytes] 01 00 [3-byte BE relative addr] 01
-    // absolute_addr = stored_BE24 + var_start
-    struct StreamEntry { uint32_t absAddr; uint8_t mixLevel; };
-    std::vector<StreamEntry> streamTable;
-    {
-        const uint8_t *p = bnk.data();
-        for (size_t k = 2; k + 6 < bnkSize; ++k) {
-            if (p[k] != 0x01 || p[k+1] != 0x00) continue;
-            if (p[k+5] != 0x01) continue;
-            size_t varStart = k + 2;
-            uint32_t stored = read_be24(p + varStart);
-            if (stored == 0) continue;
-            uint32_t absAddr = stored + (uint32_t)varStart;
-            if (absAddr + 18 >= bnkSize) continue;
-            // Validate: first 2 bytes at absAddr should be a plausible frame count
-            uint16_t nf = read_be16(p + absAddr);
-            if (nf == 0 || nf > 2000) continue;
-            StreamEntry se;
-            se.absAddr  = absAddr;
-            se.mixLevel = p[k - 3];  // byte[6] of 18-byte entry = 3 bytes before "01 00"
-            streamTable.push_back(se);
-            k += 5;  // skip past this match
-        }
-    }
+    // Data base = right after the index table
+    size_t dataBase = BNK_INDEX_OFFSET + (size_t)slotCount * 4;
 
-    // Collect valid tracks: slot -> stream via rel/18 as index into streamTable
+    // Collect valid tracks by parsing each playlist entry's bytecode
     std::vector<Track> tracks;
     for (int i = 0; i < (int)slotCount; ++i) {
         uint32_t rel = read_le32(bnk.data() + BNK_INDEX_OFFSET + i * 4);
         if (rel == 0xFFFFFFFF) continue;
 
-        size_t streamIdx = rel / BNK_PLAYLIST_STRIDE;
-        if (streamIdx >= streamTable.size()) continue;
+        size_t poff = dataBase + rel;
+        if (poff + BNK_PROGRAM_HDR + 3 >= bnkSize) continue;
+
+        auto streams = parseProgram(bnk.data(), bnkSize, poff);
+        if (streams.empty()) continue;
 
         Track t;
-        t.trackNum   = i;
-        t.streamAddr = streamTable[streamIdx].absAddr;
-        t.mixLevel   = streamTable[streamIdx].mixLevel;
+        t.trackNum = i;
+        t.streams  = std::move(streams);
         tracks.push_back(t);
     }
 
@@ -309,22 +324,80 @@ int main(int argc, char *argv[])
         snprintf(filename, sizeof(filename), "%s/%s_%04X.wav",
             outDir.c_str(), name.c_str(), t.trackNum);
 
-        // Stream at streamAddr is standard DCS format: [U16 BE nFrames][16-byte hdr][data]
-        DCSDecoder::ROMPointer streamPtr(0, bnk.data() + t.streamAddr);
-
-        auto info = decoder.GetStreamInfo(streamPtr);
-        if (info.nFrames <= 0) {
-            printf("  SKIP $%04X  (GetStreamInfo returned 0 frames)\n", t.trackNum);
+        // Get frame counts for all streams in this track
+        std::vector<int> frameCounts;
+        int totalFrames = 0;
+        bool valid = true;
+        for (auto &sr : t.streams) {
+            DCSDecoder::ROMPointer streamPtr(0, bnk.data() + sr.absAddr);
+            auto info = decoder.GetStreamInfo(streamPtr);
+            if (info.nFrames <= 0) { valid = false; break; }
+            int n = info.nFrames * (sr.loopCount > 1 ? sr.loopCount : 1);
+            frameCounts.push_back(n);
+            totalFrames += n;
+        }
+        if (!valid || totalFrames <= 0) {
+            printf("  SKIP $%04X  (no valid frames)\n", t.trackNum);
             ++nSkip;
             continue;
         }
 
-        decoder.SoftBoot();
-        decoder.LoadAudioStream(0, streamPtr, t.mixLevel);
+        // Write WAV: streams decoded back-to-back
+        FILE *fp = nullptr;
+        if (fopen_s(&fp, filename, "wb") != 0 || fp == nullptr) {
+            printf("  ERR  $%04X  cannot open %s\n", t.trackNum, filename);
+            ++nError;
+            continue;
+        }
 
-        bool ok = writeWav(filename, &decoder, (uint16_t)info.nFrames);
+        // Write WAV header with total frame count + 2 tail frames
+        uint32_t wavFrames = (uint32_t)totalFrames + 2;
+        uint8_t hdr[44];
+        memset(hdr, 0, sizeof(hdr));
+        uint32_t dataBytes = wavFrames * 240 * 2;
+        memcpy(&hdr[0], "RIFF\0\0\0\0WAVEfmt ", 16);
+        *reinterpret_cast<uint32_t*>(&hdr[4])  = dataBytes + 44 - 8;
+        *reinterpret_cast<uint32_t*>(&hdr[16]) = 16;
+        *reinterpret_cast<uint16_t*>(&hdr[20]) = 1;
+        *reinterpret_cast<uint16_t*>(&hdr[22]) = 1;
+        *reinterpret_cast<uint32_t*>(&hdr[24]) = 31250;
+        *reinterpret_cast<uint32_t*>(&hdr[28]) = 31250 * 2;
+        *reinterpret_cast<uint16_t*>(&hdr[32]) = 2;
+        *reinterpret_cast<uint16_t*>(&hdr[34]) = 16;
+        memcpy(&hdr[36], "data", 4);
+        *reinterpret_cast<uint32_t*>(&hdr[40]) = dataBytes;
+        bool ok = (fwrite(hdr, 44, 1, fp) == 1);
+
+        // Decode each stream in sequence
+        for (size_t si = 0; si < t.streams.size() && ok; ++si) {
+            auto &sr = t.streams[si];
+            DCSDecoder::ROMPointer streamPtr(0, bnk.data() + sr.absAddr);
+            uint8_t loopCount = sr.loopCount > 1 ? sr.loopCount : 1;
+            for (uint8_t loop = 0; loop < loopCount && ok; ++loop) {
+                decoder.SoftBoot();
+                decoder.LoadAudioStream(0, streamPtr, sr.mixLevel);
+                for (int f = 0; f < frameCounts[si] / loopCount && ok; ++f) {
+                    int16_t buf[240];
+                    for (int s = 0; s < 240; ++s) buf[s] = decoder.GetNextSample();
+                    ok = (fwrite(buf, sizeof(buf), 1, fp) == 1);
+                }
+            }
+        }
+        // 2 tail frames of silence for decay
         if (ok) {
-            printf("  OK   $%04X  %5d frames  %s\n", t.trackNum, info.nFrames, filename);
+            decoder.SoftBoot();
+            for (int f = 0; f < 2 && ok; ++f) {
+                int16_t buf[240];
+                for (int s = 0; s < 240; ++s) buf[s] = decoder.GetNextSample();
+                ok = (fwrite(buf, sizeof(buf), 1, fp) == 1);
+            }
+        }
+        ok = (fclose(fp) == 0) && ok;
+
+        if (ok) {
+            printf("  OK   $%04X  %5d frames (%zu stream%s)  %s\n",
+                t.trackNum, totalFrames, t.streams.size(),
+                t.streams.size() == 1 ? "" : "s", filename);
             ++nOk;
         } else {
             printf("  ERR  $%04X  %s\n", t.trackNum, filename);

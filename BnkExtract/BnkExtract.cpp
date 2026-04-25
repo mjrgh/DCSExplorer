@@ -368,29 +368,39 @@ int main(int argc, char *argv[])
             name = "track";
 
         if (samplesMode) {
-            // Write each stream in the track as a separate WAV
+            // Write each unique stream address as a separate WAV, numbered in
+            // first-appearance order (duplicates within a track are skipped).
+            std::vector<uint32_t> seen;
+            size_t sampleNum = 0;
             for (size_t si = 0; si < t.streams.size(); ++si) {
                 auto &sr = t.streams[si];
+                // Skip duplicate stream addresses within this track
+                bool dup = false;
+                for (auto a : seen) if (a == sr.absAddr) { dup = true; break; }
+                if (dup) continue;
+                seen.push_back(sr.absAddr);
+                ++sampleNum;
+
                 DCSDecoder::ROMPointer streamPtr(0, bnk.data() + sr.absAddr);
                 auto info = decoder.GetStreamInfo(streamPtr);
                 if (info.nFrames <= 0) {
-                    printf("  SKIP $%04X/%zu  (0 frames)\n", t.trackNum, si + 1);
+                    printf("  SKIP $%04X/%zu  (0 frames)\n", t.trackNum, sampleNum);
                     ++nSkip;
                     continue;
                 }
 
                 char filename[512];
                 snprintf(filename, sizeof(filename), "%s/%s_%04X_%zu.wav",
-                    outDir.c_str(), name.c_str(), t.trackNum, si + 1);
+                    outDir.c_str(), name.c_str(), t.trackNum, sampleNum);
 
                 bool ok = writeOneWav(filename, decoder, bnk.data(),
                                       sr.absAddr, sr.mixLevel, info.nFrames);
                 if (ok) {
                     printf("  OK   $%04X/%zu  %5d frames  %s\n",
-                        t.trackNum, si + 1, info.nFrames, filename);
+                        t.trackNum, sampleNum, info.nFrames, filename);
                     ++nOk;
                 } else {
-                    printf("  ERR  $%04X/%zu  %s\n", t.trackNum, si + 1, filename);
+                    printf("  ERR  $%04X/%zu  %s\n", t.trackNum, sampleNum, filename);
                     ++nError;
                 }
             }

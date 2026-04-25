@@ -112,6 +112,50 @@ static std::map<int, std::string> parseLst(const char *lstPath)
 }
 
 // ---------------------------------------------------------------------------
+// WAV writer - writes nFrames + 2 tail frames from the decoder
+// ---------------------------------------------------------------------------
+
+static bool writeOneWav(const char *path, DCSDecoderNative &decoder,
+                        const uint8_t *bnkData, uint32_t absAddr,
+                        uint8_t mixLevel, int nFrames)
+{
+    FILE *fp = nullptr;
+    if (fopen_s(&fp, path, "wb") != 0 || fp == nullptr) {
+        printf("  ERROR: cannot open \"%s\" (errno %d)\n", path, errno);
+        return false;
+    }
+
+    uint32_t wavFrames = (uint32_t)nFrames + 2;
+    uint8_t hdr[44];
+    memset(hdr, 0, sizeof(hdr));
+    uint32_t dataBytes = wavFrames * 240 * 2;
+    memcpy(&hdr[0], "RIFF\0\0\0\0WAVEfmt ", 16);
+    *reinterpret_cast<uint32_t*>(&hdr[4])  = dataBytes + 44 - 8;
+    *reinterpret_cast<uint32_t*>(&hdr[16]) = 16;
+    *reinterpret_cast<uint16_t*>(&hdr[20]) = 1;
+    *reinterpret_cast<uint16_t*>(&hdr[22]) = 1;
+    *reinterpret_cast<uint32_t*>(&hdr[24]) = 31250;
+    *reinterpret_cast<uint32_t*>(&hdr[28]) = 31250 * 2;
+    *reinterpret_cast<uint16_t*>(&hdr[32]) = 2;
+    *reinterpret_cast<uint16_t*>(&hdr[34]) = 16;
+    memcpy(&hdr[36], "data", 4);
+    *reinterpret_cast<uint32_t*>(&hdr[40]) = dataBytes;
+    bool ok = (fwrite(hdr, 44, 1, fp) == 1);
+
+    DCSDecoder::ROMPointer streamPtr(0, bnkData + absAddr);
+    decoder.SoftBoot();
+    decoder.LoadAudioStream(0, streamPtr, mixLevel);
+    for (uint32_t f = 0; f < wavFrames && ok; ++f) {
+        int16_t buf[240];
+        for (int s = 0; s < 240; ++s) buf[s] = decoder.GetNextSample();
+        ok = (fwrite(buf, sizeof(buf), 1, fp) == 1);
+    }
+
+    ok = (fclose(fp) == 0) && ok;
+    return ok;
+}
+
+// ---------------------------------------------------------------------------
 // Track entry - one or more streams played sequentially
 // ---------------------------------------------------------------------------
 
@@ -203,13 +247,16 @@ int main(int argc, char *argv[])
     printf("BnkExtract - DCS2 BNK audio extractor\n\n");
 
     // --- parse arguments ---
-    const char *bnkPath = nullptr;
-    const char *lstPath = nullptr;
-    std::string outDir  = ".";
+    const char *bnkPath  = nullptr;
+    const char *lstPath  = nullptr;
+    std::string outDir   = ".";
+    bool samplesMode     = false;
 
     for (int i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "--outdir") == 0 && i + 1 < argc) {
             outDir = argv[++i];
+        } else if (strcmp(argv[i], "--samples") == 0) {
+            samplesMode = true;
         } else if (!bnkPath) {
             bnkPath = argv[i];
         } else if (!lstPath) {
@@ -218,7 +265,8 @@ int main(int argc, char *argv[])
     }
 
     if (!bnkPath) {
-        printf("Usage: BnkExtract <file.BNK> [file.LST] [--outdir <dir>]\n");
+        printf("Usage: BnkExtract <file.BNK> [file.LST] [--outdir <dir>] [--samples]\n");
+        printf("  --samples  Write each individual stream as a separate WAV\n");
         return 1;
     }
 
@@ -312,7 +360,6 @@ int main(int argc, char *argv[])
     // --- extract each track ---
     int nOk = 0, nError = 0, nSkip = 0;
     for (auto &t : tracks) {
-        // Build output filename
         std::string name;
         auto it = names.find(t.trackNum);
         if (it != names.end())
@@ -320,88 +367,114 @@ int main(int argc, char *argv[])
         if (name.empty())
             name = "track";
 
-        char filename[512];
-        snprintf(filename, sizeof(filename), "%s/%s_%04X.wav",
-            outDir.c_str(), name.c_str(), t.trackNum);
+        if (samplesMode) {
+            // Write each stream in the track as a separate WAV
+            for (size_t si = 0; si < t.streams.size(); ++si) {
+                auto &sr = t.streams[si];
+                DCSDecoder::ROMPointer streamPtr(0, bnk.data() + sr.absAddr);
+                auto info = decoder.GetStreamInfo(streamPtr);
+                if (info.nFrames <= 0) {
+                    printf("  SKIP $%04X/%zu  (0 frames)\n", t.trackNum, si + 1);
+                    ++nSkip;
+                    continue;
+                }
 
-        // Get frame counts for all streams in this track
-        std::vector<int> frameCounts;
-        int totalFrames = 0;
-        bool valid = true;
-        for (auto &sr : t.streams) {
-            DCSDecoder::ROMPointer streamPtr(0, bnk.data() + sr.absAddr);
-            auto info = decoder.GetStreamInfo(streamPtr);
-            if (info.nFrames <= 0) { valid = false; break; }
-            int n = info.nFrames * (sr.loopCount > 1 ? sr.loopCount : 1);
-            frameCounts.push_back(n);
-            totalFrames += n;
-        }
-        if (!valid || totalFrames <= 0) {
-            printf("  SKIP $%04X  (no valid frames)\n", t.trackNum);
-            ++nSkip;
-            continue;
-        }
+                char filename[512];
+                snprintf(filename, sizeof(filename), "%s/%s_%04X_%zu.wav",
+                    outDir.c_str(), name.c_str(), t.trackNum, si + 1);
 
-        // Write WAV: streams decoded back-to-back
-        FILE *fp = nullptr;
-        if (fopen_s(&fp, filename, "wb") != 0 || fp == nullptr) {
-            printf("  ERR  $%04X  cannot open %s\n", t.trackNum, filename);
-            ++nError;
-            continue;
-        }
+                bool ok = writeOneWav(filename, decoder, bnk.data(),
+                                      sr.absAddr, sr.mixLevel, info.nFrames);
+                if (ok) {
+                    printf("  OK   $%04X/%zu  %5d frames  %s\n",
+                        t.trackNum, si + 1, info.nFrames, filename);
+                    ++nOk;
+                } else {
+                    printf("  ERR  $%04X/%zu  %s\n", t.trackNum, si + 1, filename);
+                    ++nError;
+                }
+            }
+        } else {
+            // Write all streams concatenated into one WAV
+            char filename[512];
+            snprintf(filename, sizeof(filename), "%s/%s_%04X.wav",
+                outDir.c_str(), name.c_str(), t.trackNum);
 
-        // Write WAV header with total frame count + 2 tail frames
-        uint32_t wavFrames = (uint32_t)totalFrames + 2;
-        uint8_t hdr[44];
-        memset(hdr, 0, sizeof(hdr));
-        uint32_t dataBytes = wavFrames * 240 * 2;
-        memcpy(&hdr[0], "RIFF\0\0\0\0WAVEfmt ", 16);
-        *reinterpret_cast<uint32_t*>(&hdr[4])  = dataBytes + 44 - 8;
-        *reinterpret_cast<uint32_t*>(&hdr[16]) = 16;
-        *reinterpret_cast<uint16_t*>(&hdr[20]) = 1;
-        *reinterpret_cast<uint16_t*>(&hdr[22]) = 1;
-        *reinterpret_cast<uint32_t*>(&hdr[24]) = 31250;
-        *reinterpret_cast<uint32_t*>(&hdr[28]) = 31250 * 2;
-        *reinterpret_cast<uint16_t*>(&hdr[32]) = 2;
-        *reinterpret_cast<uint16_t*>(&hdr[34]) = 16;
-        memcpy(&hdr[36], "data", 4);
-        *reinterpret_cast<uint32_t*>(&hdr[40]) = dataBytes;
-        bool ok = (fwrite(hdr, 44, 1, fp) == 1);
+            std::vector<int> frameCounts;
+            int totalFrames = 0;
+            bool valid = true;
+            for (auto &sr : t.streams) {
+                DCSDecoder::ROMPointer streamPtr(0, bnk.data() + sr.absAddr);
+                auto info = decoder.GetStreamInfo(streamPtr);
+                if (info.nFrames <= 0) { valid = false; break; }
+                int n = info.nFrames * (sr.loopCount > 1 ? sr.loopCount : 1);
+                frameCounts.push_back(n);
+                totalFrames += n;
+            }
+            if (!valid || totalFrames <= 0) {
+                printf("  SKIP $%04X  (no valid frames)\n", t.trackNum);
+                ++nSkip;
+                continue;
+            }
 
-        // Decode each stream in sequence
-        for (size_t si = 0; si < t.streams.size() && ok; ++si) {
-            auto &sr = t.streams[si];
-            DCSDecoder::ROMPointer streamPtr(0, bnk.data() + sr.absAddr);
-            uint8_t loopCount = sr.loopCount > 1 ? sr.loopCount : 1;
-            for (uint8_t loop = 0; loop < loopCount && ok; ++loop) {
+            FILE *fp = nullptr;
+            if (fopen_s(&fp, filename, "wb") != 0 || fp == nullptr) {
+                printf("  ERR  $%04X  cannot open %s\n", t.trackNum, filename);
+                ++nError;
+                continue;
+            }
+
+            uint32_t wavFrames = (uint32_t)totalFrames + 2;
+            uint8_t hdr[44];
+            memset(hdr, 0, sizeof(hdr));
+            uint32_t dataBytes = wavFrames * 240 * 2;
+            memcpy(&hdr[0], "RIFF\0\0\0\0WAVEfmt ", 16);
+            *reinterpret_cast<uint32_t*>(&hdr[4])  = dataBytes + 44 - 8;
+            *reinterpret_cast<uint32_t*>(&hdr[16]) = 16;
+            *reinterpret_cast<uint16_t*>(&hdr[20]) = 1;
+            *reinterpret_cast<uint16_t*>(&hdr[22]) = 1;
+            *reinterpret_cast<uint32_t*>(&hdr[24]) = 31250;
+            *reinterpret_cast<uint32_t*>(&hdr[28]) = 31250 * 2;
+            *reinterpret_cast<uint16_t*>(&hdr[32]) = 2;
+            *reinterpret_cast<uint16_t*>(&hdr[34]) = 16;
+            memcpy(&hdr[36], "data", 4);
+            *reinterpret_cast<uint32_t*>(&hdr[40]) = dataBytes;
+            bool ok = (fwrite(hdr, 44, 1, fp) == 1);
+
+            for (size_t si = 0; si < t.streams.size() && ok; ++si) {
+                auto &sr = t.streams[si];
+                DCSDecoder::ROMPointer streamPtr(0, bnk.data() + sr.absAddr);
+                uint8_t loopCount = sr.loopCount > 1 ? sr.loopCount : 1;
+                for (uint8_t loop = 0; loop < loopCount && ok; ++loop) {
+                    decoder.SoftBoot();
+                    decoder.LoadAudioStream(0, streamPtr, sr.mixLevel);
+                    for (int f = 0; f < frameCounts[si] / loopCount && ok; ++f) {
+                        int16_t buf[240];
+                        for (int s = 0; s < 240; ++s) buf[s] = decoder.GetNextSample();
+                        ok = (fwrite(buf, sizeof(buf), 1, fp) == 1);
+                    }
+                }
+            }
+            // 2 tail frames for decay
+            if (ok) {
                 decoder.SoftBoot();
-                decoder.LoadAudioStream(0, streamPtr, sr.mixLevel);
-                for (int f = 0; f < frameCounts[si] / loopCount && ok; ++f) {
+                for (int f = 0; f < 2 && ok; ++f) {
                     int16_t buf[240];
                     for (int s = 0; s < 240; ++s) buf[s] = decoder.GetNextSample();
                     ok = (fwrite(buf, sizeof(buf), 1, fp) == 1);
                 }
             }
-        }
-        // 2 tail frames of silence for decay
-        if (ok) {
-            decoder.SoftBoot();
-            for (int f = 0; f < 2 && ok; ++f) {
-                int16_t buf[240];
-                for (int s = 0; s < 240; ++s) buf[s] = decoder.GetNextSample();
-                ok = (fwrite(buf, sizeof(buf), 1, fp) == 1);
-            }
-        }
-        ok = (fclose(fp) == 0) && ok;
+            ok = (fclose(fp) == 0) && ok;
 
-        if (ok) {
-            printf("  OK   $%04X  %5d frames (%zu stream%s)  %s\n",
-                t.trackNum, totalFrames, t.streams.size(),
-                t.streams.size() == 1 ? "" : "s", filename);
-            ++nOk;
-        } else {
-            printf("  ERR  $%04X  %s\n", t.trackNum, filename);
-            ++nError;
+            if (ok) {
+                printf("  OK   $%04X  %5d frames (%zu stream%s)  %s\n",
+                    t.trackNum, totalFrames, t.streams.size(),
+                    t.streams.size() == 1 ? "" : "s", filename);
+                ++nOk;
+            } else {
+                printf("  ERR  $%04X  %s\n", t.trackNum, filename);
+                ++nError;
+            }
         }
     }
 

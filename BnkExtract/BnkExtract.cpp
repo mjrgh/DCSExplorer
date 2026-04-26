@@ -509,19 +509,17 @@ int main(int argc, char *argv[])
     // --- print track programs if requested ---
     if (programMode) {
         for (auto &t : tracks) {
-            std::string name;
-            auto it = names.find(t.trackNum);
-            if (it != names.end()) name = it->second;
+            uint8_t channel = (t.poff + 1 < bnkSize) ? bnk.data()[t.poff + 1] : 0;
 
-            if (!name.empty())
-                printf("Track $%04X \"%s\"\n", t.trackNum, name.c_str());
-            else
-                printf("Track $%04X\n", t.trackNum);
+            // Header matches DCSExplorer -p format; use file offset in place of ROM address
+            printf("Track $%04x Channel %d {    // Address $%06zx\n",
+                t.trackNum, channel, t.poff);
 
             std::string prog = disassembleProgram(bnk.data(), bnkSize, t.poff, "    ");
             if (!prog.empty())
                 printf("%s\n", prog.c_str());
-            printf("\n");
+
+            printf("};\n");
         }
     }
 

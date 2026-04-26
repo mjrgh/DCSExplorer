@@ -198,7 +198,7 @@ static std::string disassembleProgram(
     };
 
     for (int guard = 0; guard < 4096 && p + 2 < bnkSize; ++guard) {
-        uint16_t waitCount = (uint16_t)((bnk[p] << 8) | bnk[p+1]);  p += 2;
+        uint16_t waitCount = read_le16(bnk + p);  p += 2;
         if (p >= bnkSize) break;
         uint8_t op = bnk[p++];
 
@@ -331,7 +331,7 @@ static std::vector<StreamRef> parseProgram(
 
     int loopDepth = 0;
     for (int guard = 0; guard < 4096 && p + 2 < bnkSize; ++guard) {
-        uint16_t cp  = (uint16_t)((bnk[p] << 8) | bnk[p+1]);  p += 2;
+        uint16_t cp  = read_le16(bnk + p);  p += 2;
         if (cp == 0xFFFF) break;
         if (p >= bnkSize) break;
         uint8_t op = bnk[p++];

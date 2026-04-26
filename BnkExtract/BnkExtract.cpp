@@ -187,6 +187,7 @@ static std::string disassembleProgram(
 
     std::string loopIndent;
     const char *perLoopIndent = "  ";
+    std::vector<uint8_t> loopCountStack;  // loop counts, to detect infinite-loop termination
 
     auto appendLine = [&](const std::string &instr, const std::string &hexDesc) {
         if (!out.empty()) out += "\n";
@@ -198,7 +199,7 @@ static std::string disassembleProgram(
     };
 
     for (int guard = 0; guard < 4096 && p + 2 < bnkSize; ++guard) {
-        uint16_t waitCount = read_le16(bnk + p);  p += 2;
+        uint16_t waitCount = (uint16_t)((bnk[p] << 8) | bnk[p+1]);  p += 2;
         if (p >= bnkSize) break;
         uint8_t op = bnk[p++];
 
@@ -289,6 +290,7 @@ static std::string disassembleProgram(
                 if (cnt != 0) snprintf(istr, sizeof(istr), "Loop (%d) {", cnt);
                 else          snprintf(istr, sizeof(istr), "Loop {");
                 instr = istr;
+                loopCountStack.push_back(cnt);
             }
             break;
 
@@ -296,6 +298,11 @@ static std::string disassembleProgram(
             // dedent before printing the closing brace
             if (!loopIndent.empty()) loopIndent = loopIndent.substr(2);
             instr = "}";
+            // a Loop(0) (infinite) end means execution can never continue past here
+            if (!loopCountStack.empty()) {
+                if (loopCountStack.back() == 0) done = true;
+                loopCountStack.pop_back();
+            }
             break;
 
         default:
@@ -331,7 +338,7 @@ static std::vector<StreamRef> parseProgram(
 
     int loopDepth = 0;
     for (int guard = 0; guard < 4096 && p + 2 < bnkSize; ++guard) {
-        uint16_t cp  = read_le16(bnk + p);  p += 2;
+        uint16_t cp  = (uint16_t)((bnk[p] << 8) | bnk[p+1]);  p += 2;
         if (cp == 0xFFFF) break;
         if (p >= bnkSize) break;
         uint8_t op = bnk[p++];

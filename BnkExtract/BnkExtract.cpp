@@ -167,8 +167,152 @@ struct StreamRef {
 
 struct Track {
     int                   trackNum;
+    size_t                poff;     // file offset of the 18-byte playlist entry
     std::vector<StreamRef> streams;
 };
+
+// ---------------------------------------------------------------------------
+// Disassemble DCS track program bytecode, returning a formatted string in the
+// same style as DCSDecoder::ExplainTrackProgram / DCSExplorer -p output.
+// poff = file offset of the 18-byte playlist entry; bnkSize guards reads.
+// linePrefix is prepended to every output line (e.g. "    ").
+// ---------------------------------------------------------------------------
+static std::string disassembleProgram(
+    const uint8_t *bnk, size_t bnkSize, size_t poff, const char *linePrefix)
+{
+    std::string out;
+    size_t p = poff + BNK_PROGRAM_HDR;
+
+    uint8_t trackChannel = (poff < bnkSize) ? bnk[poff + 1] : 0;
+
+    std::string loopIndent;
+    const char *perLoopIndent = "  ";
+
+    auto appendLine = [&](const std::string &instr, const std::string &hexDesc) {
+        if (!out.empty()) out += "\n";
+        char buf[256];
+        snprintf(buf, sizeof(buf), "%-60s    // %s",
+            (loopIndent + instr).c_str(), hexDesc.c_str());
+        out += linePrefix;
+        out += buf;
+    };
+
+    for (int guard = 0; guard < 4096 && p + 2 < bnkSize; ++guard) {
+        uint16_t waitCount = (uint16_t)((bnk[p] << 8) | bnk[p+1]);  p += 2;
+        if (p >= bnkSize) break;
+        uint8_t op = bnk[p++];
+
+        std::string wait;
+        if (waitCount == 0xFFFFu)
+            wait = "Wait(Forever) ";
+        else if (waitCount != 0)
+        { char tmp[32]; snprintf(tmp, sizeof(tmp), "Wait(%u) ", waitCount); wait = tmp; }
+
+        char hex[64];
+        snprintf(hex, sizeof(hex), "%04X %02X", waitCount, op);
+        std::string hexDesc = hex;
+
+        std::string instr;
+        bool done = false;
+
+        switch (op) {
+        case 0x00:
+            instr = "End;";
+            done = true;
+            break;
+
+        case 0x01:
+            if (p + 4 >= bnkSize) { done = true; break; }
+            {
+                uint8_t  ch     = bnk[p++];
+                size_t   vs     = p;
+                uint32_t stored = read_be24(bnk + p);  p += 3;
+                uint8_t  repeat = bnk[p++];
+                uint32_t absAddr = stored + (uint32_t)vs;
+                char hx[32]; snprintf(hx, sizeof(hx), " %02X %06X %02X", ch, stored, repeat);
+                hexDesc += hx;
+                std::string chTag = (ch == trackChannel) ? "" : [&]{ char t[32]; snprintf(t, sizeof(t), "channel %d,", ch); return std::string(t); }();
+                char istr[80];
+                if (repeat == 0)
+                    snprintf(istr, sizeof(istr), "Play(%sstream $%06X, repeat forever);", chTag.c_str(), absAddr);
+                else if (repeat == 1)
+                    snprintf(istr, sizeof(istr), "Play(%sstream $%06X);", chTag.c_str(), absAddr);
+                else
+                    snprintf(istr, sizeof(istr), "Play(%sstream $%06X, repeat %d);", chTag.c_str(), absAddr, repeat);
+                instr = istr;
+            }
+            break;
+
+        case 0x02:
+            if (p < bnkSize) {
+                uint8_t ch = bnk[p++];
+                char hx[16]; snprintf(hx, sizeof(hx), " %02X", ch); hexDesc += hx;
+                char istr[48]; snprintf(istr, sizeof(istr), "Stop(channel %d);", ch);
+                instr = istr;
+            }
+            break;
+
+        case 0x07: case 0x08: case 0x09:
+            if (p + 1 < bnkSize) {
+                uint8_t ch  = bnk[p++];
+                uint8_t lvl = bnk[p++];
+                char hx[16]; snprintf(hx, sizeof(hx), " %02X %02X", ch, lvl); hexDesc += hx;
+                std::string chTag = (ch == trackChannel) ? "" : [&]{ char t[32]; snprintf(t, sizeof(t), "channel %d, ", ch); return std::string(t); }();
+                const char *verb = (op == 0x07) ? "level" : (op == 0x08) ? "increase" : "decrease";
+                char istr[80]; snprintf(istr, sizeof(istr), "SetMixingLevel(%s%s %d);", chTag.c_str(), verb, lvl);
+                instr = istr;
+            }
+            break;
+
+        case 0x0A: case 0x0B: case 0x0C:
+            if (p + 3 < bnkSize) {
+                uint8_t  ch    = bnk[p++];
+                uint8_t  lvl   = bnk[p++];
+                uint16_t steps = read_be16(bnk + p); p += 2;
+                char hx[24]; snprintf(hx, sizeof(hx), " %02X %02X %04X", ch, lvl, steps); hexDesc += hx;
+                std::string chTag = (ch == trackChannel) ? "" : [&]{ char t[32]; snprintf(t, sizeof(t), "channel %d, ", ch); return std::string(t); }();
+                const char *verb = (op == 0x0A) ? "level" : (op == 0x0B) ? "increase" : "decrease";
+                char istr[80]; snprintf(istr, sizeof(istr), "SetMixingLevel(%s%s %u, steps %u);", chTag.c_str(), verb, lvl, steps);
+                instr = istr;
+            }
+            break;
+
+        case 0x0D:
+            instr = "NOP;";
+            break;
+
+        case 0x0E:
+            if (p < bnkSize) {
+                uint8_t cnt = bnk[p++];
+                char hx[8]; snprintf(hx, sizeof(hx), " %02X", cnt); hexDesc += hx;
+                char istr[32];
+                if (cnt != 0) snprintf(istr, sizeof(istr), "Loop (%d) {", cnt);
+                else          snprintf(istr, sizeof(istr), "Loop {");
+                instr = istr;
+            }
+            break;
+
+        case 0x0F:
+            // dedent before printing the closing brace
+            if (!loopIndent.empty()) loopIndent = loopIndent.substr(2);
+            instr = "}";
+            break;
+
+        default:
+            { char istr[32]; snprintf(istr, sizeof(istr), "InvalidOpcode$%02X;", op); instr = istr; }
+            done = true;
+            break;
+        }
+
+        // For loop-end, loopIndent was already reduced above; append normally.
+        // For loop-start, append then increase indent.
+        appendLine(wait + instr, hexDesc);
+        if (op == 0x0E) loopIndent += perLoopIndent;
+
+        if (done || waitCount == 0xFFFFu) break;
+    }
+    return out;
+}
 
 // ---------------------------------------------------------------------------
 // Parse DCS track program bytecode from a BNK playlist entry.
@@ -251,12 +395,15 @@ int main(int argc, char *argv[])
     const char *lstPath  = nullptr;
     std::string outDir   = ".";
     bool samplesMode     = false;
+    bool programMode     = false;
 
     for (int i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "--outdir") == 0 && i + 1 < argc) {
             outDir = argv[++i];
         } else if (strcmp(argv[i], "--samples") == 0) {
             samplesMode = true;
+        } else if (strcmp(argv[i], "--program") == 0 || strcmp(argv[i], "-p") == 0) {
+            programMode = true;
         } else if (!bnkPath) {
             bnkPath = argv[i];
         } else if (!lstPath) {
@@ -265,8 +412,9 @@ int main(int argc, char *argv[])
     }
 
     if (!bnkPath) {
-        printf("Usage: BnkExtract <file.BNK> [file.LST] [--outdir <dir>] [--samples]\n");
+        printf("Usage: BnkExtract <file.BNK> [file.LST] [--outdir <dir>] [--samples] [-p]\n");
         printf("  --samples  Write each individual stream as a separate WAV\n");
+        printf("  -p         Print track program disassembly (DCSExplorer format)\n");
         return 1;
     }
 
@@ -331,6 +479,7 @@ int main(int argc, char *argv[])
 
         Track t;
         t.trackNum = i;
+        t.poff     = poff;
         t.streams  = std::move(streams);
         tracks.push_back(t);
     }
@@ -356,6 +505,25 @@ int main(int argc, char *argv[])
     decoder.InitStandalone(DCSDecoder::OSVersion::OS95);
     decoder.SetDefaultVolume(0xFF);
     decoder.SoftBoot();
+
+    // --- print track programs if requested ---
+    if (programMode) {
+        for (auto &t : tracks) {
+            std::string name;
+            auto it = names.find(t.trackNum);
+            if (it != names.end()) name = it->second;
+
+            if (!name.empty())
+                printf("Track $%04X \"%s\"\n", t.trackNum, name.c_str());
+            else
+                printf("Track $%04X\n", t.trackNum);
+
+            std::string prog = disassembleProgram(bnk.data(), bnkSize, t.poff, "    ");
+            if (!prog.empty())
+                printf("%s\n", prog.c_str());
+            printf("\n");
+        }
+    }
 
     // --- extract each track ---
     int nOk = 0, nError = 0, nSkip = 0;

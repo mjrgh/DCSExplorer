@@ -439,6 +439,11 @@ public:
 	// Streams by scripting name
 	std::unordered_map<std::string, Stream*> streamsByName;
 
+	// Streams by canonical file path + compression params.  This deduplicates
+	// encode jobs so that the same file referenced under different script names
+	// (or inline in Play statements) is only encoded once per unique param set.
+	std::unordered_map<std::string, Stream*> streamsByFileAndParams;
+
 	// Streams by prototype ROM address.  This indexes streams imported
 	// from the prototype ROM by their 24-bit linear ROM addresses.
 	std::unordered_map<uint32_t, Stream*> streamsByProtoAddr;

@@ -275,6 +275,31 @@ DCSCompiler::Stream *DCSCompiler::EncodeFile(Stream *replaces,
 		}
 	}
 
+	// Build a cache key from the canonical file path + all compression params,
+	// so that the same file with the same settings is only encoded once.
+	std::string cacheKey;
+	if (replaces == nullptr)
+	{
+		std::error_code ec;
+		auto canonical = std::filesystem::canonical(streamFile, ec);
+		auto keyPath = ec ? streamFile : canonical.string();
+		cacheKey = DCSEncoder::format("%s|%04x|%d|%d|%.6f|%d|%.6f|%.6f",
+			keyPath.c_str(),
+			params.formatVersion,
+			params.streamFormatType,
+			params.streamFormatSubType,
+			params.powerBandCutoff,
+			params.targetBitRate,
+			params.minimumDynamicRange,
+			params.maximumQuantizationError);
+
+		if (auto it = streamsByFileAndParams.find(cacheKey); it != streamsByFileAndParams.end())
+		{
+			Status(false, "Reusing cached encoding of %s", streamFile.c_str());
+			return it->second;
+		}
+	}
+
 	// establish the new encoding parameters
 	encoder.compressionParams = params;
 
@@ -303,6 +328,10 @@ DCSCompiler::Stream *DCSCompiler::EncodeFile(Stream *replaces,
 
 		// hand ownership of the new DCS object to the new stream entry
 		stream->Store(dcsObj);
+
+		// add to the file+params cache so subsequent references reuse this encoding
+		if (!cacheKey.empty())
+			streamsByFileAndParams.emplace(cacheKey, stream);
 
 		// log progress
 		int uncompressedBytes = dcsObj.nFrames * 240 * 2;

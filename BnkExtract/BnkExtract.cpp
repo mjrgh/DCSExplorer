@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
+#include <cstdarg>
 #include <string>
 #include <vector>
 #include <map>
@@ -18,6 +19,23 @@
 
 #include "../DCSDecoder/DCSDecoder.h"
 #include "../DCSDecoder/DCSDecoderNative.h"
+
+// ---------------------------------------------------------------------------
+// Platform compat: MSVC's fopen_s/sscanf_s vs POSIX fopen/sscanf
+// ---------------------------------------------------------------------------
+#ifndef _MSC_VER
+#include <climits>
+static inline int fopen_s(FILE **f, const char *name, const char *mode) {
+    *f = fopen(name, mode);
+    return (*f) ? 0 : errno;
+}
+static inline int sscanf_s(const char *s, const char *fmt, ...) {
+    va_list ap; va_start(ap, fmt);
+    int r = vsscanf(s, fmt, ap);
+    va_end(ap);
+    return r;
+}
+#endif
 
 // ---------------------------------------------------------------------------
 // BNK file layout constants

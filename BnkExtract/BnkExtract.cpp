@@ -403,6 +403,7 @@ int main(int argc, char *argv[])
     std::string outDir   = ".";
     bool samplesMode     = false;
     bool programMode     = false;
+    int  trackFilter     = -1;
 
     for (int i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "--outdir") == 0 && i + 1 < argc) {
@@ -411,6 +412,8 @@ int main(int argc, char *argv[])
             samplesMode = true;
         } else if (strcmp(argv[i], "--program") == 0 || strcmp(argv[i], "-p") == 0) {
             programMode = true;
+        } else if ((strcmp(argv[i], "--track") == 0 || strcmp(argv[i], "-t") == 0) && i + 1 < argc) {
+            trackFilter = (int)strtoul(argv[++i], nullptr, 16);
         } else if (!bnkPath) {
             bnkPath = argv[i];
         } else if (!lstPath) {
@@ -419,8 +422,9 @@ int main(int argc, char *argv[])
     }
 
     if (!bnkPath) {
-        printf("Usage: BnkExtract <file.BNK> [file.LST] [--outdir <dir>] [--samples] [-p]\n");
+        printf("Usage: BnkExtract <file.BNK> [file.LST] [--outdir <dir>] [--samples] [--track N] [-p]\n");
         printf("  --samples  Write each individual stream as a separate WAV\n");
+        printf("  --track N  Extract only a single sound call (track number in hex, e.g. 002A)\n");
         printf("  -p         Print track program disassembly (DCSExplorer format)\n");
         return 1;
     }
@@ -496,7 +500,23 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    printf("Found %zu tracks\n\n", tracks.size());
+    printf("Found %zu tracks\n", tracks.size());
+
+    // --- filter by track number if requested ---
+    if (trackFilter >= 0) {
+        std::vector<Track> filtered;
+        for (auto &t : tracks) {
+            if (t.trackNum == trackFilter)
+                filtered.push_back(std::move(t));
+        }
+        tracks = std::move(filtered);
+        if (tracks.empty()) {
+            printf("ERROR: track $%04X not found in BNK\n", trackFilter);
+            return 1;
+        }
+        printf("Filtered to 1 track ($%04X)\n", trackFilter);
+    }
+    printf("\n");
 
     // --- load LST names ---
     std::map<int, std::string> names;

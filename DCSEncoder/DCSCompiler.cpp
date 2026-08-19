@@ -275,6 +275,31 @@ DCSCompiler::Stream *DCSCompiler::EncodeFile(Stream *replaces,
 		}
 	}
 
+	// Build a cache key from the canonical file path + all compression params,
+	// so that the same file with the same settings is only encoded once.
+	std::string cacheKey;
+	if (replaces == nullptr)
+	{
+		std::error_code ec;
+		auto canonical = std::filesystem::canonical(streamFile, ec);
+		auto keyPath = ec ? streamFile : canonical.string();
+		cacheKey = DCSEncoder::format("%s|%04x|%d|%d|%.6f|%d|%.6f|%.6f",
+			keyPath.c_str(),
+			params.formatVersion,
+			params.streamFormatType,
+			params.streamFormatSubType,
+			params.powerBandCutoff,
+			params.targetBitRate,
+			params.minimumDynamicRange,
+			params.maximumQuantizationError);
+
+		if (auto it = streamsByFileAndParams.find(cacheKey); it != streamsByFileAndParams.end())
+		{
+			Status(false, "Reusing cached encoding of %s", streamFile.c_str());
+			return it->second;
+		}
+	}
+
 	// establish the new encoding parameters
 	encoder.compressionParams = params;
 
@@ -303,6 +328,10 @@ DCSCompiler::Stream *DCSCompiler::EncodeFile(Stream *replaces,
 
 		// hand ownership of the new DCS object to the new stream entry
 		stream->Store(dcsObj);
+
+		// add to the file+params cache so subsequent references reuse this encoding
+		if (!cacheKey.empty())
+			streamsByFileAndParams.emplace(cacheKey, stream);
 
 		// log progress
 		int uncompressedBytes = dcsObj.nFrames * 240 * 2;
@@ -2125,6 +2154,21 @@ bool DCSCompiler::GenerateROM(const char *outZipFile,
 			while (((p - data.get()) & 3) != 0)
 				++p;
 		}
+
+		// Ensure the stream preamble won't cross a ROM bank boundary.
+		// The ADSP-2105 firmware reads the ROM through a sliding bank
+		// window (4KB on original DCS boards, 2KB on DCS-95).  If the
+		// preamble of a stream crosses a bank boundary, reads overflow
+		// past the end of the window into the memory-mapped register
+		// area at DM($3000+), returning register values instead of ROM
+		// data and corrupting the stream header.  Pad forward to the
+		// next bank boundary when necessary.
+		void BankAlignFreePointer(size_t bankSize, size_t preambleBytes)
+		{
+			size_t pageOff = static_cast<size_t>(p - data.get()) & (bankSize - 1);
+			if (pageOff + preambleBytes > bankSize)
+				p += bankSize - pageOff;
+		}
 	};
 
 	std::list<ROMImage> newRoms;
@@ -2602,7 +2646,13 @@ bool DCSCompiler::GenerateROM(const char *outZipFile,
 		// the free pointer even-aligned after placing each stream.
 		// OS93a Type 1 streams require ODD alignment, which means
 		// we have to add one byte of padding before the stream.
-		size_t sizeNeeded = s->nBytes;
+		//
+		// We also need to account for potential bank-alignment
+		// padding (see BankAlignFreePointer).  The worst case is
+		// preambleBytes-1 extra bytes needed.
+		const size_t bankSize = (protoRomHWVer == DCSDecoder::HWVersion::DCS95) ? 0x800 : 0x1000;
+		const size_t preambleBytes = (protoRomOSVer == DCSDecoder::OSVersion::OS93a && s->GetStreamType() == 1) ? 3 : 18;
+		size_t sizeNeeded = s->nBytes + (preambleBytes - 1);
 		bool oddAligned = false;
 		if (protoRomOSVer == DCSDecoder::OSVersion::OS93a && s->GetStreamType() == 1)
 		{
@@ -2668,6 +2718,9 @@ bool DCSCompiler::GenerateROM(const char *outZipFile,
 		// of padding before placing the stream.
 		if (oddAligned)
 			bestChip->p += 1;
+
+		// Ensure the stream preamble won't cross a ROM bank boundary.
+		bestChip->BankAlignFreePointer(bankSize, preambleBytes);
 
 		// record the stream's newly assigned address
 		s->romAddr.chipNo = bestChip->chipNum;

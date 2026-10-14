@@ -10,30 +10,37 @@
 <h1>DCS Audio Format Technical Reference</h1>
 <img src="VolumeUI.png" class="ex">
 <p>
-   This is an unofficial technical reference guide to the internals of DCS audio format used
-   in the classic Williams/&ZeroWidthSpace;Bally/&ZeroWidthSpace;Midway pinball machines
-   of the 1990s.  DCS (initials for Digital Compression System) consists of
-   a family of proprietary digital audio compression formats, along with
-   a run-time system tailored to the real-time event-driven playback environment
-   of an arcade game.  The DCS bit-stream formats are similar in their
-   broad outlines to standard formats like MP3 and Vorbis, but only <i>similar</i>.
-   They're not in any way compatible with any of the standard formats, and they're not
-   based on or derived from any of them.  The DCS formats were entirely original, designed
-   from the ground up, before any of today's formats even existed.
+   This is an unofficial technical reference guide to the internals of the DCS audio format
+   that was used in the classic Williams/&ZeroWidthSpace;Bally/&ZeroWidthSpace;Midway pinball
+   machines of the 1990s.  DCS, which stands for Digital Compression System, consists of
+   a family of proprietary digital audio compression formats, along with a run-time
+   playback system tailored to the real-time event-driven environment of an arcade game.
+   The DCS bit-stream formats are similar in their broad outlines to modern formats like
+   MP3 and Vorbis, but they're only <i>similar</i>.  They're not compatible with any of
+   the modern formats, and they weren't derived from or based on any of them.  The DCS
+   formats were entirely original, designed from the ground up, before any of today's
+   standard formats even existed.
 </p>
 <p>
-   The DCS decoders found in the 1990s pinball machines were implemented with
-   dedicated circuit boards based on the Analog Devices ADSP-2105.  That was a
-   specialized CPU designed just for DSP applications, so it was a good fit
-   for the job at the time.  But there's nothing about DCS itself that's tied
-   to that particular hardware.  DCS was an entirely software system that
-   happened to run on ADSP-2105.  General-purpose CPUs have become so much
-   faster since the 1990s that equivalent software can now easily be implemented
-   on just about any modern processor, even including relatively low-end machines
-   like a Raspberry Pi or Pico.  This reference is all about the <i>formats</i>,
-   which aren't tied to the original hardware, so we don't cover the old hardware
-   in any detail here.  If the hardware is your main interest, you can find
-   much better information on that elsewhere on the web (see <a href="#References">References</a>),
+   The DCS decoders found in the 1990s pinball machines were implemented with dedicated
+   circuit boards based on a CPU chip made by Analog Devices, sold under the name ADSP-2105.
+   The ADSP-2105 was in many ways a general-purpose CPU, but its instruction set and
+   overall architecture were highly optimized for digital signal processing applications
+   in particular.  It was a fairly high-performance processor for its day, and it was
+   especially fast at the sorts of arithmetic operations that digital audio programs
+   do a lot of, so it was a good fit for DCS.  But DCS could just as well have been
+   implemented on any other CPU available at time, provided that it was fast enough.
+   To all appearances, the selection of the ADSP-2105 as the implementation platform
+   didn't significantly affect the design of the software system, beyond a few mundane
+   details of how the bytes are laid out in the files (to match the CPU's native byte
+   ordering and the like).  As a result, we don't
+   have to worry too much about the inner workings of the ADSP-2105 hardware in this
+   reference guide.  That lets us keep the focus on the DCS <i>format</i> as a software
+   abstraction.  We try to keep the hardware details out of it as much as possible,
+   since one of our major goals is to facilitate the creation of new implementations
+   of DCS on modern hardware.  If your main interest is in the original DCS
+   hardware, this guide will likely disappoint, but you can find extensive
+   information on the hardware elsewhere on the web (see <a href="#References">References</a>).
 </p>
 <p>
    This reference guide describes the DCS audio encoding system in detail,
@@ -67,19 +74,26 @@
    which was still monophonic.
 </p>
 <p>
-   I find DCS to be a fascinating bit of pinball and technology history.
-   It was cutting-edge for its day, and it still looks pretty modern now,
-   decades later, given its similarities to mainstream digital audio
-   formats like MP3.  The designers created a new digital audio format
-   from scratch at a time when the whole idea of lossy audio compression
-   was just starting to make the transition from theory to practice, when few other
-   examples existed.  It's all the more remarkable that this little feat of
-   engineering  was all for the sake of <i>pinball</i>, of all things.
-   Today, there's no serious reason for anyone to understand the format;
-   the existing pinball ROMs can be played back on any PC using the PinMame
-   emulator, and anyone wishing to create new audio for an old
-   pinball machine would probably just replace the machine's entire
-   audio system with more modern hardware that can play back MP3 files.
+   I think DCS is a fascinating bit of pinball and technology history.
+   DCS's designers created a new digital audio format from scratch at a time
+   when the whole idea of lossy audio compression was just starting to make
+   the transition from theory to practice.  It was cutting-edge for its
+   day, and it still looks pretty modern, decades later, when you consider
+   how similar its basic architecture is to today's standard formats.
+   It's all the more remarkable that this little feat of engineering was
+   for the sake of <i>pinball</i>, of all things.
+</p>
+<p>
+   Today, there's no practical reason for anyone to understand the format.
+   You don't need to know anything about the format to play back a DCS ROM,
+   since PinMame can handle that task simply by running the original decoder
+   software in emulation.  You would need to understand the format if you
+   wanted to create an original DCS ROM, since no encoder software was
+   ever published in any form (until this project), but again, there's
+   no practical reason to do that: if you wanted to create an original
+   soundtrack for a DCS-based pinball machine, it would be much easier to
+   replace the machine's entire audio system with something modern and
+   off-the-shelf, such as an MP3 player, taking DCS out of the picture.
    I only looked into the format's internals to satisfy my curiosity.
    Perhaps this reference will do the same for a few other people who
    also wonder what's inside those audio boards, or who think it would
@@ -144,33 +158,39 @@
    contrast, amount to an implementation detail that's invisible
    from the outside.  But we're looking at how the system works
    on the inside, and from that perspective, the streams
-   become distinct entities, so I needed to given them their
-   own name.
+   become distinct entities, so it's convenient to have a
+   term we can use to refer to them specifically.
 </p>
 
 <h3>Channels</h3>
 <p>
-   The DCS software organizes all of its audio processing
-   into "channels".  These aren't stereo channels or
-   surround-sound channels, though.  The DCS-based pinball machines
-   only had monophonic speaker systems, and the audio
-   recordings themselves are purely in mono.  (Later versions
-   of DCS used in video games did have stereo and surround
-   features, but that never made it into any DCS pinball games.)
+   The DCS software processes all of its audio playback through
+   "mixing channels", which I'll simply refer to as "channels"
+   from now on.  These aren't channels in the sense of stereo
+   left/right channels or surround-sound channels; they're
+   just units of playback, with each channel capable of playing
+   one audio stream.  This is analogous to a recording studio's
+   mixing console, where the engineer combines separate recordings
+   of the vocals and instruments and so forth into the final mix.
+   DCS likewise mixes all of the active channels together to create a
+   single monophonic output.  The DCS-based pinball machines all had
+   monophonic speaker systems, so the final signal is always mixed
+   down into a single monophonic signal.
+   (Some of the later versions of DCS used in video games did
+   have stereo and surround features, but that was a whole
+   separate matter from the mixing channel system.  And in any
+   case, those features came later on, after Williams stopped
+   making pinball machines.)
 </p>
 <p>
-   What I call "channels" throughout this document are the
-   internal data structures that keep track of the individual audio
-   clips that are currently playing.  The purpose of the channels
-   is that they allow the software to play back more than one clip
-   at a time, to overlay multiple effects simultaneously: music
+   In terms of the decoder implementation, each channel is represented
+   by a data structure that keeps track of the individual audio
+   clip playing on that channel.  The decoder has an array of
+   these structures, allowing the software to play back more than one
+   clip at a time, to overlay multiple effects simultaneously: music
    and a voice clip and a sound effect, for example.  The sounds
-   playing in the different channels are all mixed together, still
-   in the digital domain, to form the final mono output signal.
-   These are channels in the sense of a recording studio's
-   mixing console, where the engineer combines
-   separate recordings of the vocals and instruments and
-   so forth into the final mix.
+   playing in the different channels are all mixed together, while
+   still in the digital domain, to form the final mono output signal.
 </p>
 <p>
    Each channel is a container for two live playback objects:
@@ -184,12 +204,11 @@
 <p>
    The earliest version of the DCS software, used in the 1993 games,
    has four channels, numbered 0 through 3.  All of the later
-   versions have six channels, numbered 0 through 5.  (The DCS-95
-   software makes room in its memory structures for
-   eight channels, but none of the pinball titles use more
-   than six.  Perhaps the extra channels were used in video
-   games released in the same time-frame, or maybe they
-   were just included for future use.)
+   versions have six channels, numbered 0 through 5.  The DCS-95
+   decoder allows for eight channels, but none of the pinball titles
+   use more than six.  (Perhaps the extra channels were used in video
+   games released in the same time-frame, or maybe the engineers
+   were just planning ahead.)
 </p>
    
 
@@ -265,25 +284,32 @@
    The original ADSP-2105 implementation of the decoder makes heavy
    use of something called fixed-point numbers, which are a way to
    represent fractional values (and perform arithmetic on them)
-   using only integer operations.  I've <i>mostly</i>
-   tried to keep this sort of ADSP-2105-specific detail out of this
-   document - it shouldn't really matter how the ADSP-2105 happened
-   to store a particular number, because the abstract mathematical value of the
-   number is usually what's important, not the particular bit pattern
-   used to store it on one particular machine.  But there are cases
-   where you have to use the original fixed-point representation in
+   using only integer operations.  The ADSP-2105 has special support
+   in its arithmetic instructions for a couple of specific fixed-point
+   formats, so the DCS software uses those formats in places for the
+   sake of optimizations.  I've <i>mostly</i> tried to keep this sort
+   of ADSP-2105-specific detail out of this document, since the DCS
+   format is based on mathematical abstractions that are independent
+   of the numerical format used for the arithmetic.  The choice of
+   numeric format is just an implementation detail.  But there are
+   cases where you have to use the original bit-for-bit representation in
    a calculation if you want to arrive at a numerically identical result,
    because any other computer representation of the same numbers might
-   result in slight differences in the output of a calculation, due
-   to rounding errors when fractional values have to be rounded to
-   fit the particular computer format chosen.
-   The final numerical results in such cases will generally still agree
-   <i>within the respective rounding errors</i> of the formats involved,
-   but they won't always be numerically identical.  For testing purposes
-   in particular, it's important to be able to reproduce results that
-   are truly identical, so that there's no question that the new program
-   is yielding the same results as the original.  So I wanted to at
-   least mention the fixed-point format and describe how it works.
+   yield slight differences in the output of a calculation, due to
+   differences between the rules for rounding fractions in the
+   different formats.  The final numeric results in such cases will
+   always still agree <i>within the respective rounding errors</i> of
+   the formats involved, but they won't always be numerically identical
+   due to the differences in stored precision and rounding rules.
+   That doesn't really matter for normal operation, since the results
+   will be so close to one another that it would be impossible to hear
+   the difference in playback.  The case where it's important is
+   testing:  for testing purposes, it's desirable to be able to produce
+   results that are truly identical, down to the individual bit level,
+   so that the output from a new implementation being tested can be
+   compared to the output from an original decoder, to make sure
+   that the new implementation reproduces <i>exactly</i> the same
+   results as the original.
 </p>
 <p>
    The DCS ADSP-2105 code uses two forms of fixed-point numbers, known as
@@ -533,10 +559,12 @@
    <li>Pause for 250ms, monitoring the data port throughout the pause
    for an incoming byte.
    
-   <li>If a byte arrives within 250ms, immediately perform a soft CPU reset,
-   which reloads the program memory space from the main decoder program image in U2
-   and starts it running.  (The data port byte received is otherwise
-   discarded; its value makes no difference.)
+   <li>If a byte arrives within 250ms, immediately perform a soft CPU
+   reset, which reloads the program memory space from the main decoder
+   program image in U2 and starts it running.  The data port byte received
+   is otherwise discarded; its value makes no difference.  This bypasses
+   the entire rest of the procedure below, since the soft reset jumps
+   straight into the main decoder program.  See <b>Fast reset</b> below.
    
    <li>If nothing arrives on the data port within 250ms, proceed to the
    self-test procedure:
@@ -573,40 +601,56 @@
    running.
 </ul>
 
+<h4>Fast reset</h4>
 <p>
    The purpose of the initial 250ms data port monitoring period
-   is that it allows the WPC host to reset the sound board at any
-   time, under program control, without having to go through the
-   full power-on self-test procedure.  The WPC host has access to
-   a hardware port (separate from the communications port that's
-   used to send the command bytes) that allows the WPC host to
-   assert a hard reset signal on the ADSP-2015 CPU, which forces
-   the CPU into its initial boot mode, exactly as though it had
-   just been power cycled.  The WPC software exercises this
-   authority at certain times, such as whenever the user enters
-   or exits the operator menu.  (The forced reset at every operator
-   menu invocation is presumably a just-in-case fault-tolerance
-   feature, so that if the sound board ever gets itself into a
-   bad state where it's not playing audio properly, the problem
-   will be fixed as soon as the operator goes into the menu system
-   to see what's wrong.)  Normally, a hard reset would trigger
-   the time-consuming self-test procedure, but you wouldn't want
-   to wait for that if you were doing a just-in-case reset.  So
-   when the host wants to reset the sound board without waiting
-   for a self-test, it asserts the hard reset signal, and then
-   immediately writes a data byte to the command port.  The
-   sound board notices the command port byte during the 250ms
-   delay period and skips the self tests, going straight into
-   its main decoder loop.  When the self tests aren't involved,
-   the whole hard reset procedure only takes a few milliseconds,
-   making it harmless to execute at any time, as long as you don't
-   care that any previously playing audio track will be canceled.
+   is that it allows the host to perform a fast reset that bypasses
+   the self-test procedure.
+</p>
+<p>
+   The WPC host has access to a hardware port (separate from the
+   communications port that's used to send the command bytes) that
+   allows the host to assert a hard reset signal on the ADSP-2015 CPU.
+   This forces the CPU into its initial boot mode, exactly as though
+   it had just been power cycled.  Normally, a hard reset like this
+   would go through the time-consuming self-test procedure again,
+   but the host can bypass that by writing to the command port
+   during the 250ms startup delay.  The byte value written
+   doesn't matter; the startup delay loop just looks for the status
+   signal that says that the host wrote a byte to the port.  When
+   a byte appears on the port within the 250ms startup delay,
+   the DCS software immediately exits the delay loop, skips the
+   entire self-test procedure, and jumps straight into the main
+   decoder program.
+</p>
+<p>
+   A reset with the self-test bypass only takes a few milliseconds,
+   so the host can execute a fast reset at any time with practically
+   no effect on game play, other than canceling any sound playback
+   currently in progress.
+</p>
+<p>
+   The WPC pinball software makes use of the fast reset feature
+   at certain times, particularly every time that the user enters
+   or exits the operator menus.  This is probably a just-in-case
+   fault-tolerance feature designed to make the operator's life
+   easier: if the sound board software ever crashes, the first
+   thing the operator will probably do is open the coin door and
+   bring up the service menu to see what's wrong with the audio.
+   The mere act of entering the menu system resets the sound board, so
+   if the problem was a simple software crash, the reset should get
+   everything back in good order.  There's no need for the operator
+   to remember a special command sequence or search through the
+   menus to reset the sound board; it's just something that happens
+   automatically when you enter the service menu.  And because it's
+   so fast, it's not even noticeable in the typical case where
+   no reset was needed.
 </p>
 
 <h4>Startup bong</h4>
 <p>
    The "bong" tone played after the self-test is a 195Hz square
-   wave, starting at 100% PCM amplutude, then attenuated with an
+   wave, starting at 100% PCM amplitude, then attenuated with an
    exponential decay envelope by about 0.4% every 1ms.  That is,
    every 1ms, multiply the current square wave amplitude by
    0.996 to get the new square wave amplitude.  The overall
@@ -1162,9 +1206,9 @@
    rate, it would be harmless to include any such extra bytes
    as part of a stream if you were, say, extracting the stream
    to an external file; the extra bytes would just be meaningless
-   garbage after the end of the stream that a decoder would
-   know not to read simply by virtue of running out of frames
-   before reaching them.
+   padding after the end of the stream that a decoder would
+   automatically ignore, simply by virtue of running out of
+   frames before reaching the first extra byte.
 </p>
 
 <h3>Unused space</h3>
@@ -1190,8 +1234,8 @@
    and after that simply continue the "Audio Data" section from U2,
    containing more audio streams packed end-on-end, with up to one byte
    of padding between adjacent streams to meet even or odd alignment
-   requirements per stream.  Each stream must be fully contained within a single
-   ROM chip (a stream can't be split across two ROMs).
+   requirements per stream.  Each stream must be fully contained within
+   a single ROM chip; a stream can't be split across two ROMs.
 </p>
    
 
@@ -5954,7 +5998,7 @@ for (int i = 0 ; i < 16 ; ++i) {
 
 <h2>Copyright and license</h2>
 <p>
-   Copyright 2023, 2025 by Michael J Roberts
+   Copyright 2023, 2026 by Michael J Roberts
 </p>
 <p>
    This document is released under a <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">

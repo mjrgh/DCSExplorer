@@ -290,7 +290,7 @@ public:
 
 	// Find the catalog in a ROM U2 image.  The catalog contains
 	// a list of the game's ROMs, with their sizes and checksums,
-	// and the nubmer of tracks.  The different DCS versions place
+	// and the number of tracks.  The different DCS versions place
 	// the catalog at different points in U2, so this searches the
 	// known locations for data that matches the catalog format.
 	// The DCS system software version can be inferred from this
@@ -512,7 +512,7 @@ public:
 			Table(int id) : id(id) { }
 			int id;                      // table ID, 0..255
 			std::list<uint16_t> tracks;  // track numbers stored in the table
-			std::list<uint8_t> vars;     // variable numbers used to acccess this table
+			std::list<uint8_t> vars;     // variable numbers used to access this table
 		};
 		std::list<Table> tables;
 	};
@@ -874,7 +874,7 @@ public:
 
 		// OS93b - DCS hardware with second 1993 software release.  This
 		// was used for only one game, Star Trek: The Next Generation.
-		// This uses the identical frame format and trasnformation
+		// This uses the identical frame format and transformation
 		// algorithm as the OS93a games, but it has a tiny difference
 		// in how it calculates the mixing levels that requires
 		// recognizing this as a separate version.
@@ -921,7 +921,7 @@ public:
 	// never, with no exceptions whatsoever, zero exceptions, simply
 	// never... except when absolutely necessary.  The one current
 	// example is TOTAN (see the list below), which has an
-	// idiosyncracy that's so obviously a hack in the original ROM
+	// idiosyncrasy that's so obviously a hack in the original ROM
 	// code that there's simply no general way to handle it.
 	//
 	// Also: we DON'T use the recognized game to determine which OS
@@ -955,7 +955,7 @@ public:
 		// Corvette, 1994 (no known hacks)
 		Corvette,
 
-		// Demoliion Man, 1994 (no known hacks)
+		// Demolition Man, 1994 (no known hacks)
 		DM,
 
 		// Dirty Harry, 1995 (no known hacks)
@@ -1201,7 +1201,7 @@ protected:
 	}
 
 	// Search a memory block containing ROM data for a sequence of 
-	// ADSP-2105 opcodes.  The code sequenceis specified as a string, 
+	// ADSP-2105 opcodes.  The code sequence is specified as a string, 
 	// with hex digits for the opcodes in groups of 6.  Wildcards can 
 	// be specified with letters outside of the A-F range or with 
 	// asterisks.  When letters are used, they form variable names 

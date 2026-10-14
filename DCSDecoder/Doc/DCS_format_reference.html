@@ -522,7 +522,7 @@
       </td>
    </tr>
    <tr>
-      <td>$03000, $04000, or $06000</td>
+      <td>$03000, $04000, $06000, or $09000</td>
       <td>ROM catalog</td>
       <td>
          Index of the populated ROMs.  See below.
@@ -970,10 +970,11 @@
    we can find it by applying some heuristics.
 </p>
 <p>
-   First, the catalog in every DCS pinball ROM is at one of three fixed
-   offsets within U2: $03000, $04000, or $06000.  We only have to
-   look in each of those three locations, and we should always find
-   the catalog in one of them.
+   First, the catalog in every DCS pinball ROM is at one of three
+   offsets within U2: $03000, $04000, or $06000.  In addition, at
+   least one post-pinball DCS video game (Mortal Kombat 4) places
+   its catalog at $09000.  We only have to look in each of those
+   locations, and we should always find the catalog in one of them.
 </p>
 <p>
    Second, it's fairly easy to determine whether or not the 50 bytes
@@ -2688,6 +2689,25 @@ for (int i = 0 ; i < 16 ; ++i) {
 <a name="StreamAlignment"></a>
 <h3>Stream address alignment requirements</h3>
 <p>
+   There are two restrictions on the starting address of a stream:
+</p>
+<ul>
+   <li>The "packed bit stream" portion must be aligned on an even address boundary
+   <li>The entire stream header (3 bytes for DCS 1995a Type 1 streams, 18 bytes
+   for all other stream types) must be contained within a single ROM "bank"
+   (4KB on the original DCS boards, 2KB on DCS-95 boards)
+</ul>
+<p>
+   Both of these requirements are artifacts of the original ADSP-2105 implementation.
+   There's no need for new decoder implementations to enforce them, although they
+   might choose to do so anyway, if they wish to test input for strict compatibility
+   with the original hardware.  Encoders, on the other hand, must observe the
+   restrictions when creating new ROMs if the ROMs are intended to run on original
+   DCS boards.
+</p>
+
+<h4>Packed bit stream even address alignment</h4>
+<p>
    Streams must be stored in ROM such that the first byte of the
    "packed bit stream" portion (i.e., the first byte
    following the stream header) is on an <b>even address offset</b> within
@@ -2735,14 +2755,65 @@ for (int i = 0 ; i < 16 ; ++i) {
    the DCS format itself.  It's purely an accident of how
    the original ADSP-2105 DCS decoder software was implemented.
    That software reads the packed bit stream using an
-   algorithm that only works correctly if the packed bit stream
-   starts on an even address within the ROM.  New decoders need
-   not enforce the alignment rules, although they're free to
+   algorithm that reads two bytes at a time in a 16-bit window
+   with even address alignment, which only works correctly if the
+   starting address in ROM of the packed bit stream is even.  New decoders
+   need not enforce the alignment rules, although they're free to
    assume them.  Encoders must observe the alignment requirements if
    they intend to generate ROMs that can be played back with the factory
    software, since the original software will behave unpredictably (usually
    resulting in a CPU reset) if presented with a misaligned stream.
 </p>
+
+<h4>Header ROM bank alignment</h4>
+<p>
+   The entire stream header (3 bytes for DCS 1993 Type 1 streams, 18
+   bytes for all others) must fit within a single ROM "bank".  For
+   the original DCS boards, a bank is 4KB block of ROM starting at a
+   4KB-aligned address;  for DCS-95 boards, it's a 2KB block starting
+   at a 2KB-aligned address.
+</p>
+<p>
+   Note that it's <b>not</b> necessary for a stream header to <b>start</b>
+   on a ROM bank boundary.  A stream header can start at any offset
+   within a bank, as long as it <b>ends</b> before the next 4KB/2KB
+   bank boundary, and satisfies the even/odd requirement for the
+   packed bit-stream portion.
+</p>
+<p>
+   The restriction applies only to the stream header.  It doesn't
+   apply to the packed bit-stream section following the header.  The
+   bit-stream section doesn't even need to start within the same ROM
+   bank as the header: it's fine for the header to end exactly at
+   a bank boundary.
+</p>
+<p>
+   Modern decoder implementations need not enforce this restriction,
+   although they are free to assume it.  Encoders must observe it if
+   the ROMs they create are to run on original DCS hardware.
+</p>
+<p>
+   The restriction arises from the ROM memory architecture of the
+   DCS hardware.  The ADSP-2105's address space is too small to map
+   an entire ROM data set, so the DCS hardware implements a ROM
+   memory mapper that dynamically maps a single 4KB (original DCS)
+   or 2KB (DCS-95) section of ROM into the ADSP-2015 address space
+   at any given time.  The mapped section always starts at an offset
+   within the overall ROM address space that's a multiple of the bank
+   size.  When the decoder program is about to start reading a stream,
+   it commands the ROM memory mapper to load the bank containing the
+   first byte of the stream header, and then it reads the entire
+   header without any further bank selection changes.  In other
+   words, the decoder implicitly assumes that the entire header is
+   within the same ROM bank that contains the header's first byte.
+   If that's not true, the decoder program's assumption that it
+   doesn't need to check again for a bank change makes it incorrectly
+   read past the end of the mapped header data.  This fetches
+   invalid data for the portion of the header that lies beyond
+   the end of the mapped ROM bank, which makes the decoder behave
+   unpredictably, and typically crashes the whole program.
+</p>
+   
 
 <h3>Audio sample data format</h3>
 <p>

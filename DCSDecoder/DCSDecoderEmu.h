@@ -12,7 +12,7 @@
 // Native means no emulation - a full C++ translation of the decoder.
 // So why are we talking about emulation now???  Because we're providing
 // the emulator implementation *in addition to* the native decoder.  The
-// emualtor is a reference point to compare the native deocder against
+// emulator is a reference point to compare the native decoder against
 // to determine if it's working correctly.  Running the original ROM code
 // in emulation is as close as we can get to a reference standard, short 
 // of running the original ROM code on the original hardware.  Of course,
@@ -88,7 +88,7 @@ protected:
 	// Global singleton.  We provide the DM() and PM() memory arrays
 	// for the ADSP-2105 emulator, so the emulator needs to be able to
 	// find the decoder object it's associated with.  It doesn't have
-	// a notion of a "client" or "host" conext object; it just calls 
+	// a notion of a "client" or "host" context object; it just calls 
 	// global functions to access memory.  So the only way for these
 	// to find their way back to the decoder object is through a
 	// static singleton.  This means tha the decoder can only be
